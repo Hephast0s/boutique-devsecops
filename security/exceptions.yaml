@@ -1,0 +1,21 @@
+# security/exceptions.yaml — accepted risks (single source of truth)
+#
+# Schema per entry:
+#   id:            unique id (e.g. CVE-2024-12345, SEMGREP-0001)
+#   type:          cve | semgrep | secret | iac | license
+#   identifier:    tool-specific id / rule / package
+#   justification: why it is accepted
+#   owner:         who owns the exception
+#   expires:       ISO date; past this date the build FAILS
+#
+# Tool ignore files (.trivyignore, .gitleaksignore, semgrep ignores) are GENERATED from this file.
+# Do not hand-edit the tool ignore files.
+
+exceptions: []
+# Example (inactive):
+#  - id: CVE-2024-XXXXX
+#    type: cve
+#    identifier: libfoo@1.2.3
+#    justification: not reachable in our usage; upstream fix pending in 1.2.4
+#    owner: Hephast0s
+#    expires: 2026-12-31

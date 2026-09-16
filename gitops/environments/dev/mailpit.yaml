@@ -16,6 +16,9 @@ spec:
         app: mailpit
         app.kubernetes.io/part-of: online-boutique
     spec:
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: mailpit
           image: axllent/mailpit:latest
@@ -24,6 +27,9 @@ spec:
               containerPort: 1025
             - name: http
               containerPort: 8025
+          volumeMounts:
+            - name: data
+              mountPath: /data
           livenessProbe:
             httpGet:
               path: /
@@ -43,6 +49,9 @@ spec:
             limits:
               cpu: "200m"
               memory: "128Mi"
+      volumes:
+        - name: data
+          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service

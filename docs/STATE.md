@@ -4,11 +4,10 @@
 > Last updated: end of Phase 1.
 
 ## CURRENT
-- Phase: **8 — COMPLETE** (Kyverno admission; 7 policies Enforce, verify-images Audit). See
-  `docs/phases/PHASE-8-REPORT.md`.
-- Next: **Phase 9** (network segmentation + Falco + Trivy Operator) — install permissions for Falco/Trivy
-  Operator still open (CR-003).
-- Open CRs: CR-KYVERNO-1 (private-IP registry realm), CR-ARGO-1 (repo-server resources).
+- Phase: **9 — COMPLETE for network (9.1)**; runtime security (9.2/9.3) **blocked** on CR-003. See
+  `docs/phases/PHASE-9-REPORT.md`.
+- Next: **Phase 10** (smoke tests, DAST/ZAP, load).
+- Applied: CR-ARGO-1 (repo-server 1 replica, 1 CPU/1Gi) — ended the `DeadlineExceeded` flakiness.
 
 ## NEXT ACTION WHEN UNBLOCKED
 1. Operator decision needed on `docs/CHANGE_REQUESTS.md` CR-001 (Jenkins up). Phase 2 can proceed on GitHub now.

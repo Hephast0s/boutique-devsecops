@@ -26,7 +26,12 @@ spec:
       image: python:3.14-alpine
       command: ['sleep']
       args: ['3600']
-      resources: {requests: {cpu: "50m", memory: "128Mi"}, limits: {cpu: "500m", memory: "512Mi"}}
+      env:
+        - name: COSIGN_PASSWORD
+          valueFrom: {secretKeyRef: {name: cosign-key, key: COSIGN_PASSWORD}}
+      volumeMounts:
+        - {name: cosign-key, mountPath: /cosign, readOnly: true}
+      resources: {requests: {cpu: "50m", memory: "128Mi"}, limits: {cpu: "1000m", memory: "1Gi"}}
     - name: gitleaks
       image: ghcr.io/gitleaks/gitleaks:v8.30.0
       command: ['sleep']
@@ -38,11 +43,6 @@ spec:
       args: ['3600']
       volumeMounts: [{name: docker-config, mountPath: /kaniko/.docker}]
       resources: {requests: {cpu: "200m", memory: "512Mi"}, limits: {cpu: "1500m", memory: "2Gi"}}
-    - name: syft
-      image: anchore/syft:latest
-      command: ['sleep']
-      args: ['3600']
-      resources: {requests: {cpu: "50m", memory: "128Mi"}, limits: {cpu: "500m", memory: "1Gi"}}
     - name: trivy
       image: aquasec/trivy:latest
       command: ['sleep']
@@ -53,16 +53,6 @@ spec:
       command: ['sleep']
       args: ['3600']
       resources: {requests: {cpu: "50m", memory: "256Mi"}, limits: {cpu: "1000m", memory: "1Gi"}}
-    - name: cosign
-      image: gcr.io/projectsigstore/cosign:latest
-      command: ['sleep']
-      args: ['3600']
-      env:
-        - name: COSIGN_PASSWORD
-          valueFrom: {secretKeyRef: {name: cosign-key, key: COSIGN_PASSWORD}}
-      volumeMounts:
-        - {name: cosign-key, mountPath: /cosign, readOnly: true}
-      resources: {requests: {cpu: "50m", memory: "128Mi"}, limits: {cpu: "500m", memory: "512Mi"}}
   volumes:
     - name: docker-config
       secret: {secretName: harbor-push, items: [{key: .dockerconfigjson, path: config.json}]}
@@ -86,7 +76,7 @@ spec:
   stages {
     stage('1. Preflight') {
       steps { container('tools') { script {
-        sh 'apk add --no-cache git >/dev/null 2>&1 || true; git config --global --add safe.directory "*" || true'
+        sh 'apk add --no-cache git syft cosign >/dev/null 2>&1 || true; git config --global --add safe.directory "*" || true'
         env.GIT_SHA = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
         echo "git_sha=${env.GIT_SHA}"
       } } }
@@ -128,7 +118,7 @@ spec:
 
     stage('5. SBOM (Syft)') {
       when { expression { return env.BUILD_TARGET != '' } }
-      steps { container('syft') {
+      steps { container('tools') {
         sh '''
           set -e
           for f in digest/*.txt; do [ -f "$f" ] || continue
@@ -174,7 +164,7 @@ spec:
 
     stage('8. Sign & Attest (cosign)') {
       when { expression { return env.BUILD_TARGET != '' } }
-      steps { container('cosign') {
+      steps { container('tools') {
         sh '''
           set -e
           SHA="${GIT_SHA:-manual}"
@@ -202,7 +192,7 @@ EOF
     stage('9. Verify (cosign)') {
       when { expression { return fileExists('digest') } }
       steps {
-        container('cosign') {
+        container('tools') {
           sh '''
             set -e
             for f in digest/*.txt; do [ -f "$f" ] || continue

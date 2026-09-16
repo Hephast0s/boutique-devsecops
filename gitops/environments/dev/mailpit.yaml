@@ -27,6 +27,7 @@ spec:
         - name: mailpit
           image: 192.168.1.8:30082/boutique/mailpit@sha256:3856f9327f3f228afe8c4ce2dcca3cb2aa00f6ec60b569f36483f7ebb1ff44f7
           securityContext:
+            privileged: false
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             capabilities:

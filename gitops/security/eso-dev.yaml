@@ -49,3 +49,30 @@ spec:
       remoteRef:
         key: dev/redis
         property: connection_string
+---
+# SMTP credentials for real email delivery (Vault -> ESO -> Secret, never in Git).
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: smtp-eso
+  namespace: boutique-dev
+  labels:
+    app.kubernetes.io/part-of: online-boutique
+    managed-by: external-secrets
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: boutique-vault
+    kind: SecretStore
+  target:
+    name: smtp-eso
+    creationPolicy: Owner
+  data:
+    - secretKey: username
+      remoteRef:
+        key: dev/smtp
+        property: username
+    - secretKey: password
+      remoteRef:
+        key: dev/smtp
+        property: password

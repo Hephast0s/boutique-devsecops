@@ -1,20 +1,20 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-# dev environment. Built on upstream kustomize/base; images remapped to Harbor and PINNED BY DIGEST.
-namespace: boutique-dev
+# prod environment. Same hardened shape; manual sync + PDBs.
+namespace: boutique-prod
 
 resources:
   - ../../../kustomize/base
   - namespace.yaml
   - ingress.yaml
+  - pdb.yaml
 
 components:
   - ../../../kustomize/components/container-images-registry
   - ../../../kustomize/components/without-loadgenerator
   - ../../components/boutique-hardening
 
-# Pin every image to an immutable digest in Harbor (threat R-01 / control C-PIN).
 images:
   - name: CONTAINER_IMAGES_REGISTRY/adservice
     newName: 192.168.1.8:30082/boutique/adservice

@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: boutique-staging
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: online-boutique
+    environment: staging
+spec:
+  project: boutique
+  source:
+    repoURL: https://github.com/Hephast0s/boutique-devsecops.git
+    targetRevision: devsecops
+    path: gitops/environments/staging
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: boutique-staging
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false

@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: boutique-prod
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: online-boutique
+    environment: prod
+spec:
+  project: boutique
+  source:
+    repoURL: https://github.com/Hephast0s/boutique-devsecops.git
+    targetRevision: devsecops
+    path: gitops/environments/prod
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: boutique-prod
+  # prod is MANUAL sync: a human must approve every deployment.
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=false
+      - PrunePropagationPolicy=foreground

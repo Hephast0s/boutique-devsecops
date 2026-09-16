@@ -29,8 +29,11 @@ spec:
       env:
         - name: COSIGN_PASSWORD
           valueFrom: {secretKeyRef: {name: cosign-key, key: COSIGN_PASSWORD}}
+        - name: DOCKER_CONFIG
+          value: /dockercfg
       volumeMounts:
         - {name: cosign-key, mountPath: /cosign, readOnly: true}
+        - {name: docker-config, mountPath: /dockercfg, readOnly: true}
       resources: {requests: {cpu: "50m", memory: "128Mi"}, limits: {cpu: "1000m", memory: "1Gi"}}
     - name: gitleaks
       image: ghcr.io/gitleaks/gitleaks:v8.30.0

@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vault-auth
+  namespace: boutique-dev
+  labels:
+    app.kubernetes.io/part-of: online-boutique
+---
+# Per-environment SecretStore (small blast radius; no ClusterSecretStore).
+apiVersion: external-secrets.io/v1
+kind: SecretStore
+metadata:
+  name: boutique-vault
+  namespace: boutique-dev
+  labels:
+    app.kubernetes.io/part-of: online-boutique
+spec:
+  provider:
+    vault:
+      server: http://vault.vault.svc:8200
+      path: boutique
+      version: v2
+      auth:
+        kubernetes:
+          mountPath: kubernetes
+          role: boutique
+          serviceAccountRef:
+            name: vault-auth
+---
+# ESO-managed Secret. Naming convention: *-eso, so kustomize/Helm never co-manage it.
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: redis-eso
+  namespace: boutique-dev
+  labels:
+    app.kubernetes.io/part-of: online-boutique
+    managed-by: external-secrets
+spec:
+  refreshInterval: 1m
+  secretStoreRef:
+    name: boutique-vault
+    kind: SecretStore
+  target:
+    name: redis-eso
+    creationPolicy: Owner
+  data:
+    - secretKey: connection_string
+      remoteRef:
+        key: dev/redis
+        property: connection_string

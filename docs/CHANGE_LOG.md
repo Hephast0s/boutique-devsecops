@@ -123,4 +123,18 @@ No existing platform object modified.
 
 Existing `secret/` mount and all other Vault paths untouched.
 
-## Phase 7+ — (empty; populated as objects are created)
+## Phase 7 — GitOps CD (dev/staging/prod) + email delivery fix
+
+| Action | System | Exact create | Exact remove |
+|---|---|---|---|
+| AppProject + Applications | k8s (argocd) | `kubectl apply -f gitops/argocd/{project,app-dev,app-staging,app-prod}.yaml` | `kubectl -n argocd delete -f gitops/argocd/` |
+| staging/prod namespaces | k8s | via Argo sync of the overlays | `kubectl delete ns boutique-staging boutique-prod` |
+| Mailpit (dev mail sink) | k8s | in `gitops/environments/dev/mailpit.yaml` (Argo) | remove from overlay |
+| smtp-eso ExternalSecret | k8s | `kubectl apply -f gitops/security/eso-dev.yaml` | `kubectl -n boutique-dev delete externalsecret smtp-eso` |
+| Gmail SMTP creds | Vault | `vault kv put boutique/dev/smtp username=... password=...` | `vault kv metadata delete boutique/dev/smtp` |
+| emailservice image (SMTP) | Harbor | `docker build/push 192.168.1.8:30082/boutique/emailservice:...` | delete artifact in Harbor |
+
+Existing objects changed: none. Gmail App Password stored only in Vault / k8s secret `smtp-eso`
+(never in Git). **Rotate it after testing** (it was shared in chat).
+
+## Phase 8+ — (empty; populated as objects are created)

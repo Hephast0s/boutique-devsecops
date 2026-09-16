@@ -3,14 +3,12 @@
 Requests that require the operator's approval or action because they would modify a component this
 engagement does not own (rule 1.1) or because a Section 0 permission is missing.
 
-## CR-001 — Scale Jenkins back up (BLOCKING for Phases 2 & 4)
-- **Observed:** `kubectl -n jenkins get sts jenkins` → `replicas=0`; pod list empty; NodePort 30081 closed.
-- **Need:** Jenkins running so CI can be configured.
-- **Proposed command (operator, or approve me to run):**
-  `kubectl -n jenkins scale statefulset jenkins --replicas=1`
-- **Blast radius:** starts the existing Jenkins controller (~1–2 Gi on its scheduled node). No config change.
-- **Rollback:** `kubectl -n jenkins scale statefulset jenkins --replicas=0`
-- **Risk:** resource pressure if scheduled on a node without headroom; prefer node `mina`.
+## CR-001 — Jenkins — RESOLVED (scaled up, operator-authorized)
+Operator authorized the scale command on 2026-09-16. Executed:
+`kubectl -n jenkins scale statefulset jenkins --replicas=1` → pod `jenkins-0` 3/3 Running on `mina`.
+Jenkins 2.568.1-jdk21; anonymous API returns **403** (no anonymous read). Credentials exist in the
+`jenkins` secret (`jenkins-admin-user`/`jenkins-admin-password`) — value not printed.
+Still needed for Phase 4: a Jenkins **API token** or admin credentials (CR-007).
 
 ## CR-002 — Gitea — RESOLVED (will not be used)
 Operator decision 2026-09-16: **Gitea will not be started.** All Git work happens on **GitHub**.

@@ -5,7 +5,8 @@
 
 ## CURRENT
 - Phase: **1 — COMPLETE** (infrastructure discovery, read-only). See `docs/phases/PHASE-1-REPORT.md`.
-- Next: **Phase 2** (Git strategy/repos) — now on **GitHub** (operator dropped Gitea). Jenkins still down → Phase 4 blocker.
+- Next: **Phase 2** (Git strategy/repos) — on **GitHub**, branch-based (operator: a branch per item + a
+  final integrated branch). Jenkins is now UP (operator-authorized scale) → Phase 4 unblocked too.
 - Writes so far: one temporary `boutique-preflight` namespace (created + deleted, proven). No retained
   cluster/remote objects. Repo changes are committed to the GitHub fork (Gitea down).
 
@@ -17,7 +18,10 @@
 
 ## BLOCKED — on operator (details in docs/CHANGE_REQUESTS.md)
 - **CR-001** Jenkins replicas=0 → blocks Phases 2 & 4.
+- **CR-001 RESOLVED** — Jenkins scaled up (authorized), pod 3/3 on mina; anonymous API 403.
 - **CR-002 RESOLVED** — Gitea dropped; GitHub is the source of truth (CR-010 resolved too).
+- **Repo strategy (operator):** work on the current repo with **a branch per work-stream** and a
+  **final integrated branch** at the end. Integration branch: `devsecops`; work: `phase-<n>-*`.
 - **Resource cap (operator):** this engagement may add at most **4 GiB RAM total**.
 - **CR-003** install permissions: falco / trivy-operator / Loki (Loki absent).
 - **CR-004** `may_install_local_tools` — missing syft/gitleaks/semgrep/hadolint/kustomize/dotnet/java.

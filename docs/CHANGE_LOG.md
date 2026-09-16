@@ -45,4 +45,15 @@ Local files created: `docs/01-agent-capabilities.md`, `docs/01-infrastructure-in
 `origin=https://github.com/MinaC4/microservices-demo.git` because Gitea is scaled to 0. This is not the
 Google upstream. See `CHANGE_REQUESTS.md` CR-010.
 
-## Phase 2+ — (empty; populated as objects are created)
+## Phase 2 — Git controls & platform prep (branch-based on GitHub)
+
+| Action | System | Exact create | Exact remove |
+|---|---|---|---|
+| Scale Jenkins up | k8s ns `jenkins` | `kubectl -n jenkins scale statefulset jenkins --replicas=1` | `kubectl -n jenkins scale statefulset jenkins --replicas=0` |
+| Create integration branch | GitHub | `git branch devsecops main && git push -u origin devsecops` | `git push origin --delete devsecops` |
+| Create phase-2 work branch | GitHub | `git switch -c phase-2-git-controls devsecops` | `git push origin --delete phase-2-git-controls` |
+
+Jenkins came up healthy (pod `jenkins-0` 3/3 on node `mina`). This is a change to an **existing**
+component and was explicitly authorized by the operator. No config was modified.
+
+## Phase 3+ — (empty; populated as objects are created)

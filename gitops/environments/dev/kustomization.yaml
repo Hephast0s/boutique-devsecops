@@ -31,7 +31,7 @@ images:
     digest: sha256:7b2f3f804555c926861d67cd22c1b7c9e32d46b81cf1a64dd3089ae424d73be9
   - name: CONTAINER_IMAGES_REGISTRY/emailservice
     newName: 192.168.1.8:30082/boutique/emailservice
-    digest: sha256:d15b53f6e587c964fe97bbd390e9aedbf4e951eecc81ca88494be36ff9427915
+    digest: sha256:acaa03ca379b2e398a5d9e2a8c52d08e3e2f2d727e794b2416f57f0cd74074f1
   - name: CONTAINER_IMAGES_REGISTRY/frontend
     newName: 192.168.1.8:30082/boutique/frontend
     digest: sha256:c06df08eccd78568a37292cfbe889df42fac48691b7fb05f2deeba0ae8d669ef
@@ -75,10 +75,29 @@ patches:
     patch: |-
       - op: add
         path: /spec/template/spec/containers/0/env/-
-        value: {name: SMTP_HOST, value: mailpit}
+        value: {name: SMTP_HOST, value: smtp.gmail.com}
       - op: add
         path: /spec/template/spec/containers/0/env/-
-        value: {name: SMTP_PORT, value: "1025"}
+        value: {name: SMTP_PORT, value: "587"}
       - op: add
         path: /spec/template/spec/containers/0/env/-
-        value: {name: SMTP_FROM, value: "no-reply@boutique.local"}
+        value: {name: SMTP_TLS, value: "1"}
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value: {name: SMTP_FROM, value: kazbar2002@gmail.com}
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: SMTP_USER
+          valueFrom:
+            secretKeyRef:
+              name: smtp-eso
+              key: username
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: SMTP_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: smtp-eso
+              key: password

@@ -8,6 +8,7 @@ resources:
   - ../../../kustomize/base
   - namespace.yaml
   - ingress.yaml
+  - mailpit.yaml
 
 components:
   - ../../../kustomize/components/container-images-registry
@@ -30,7 +31,7 @@ images:
     digest: sha256:7b2f3f804555c926861d67cd22c1b7c9e32d46b81cf1a64dd3089ae424d73be9
   - name: CONTAINER_IMAGES_REGISTRY/emailservice
     newName: 192.168.1.8:30082/boutique/emailservice
-    digest: sha256:77fd45d411b3550cbd39e30bda83ed6ea23d87fd6e58e69cf9fa2808e003984d
+    digest: sha256:d15b53f6e587c964fe97bbd390e9aedbf4e951eecc81ca88494be36ff9427915
   - name: CONTAINER_IMAGES_REGISTRY/frontend
     newName: 192.168.1.8:30082/boutique/frontend
     digest: sha256:0c19e21f173849abd5207333f27cb005088d961018f3c77714381021275886cb
@@ -63,3 +64,21 @@ replicas:
   - {name: recommendationservice, count: 1}
   - {name: shippingservice, count: 1}
   - {name: redis-cart, count: 1}
+
+# Point emailservice at the local Mailpit SMTP sink (non-GCP email delivery).
+patches:
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: emailservice
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value: {name: SMTP_HOST, value: mailpit}
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value: {name: SMTP_PORT, value: "1025"}
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value: {name: SMTP_FROM, value: "no-reply@boutique.local"}

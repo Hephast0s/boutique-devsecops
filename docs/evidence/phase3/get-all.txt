@@ -1,0 +1,53 @@
+NAME                                         READY   STATUS    RESTARTS   AGE     IP           NODE       NOMINATED NODE   READINESS GATES
+pod/adservice-7545b57c9b-hzzh4               1/1     Running   0          3m37s   10.42.2.9    worker-2   <none>           <none>
+pod/cartservice-6cb4bc8b8b-rvcwb             1/1     Running   0          3m37s   10.42.1.68   worker-1   <none>           <none>
+pod/checkoutservice-59bcb96656-g5pcv         1/1     Running   0          3m37s   10.42.2.10   worker-2   <none>           <none>
+pod/currencyservice-6654649555-pnnrl         1/1     Running   0          3m36s   10.42.2.11   worker-2   <none>           <none>
+pod/emailservice-ddcdd56b4-dd9fc             1/1     Running   0          3m36s   10.42.1.70   worker-1   <none>           <none>
+pod/frontend-795476c4cc-rp8xm                1/1     Running   0          3m36s   10.42.1.69   worker-1   <none>           <none>
+pod/paymentservice-7475b46455-tnzks          1/1     Running   0          3m36s   10.42.2.12   worker-2   <none>           <none>
+pod/productcatalogservice-8d64686cf-2rlt7    1/1     Running   0          3m36s   10.42.1.71   worker-1   <none>           <none>
+pod/recommendationservice-584ff4ccb5-wdhxd   1/1     Running   0          3m36s   10.42.2.13   worker-2   <none>           <none>
+pod/redis-cart-7b5b9848dd-9td9s              1/1     Running   0          36s     10.42.2.14   worker-2   <none>           <none>
+pod/shippingservice-6495db94f4-vfd6b         1/1     Running   0          3m36s   10.42.1.72   worker-1   <none>           <none>
+
+NAME                            TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)     AGE     SELECTOR
+service/adservice               ClusterIP   10.43.93.186    <none>        9555/TCP    3m38s   app=adservice
+service/cartservice             ClusterIP   10.43.152.248   <none>        7070/TCP    3m38s   app=cartservice
+service/checkoutservice         ClusterIP   10.43.151.231   <none>        5050/TCP    3m38s   app=checkoutservice
+service/currencyservice         ClusterIP   10.43.80.29     <none>        7000/TCP    3m38s   app=currencyservice
+service/emailservice            ClusterIP   10.43.202.7     <none>        5000/TCP    3m38s   app=emailservice
+service/frontend                ClusterIP   10.43.89.57     <none>        80/TCP      3m38s   app=frontend
+service/frontend-external       ClusterIP   10.43.88.21     <none>        80/TCP      3m38s   app=frontend
+service/paymentservice          ClusterIP   10.43.66.133    <none>        50051/TCP   3m38s   app=paymentservice
+service/productcatalogservice   ClusterIP   10.43.146.86    <none>        3550/TCP    3m38s   app=productcatalogservice
+service/recommendationservice   ClusterIP   10.43.41.94     <none>        8080/TCP    3m38s   app=recommendationservice
+service/redis-cart              ClusterIP   10.43.30.139    <none>        6379/TCP    3m38s   app=redis-cart
+service/shippingservice         ClusterIP   10.43.30.99     <none>        50051/TCP   3m38s   app=shippingservice
+
+NAME                                    READY   UP-TO-DATE   AVAILABLE   AGE     CONTAINERS   IMAGES                                                                                                                     SELECTOR
+deployment.apps/adservice               1/1     1            1           3m38s   server       192.168.1.8:30082/boutique/adservice@sha256:f580c4853e896dd2083f0c270c4b7aa5feda6dd56058a93b87d0c88334a4c07d               app=adservice
+deployment.apps/cartservice             1/1     1            1           3m38s   server       192.168.1.8:30082/boutique/cartservice@sha256:b5c29ddb3238474ea8d1842f07004fedeeae47f660627ab111a613a681cd0356             app=cartservice
+deployment.apps/checkoutservice         1/1     1            1           3m38s   server       192.168.1.8:30082/boutique/checkoutservice@sha256:ab40699b6d9e45c9a93b5427008f327fbe912465361e2ff7a1a1be7111e36134         app=checkoutservice
+deployment.apps/currencyservice         1/1     1            1           3m38s   server       192.168.1.8:30082/boutique/currencyservice@sha256:7b2f3f804555c926861d67cd22c1b7c9e32d46b81cf1a64dd3089ae424d73be9         app=currencyservice
+deployment.apps/emailservice            1/1     1            1           3m38s   server       192.168.1.8:30082/boutique/emailservice@sha256:77fd45d411b3550cbd39e30bda83ed6ea23d87fd6e58e69cf9fa2808e003984d            app=emailservice
+deployment.apps/frontend                1/1     1            1           3m38s   server       192.168.1.8:30082/boutique/frontend@sha256:c06df08eccd78568a37292cfbe889df42fac48691b7fb05f2deeba0ae8d669ef                app=frontend
+deployment.apps/paymentservice          1/1     1            1           3m37s   server       192.168.1.8:30082/boutique/paymentservice@sha256:735b6d3255e2c74b0135a95cfc2337987e492f24e163c0bb9a853635876993c4          app=paymentservice
+deployment.apps/productcatalogservice   1/1     1            1           3m37s   server       192.168.1.8:30082/boutique/productcatalogservice@sha256:fb8568ecfc948717eb07746a6ce360fb8e5f906ae8a874cbad666891f0d21790   app=productcatalogservice
+deployment.apps/recommendationservice   1/1     1            1           3m37s   server       192.168.1.8:30082/boutique/recommendationservice@sha256:5d8321f2d24132889f654f75308e541b0626e6ae0cbacf81b170e5eb0921b415   app=recommendationservice
+deployment.apps/redis-cart              1/1     1            1           3m37s   redis        192.168.1.8:30082/boutique/redis@sha256:9c3ecc609a8087c0f11c494fefaf37a8f7bf9a967631d4a0da8967a9810be354                   app=redis-cart
+deployment.apps/shippingservice         1/1     1            1           3m37s   server       192.168.1.8:30082/boutique/shippingservice@sha256:8527bafff8c8776e345f2dca0641f6e8595b053ce67f9a5af66f5a85d9eaca9d         app=shippingservice
+
+NAME                                               DESIRED   CURRENT   READY   AGE     CONTAINERS   IMAGES                                                                                                                     SELECTOR
+replicaset.apps/adservice-7545b57c9b               1         1         1       3m38s   server       192.168.1.8:30082/boutique/adservice@sha256:f580c4853e896dd2083f0c270c4b7aa5feda6dd56058a93b87d0c88334a4c07d               app=adservice,pod-template-hash=7545b57c9b
+replicaset.apps/cartservice-6cb4bc8b8b             1         1         1       3m38s   server       192.168.1.8:30082/boutique/cartservice@sha256:b5c29ddb3238474ea8d1842f07004fedeeae47f660627ab111a613a681cd0356             app=cartservice,pod-template-hash=6cb4bc8b8b
+replicaset.apps/checkoutservice-59bcb96656         1         1         1       3m38s   server       192.168.1.8:30082/boutique/checkoutservice@sha256:ab40699b6d9e45c9a93b5427008f327fbe912465361e2ff7a1a1be7111e36134         app=checkoutservice,pod-template-hash=59bcb96656
+replicaset.apps/currencyservice-6654649555         1         1         1       3m38s   server       192.168.1.8:30082/boutique/currencyservice@sha256:7b2f3f804555c926861d67cd22c1b7c9e32d46b81cf1a64dd3089ae424d73be9         app=currencyservice,pod-template-hash=6654649555
+replicaset.apps/emailservice-ddcdd56b4             1         1         1       3m38s   server       192.168.1.8:30082/boutique/emailservice@sha256:77fd45d411b3550cbd39e30bda83ed6ea23d87fd6e58e69cf9fa2808e003984d            app=emailservice,pod-template-hash=ddcdd56b4
+replicaset.apps/frontend-795476c4cc                1         1         1       3m38s   server       192.168.1.8:30082/boutique/frontend@sha256:c06df08eccd78568a37292cfbe889df42fac48691b7fb05f2deeba0ae8d669ef                app=frontend,pod-template-hash=795476c4cc
+replicaset.apps/paymentservice-7475b46455          1         1         1       3m37s   server       192.168.1.8:30082/boutique/paymentservice@sha256:735b6d3255e2c74b0135a95cfc2337987e492f24e163c0bb9a853635876993c4          app=paymentservice,pod-template-hash=7475b46455
+replicaset.apps/productcatalogservice-8d64686cf    1         1         1       3m37s   server       192.168.1.8:30082/boutique/productcatalogservice@sha256:fb8568ecfc948717eb07746a6ce360fb8e5f906ae8a874cbad666891f0d21790   app=productcatalogservice,pod-template-hash=8d64686cf
+replicaset.apps/recommendationservice-584ff4ccb5   1         1         1       3m37s   server       192.168.1.8:30082/boutique/recommendationservice@sha256:5d8321f2d24132889f654f75308e541b0626e6ae0cbacf81b170e5eb0921b415   app=recommendationservice,pod-template-hash=584ff4ccb5
+replicaset.apps/redis-cart-5f8fc8d7b8              0         0         0       3m37s   redis        192.168.1.8:30082/boutique/redis@sha256:becdda6c7f4b3fb42e42fd7f120bbf5c54c4caaaf16f26da24e4563d2c1f0576                   app=redis-cart,pod-template-hash=5f8fc8d7b8
+replicaset.apps/redis-cart-7b5b9848dd              1         1         1       37s     redis        192.168.1.8:30082/boutique/redis@sha256:9c3ecc609a8087c0f11c494fefaf37a8f7bf9a967631d4a0da8967a9810be354                   app=redis-cart,pod-template-hash=7b5b9848dd
+replicaset.apps/shippingservice-6495db94f4         1         1         1       3m37s   server       192.168.1.8:30082/boutique/shippingservice@sha256:8527bafff8c8776e345f2dca0641f6e8595b053ce67f9a5af66f5a85d9eaca9d         app=shippingservice,pod-template-hash=6495db94f4

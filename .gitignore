@@ -31,3 +31,7 @@ gha-creds-*.json
 # DevSecOps engagement evidence: raw cluster exports are large; kept locally, not versioned
 docs/evidence/pre-engagement/all.yaml
 docs/evidence/pre-engagement/cluster-scoped.yaml
+
+# never commit signing material
+cosign.key
+*.cosign.key

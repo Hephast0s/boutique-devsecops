@@ -97,4 +97,16 @@ Additive only: no existing namespace/Harbor project/ingress was modified. `loadg
 No existing Jenkins job/credential/config was modified. Controller SA granted a namespace-scoped Role in
 `boutique-ci` only.
 
-## Phase 5+ — (empty; populated as objects are created)
+## Phase 5 — Supply chain (gates, SBOM, signing)
+
+| Action | System | Exact create | Exact remove |
+|---|---|---|---|
+| Generate cosign keypair | local | `cosign generate-key-pair --output-key-prefix security/cosign` | `rm security/cosign.{key,pub}` |
+| Store cosign key for CI | k8s | `kubectl -n boutique-ci create secret generic cosign-key --from-file=cosign.key=security/cosign.key --from-literal=COSIGN_PASSWORD=...` | `kubectl -n boutique-ci delete secret cosign-key` |
+| Sign + attest images | Harbor | `cosign sign/attest --key ... <img>@sha256:...` (in CI) | delete the signature/attestation artifacts in Harbor |
+| Probe tolerance patch | k8s (boutique-dev overlay) | edit `gitops/environments/dev/kustomization.yaml` + `kubectl apply` | revert the file + re-apply |
+| Availability fix (incident) | k8s | raised probe `timeoutSeconds:3`, `failureThreshold:6` | revert overlay |
+
+No existing platform object modified.
+
+## Phase 6+ — (empty; populated as objects are created)

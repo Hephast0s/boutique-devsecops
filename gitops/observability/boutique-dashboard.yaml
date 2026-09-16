@@ -1,0 +1,32 @@
+# Grafana dashboard for the boutique platform, delivered as a ConfigMap.
+# The Grafana sidecar (LABEL=grafana_dashboard, LABEL_VALUE=1, NAMESPACE=ALL) imports it automatically.
+# Data sources: kube-state-metrics + cAdvisor (the demo app does not expose Prometheus metrics).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: boutique-runtime-dashboard
+  namespace: boutique-security
+  labels:
+    grafana_dashboard: "1"
+    app.kubernetes.io/part-of: online-boutique
+data:
+  boutique-runtime.json: |
+    {
+      "title": "Boutique — Runtime & Health",
+      "uid": "boutique-runtime",
+      "schemaVersion": 39,
+      "refresh": "30s",
+      "time": {"from": "now-3h", "to": "now"},
+      "panels": [
+        {"type": "stat", "title": "Pods not ready (boutique-*)", "gridPos": {"h": 6, "w": 6, "x": 0, "y": 0},
+         "targets": [{"expr": "sum(kube_pod_status_ready{namespace=~\"boutique-.*\",condition=\"true\"} == 0)", "refId": "A"}]},
+        {"type": "stat", "title": "Deployment replica shortfall", "gridPos": {"h": 6, "w": 6, "x": 6, "y": 0},
+         "targets": [{"expr": "sum(kube_deployment_spec_replicas{namespace=~\"boutique-.*\"} - kube_deployment_status_replicas_available{namespace=~\"boutique-.*\"})", "refId": "A"}]},
+        {"type": "stat", "title": "Container restarts (1h)", "gridPos": {"h": 6, "w": 6, "x": 12, "y": 0},
+         "targets": [{"expr": "sum(increase(kube_pod_container_status_restarts_total{namespace=~\"boutique-.*\"}[1h]))", "refId": "A"}]},
+        {"type": "timeseries", "title": "CPU by pod (cores)", "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6},
+         "targets": [{"expr": "sum(rate(container_cpu_usage_seconds_total{namespace=~\"boutique-.*\",container!=\"POD\"}[5m])) by (pod)", "refId": "A"}]},
+        {"type": "timeseries", "title": "Memory working set by pod (bytes)", "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6},
+         "targets": [{"expr": "sum(container_memory_working_set_bytes{namespace=~\"boutique-.*\",container!=\"POD\"}) by (pod)", "refId": "A"}]}
+      ]
+    }

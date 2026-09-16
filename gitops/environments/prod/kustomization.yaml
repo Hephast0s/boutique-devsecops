@@ -14,6 +14,7 @@ components:
   - ../../../kustomize/components/container-images-registry
   - ../../../kustomize/components/without-loadgenerator
   - ../../components/boutique-hardening
+  - ../../components/boutique-network
 
 images:
   - name: CONTAINER_IMAGES_REGISTRY/adservice

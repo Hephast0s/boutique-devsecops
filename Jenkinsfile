@@ -76,7 +76,7 @@ spec:
   stages {
     stage('1. Preflight') {
       steps { container('tools') { script {
-        sh 'apk add --no-cache git syft cosign >/dev/null 2>&1 || true; git config --global --add safe.directory "*" || true'
+        sh 'apk add --no-cache git bash syft cosign >/dev/null 2>&1 || true; git config --global --add safe.directory "*" || true'
         env.GIT_SHA = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
         echo "git_sha=${env.GIT_SHA}"
       } } }
@@ -178,10 +178,10 @@ spec:
   "metadata": {"buildInvocationId": "boutique-app-ci#${BUILD_NUMBER}", "buildStartedOn": "2026-09-16T00:00:00Z", "completeness": {"parameters": true, "environment": false, "materials": false}, "reproducible": false}
 }
 EOF
-            cosign sign --key /cosign/cosign.key --yes --allow-insecure-registry --tlog-upload=false "$img"
-            cosign attest --key /cosign/cosign.key --yes --allow-insecure-registry --tlog-upload=false \
+            cosign sign --key /cosign/cosign.key --yes --allow-insecure-registry "$img"
+            cosign attest --key /cosign/cosign.key --yes --allow-insecure-registry \
               --predicate "$WORKSPACE/sbom/$svc.cdx.json" --type cyclonedx "$img"
-            cosign attest --key /cosign/cosign.key --yes --allow-insecure-registry --tlog-upload=false \
+            cosign attest --key /cosign/cosign.key --yes --allow-insecure-registry \
               --predicate "$WORKSPACE/provenance-$svc.json" --type slsaprovenance "$img"
             echo "signed+attested $svc"
           done

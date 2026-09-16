@@ -52,3 +52,14 @@ repos for GitOps/library. The Gitea-first plan in the original engagement is sup
 Operator directive 2026-09-16: total RAM added by this engagement must stay **≤ 4 GiB**
 (tooling + any new cluster components). This constrains Falco + Trivy Operator + Loki + ZAP to fit
 within 4 GiB combined; Loki is the first thing to drop if the cap is hit.
+
+## JS-CR-1 — Jenkins authorization is `loggedInUsersCanDoAnything` (High)
+Any authenticated user has full admin. Recommend installing `matrix-auth`/`role-strategy` and defining a
+least-privilege matrix. Shared config → operator decision. Details: `docs/04-jenkins-security-review.md`.
+
+## JS-CR-2 — Default Jenkins agent template mounts the host Docker socket (Medium)
+`/var/run/docker.sock` + `/usr/bin/docker` are hostPath volumes in the default agent template. Any job
+using it can control the node. Recommend removing them. Our pipeline does not use that template.
+
+## JS-CR-3 — `JENKINS_HOME` is a hostPath tied to node `mina` (Medium)
+Recommend migrating to a PVC and including it in Velero backups (ties to CR-009).

@@ -158,4 +158,13 @@ Existing Kyverno policies (hephastos-scoped) untouched. `boutique-verify-images`
 Existing objects changed: Argo CD `argocd-repo-server` (approved/operator-directed, reversible). All
 other objects are new.
 
-## Phase 10+ — (empty; populated as objects are created)
+## Phase 10 — Dynamic testing (smoke, DAST, load)
+
+| Action | System | Exact create | Exact remove |
+|---|---|---|---|
+| Smoke image mirror+sign | Harbor | `docker push 192.168.1.8:30082/boutique/smoke:8.11.1; cosign sign ...` | delete artifact |
+| ZAP baseline | host docker | `docker run ... zaproxy/zaproxy zap-baseline.py -t http://boutique-staging...` | remove container/report |
+
+No cluster objects retained. ZAP findings triaged in `security/exceptions.yaml`.
+
+## Phase 11+ — (empty; populated as objects are created)

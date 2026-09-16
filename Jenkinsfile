@@ -24,32 +24,39 @@ spec:
       resources: {requests: {cpu: "100m", memory: "256Mi"}, limits: {cpu: "500m", memory: "512Mi"}}
     - name: tools
       image: python:3.14-alpine
-      command: ['sleep']; args: ['3600']
+      command: ['sleep']
+      args: ['3600']
       resources: {requests: {cpu: "50m", memory: "128Mi"}, limits: {cpu: "500m", memory: "512Mi"}}
     - name: gitleaks
       image: ghcr.io/gitleaks/gitleaks:v8.30.0
-      command: ['sleep']; args: ['3600']
+      command: ['sleep']
+      args: ['3600']
       resources: {requests: {cpu: "50m", memory: "128Mi"}, limits: {cpu: "500m", memory: "512Mi"}}
     - name: kaniko
       image: gcr.io/kaniko-project/executor:v1.23.2-debug
-      command: ['sleep']; args: ['3600']
+      command: ['sleep']
+      args: ['3600']
       volumeMounts: [{name: docker-config, mountPath: /kaniko/.docker}]
       resources: {requests: {cpu: "200m", memory: "512Mi"}, limits: {cpu: "1500m", memory: "2Gi"}}
     - name: syft
       image: anchore/syft:latest
-      command: ['sleep']; args: ['3600']
+      command: ['sleep']
+      args: ['3600']
       resources: {requests: {cpu: "50m", memory: "128Mi"}, limits: {cpu: "500m", memory: "1Gi"}}
     - name: trivy
       image: aquasec/trivy:latest
-      command: ['sleep']; args: ['3600']
+      command: ['sleep']
+      args: ['3600']
       resources: {requests: {cpu: "50m", memory: "128Mi"}, limits: {cpu: "500m", memory: "1Gi"}}
     - name: semgrep
       image: semgrep/semgrep:latest
-      command: ['sleep']; args: ['3600']
+      command: ['sleep']
+      args: ['3600']
       resources: {requests: {cpu: "50m", memory: "256Mi"}, limits: {cpu: "1000m", memory: "1Gi"}}
     - name: cosign
       image: gcr.io/projectsigstore/cosign:latest
-      command: ['sleep']; args: ['3600']
+      command: ['sleep']
+      args: ['3600']
       env:
         - name: COSIGN_PASSWORD
           valueFrom: {secretKeyRef: {name: cosign-key, key: COSIGN_PASSWORD}}

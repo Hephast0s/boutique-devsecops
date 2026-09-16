@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app.kubernetes.io/part-of: online-boutique
+    app.kubernetes.io/component: ci-agent
+spec:
+  serviceAccountName: jenkins-agent
+  automountServiceAccountToken: false
+  restartPolicy: Never
+  containers:
+    - name: jnlp
+      image: jenkins/inbound-agent:3384.v60d89463d9e0-1
+      args: ['$(JENKINS_SECRET)', '$(JENKINS_NAME)']
+      env:
+        - name: JENKINS_URL
+          value: "http://jenkins.jenkins.svc.cluster.local:8080/"
+      resources:
+        requests: {cpu: "100m", memory: "256Mi"}
+        limits: {cpu: "500m", memory: "512Mi"}
+    - name: tools
+      image: python:3.14-alpine
+      command: ['sleep']
+      args: ['3600']
+      resources:
+        requests: {cpu: "50m", memory: "128Mi"}
+        limits: {cpu: "500m", memory: "512Mi"}
+    - name: gitleaks
+      image: ghcr.io/gitleaks/gitleaks:v8.30.0
+      command: ['sleep']
+      args: ['3600']
+      resources:
+        requests: {cpu: "50m", memory: "128Mi"}
+        limits: {cpu: "500m", memory: "512Mi"}
+    - name: kaniko
+      image: gcr.io/kaniko-project/executor:v1.23.2-debug
+      command: ['sleep']
+      args: ['3600']
+      volumeMounts:
+        - name: docker-config
+          mountPath: /kaniko/.docker
+      resources:
+        requests: {cpu: "200m", memory: "512Mi"}
+        limits: {cpu: "1500m", memory: "2Gi"}
+  volumes:
+    - name: docker-config
+      secret:
+        secretName: harbor-push
+        items:
+          - key: .dockerconfigjson
+            path: config.json

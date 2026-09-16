@@ -4,13 +4,12 @@
 > Last updated: end of Phase 1.
 
 ## CURRENT
-- Phase: **5 — COMPLETE (core)** (SBOM + Trivy gate + cosign sign/attest/verify in CI). See
-  `docs/phases/PHASE-5-REPORT.md`. Build #11 = SUCCESS.
-- Next: **Phase 6** (Vault + External Secrets Operator) — needs a Vault token/mount permission (CR-005).
-- Writes so far: Harbor project `boutique` (12 repos), `boutique-dev` (11 workloads + ingress),
-  `boutique-ci` (ns/SA/RBAC/secrets), Jenkins job `boutique-app-ci`, cosign signatures/attestations.
-- Audit (2026-09-16): all prior-phase artefacts present; `boutique-dev` 11/11 ready; existing platform
-  namespaces all healthy; branch protection active on `main`+`devsecops`.
+- Phase: **6 — COMPLETE (core)** (Vault scoped mount + k8s auth + ESO delivery + rotation + denial).
+  See `docs/phases/PHASE-6-REPORT.md`.
+- Next: **Phase 7** (GitOps CD, dev→staging→prod) — Argo CD chosen; create a new Argo Project +
+  Applications scoped to `boutique-*`.
+- Writes so far: Harbor project `boutique`, `boutique-dev`, `boutique-ci`, `boutique-security`,
+  Jenkins job, cosign signatures, Vault `boutique/` mount, ESO SecretStore/ExternalSecret.
 
 ## NEXT ACTION WHEN UNBLOCKED
 1. Operator decision needed on `docs/CHANGE_REQUESTS.md` CR-001 (Jenkins up). Phase 2 can proceed on GitHub now.

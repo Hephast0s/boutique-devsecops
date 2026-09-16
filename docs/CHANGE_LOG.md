@@ -109,4 +109,18 @@ No existing Jenkins job/credential/config was modified. Controller SA granted a 
 
 No existing platform object modified.
 
-## Phase 6+ — (empty; populated as objects are created)
+## Phase 6 — Secrets (Vault + ESO)
+
+| Action | System | Exact create | Exact remove |
+|---|---|---|---|
+| KV v2 mount `boutique/` | Vault | `vault secrets enable -path=boutique kv-v2` | `vault secrets disable boutique/` |
+| Policy `boutique-read` | Vault | `vault policy write boutique-read -` | `vault policy delete boutique-read` |
+| Secrets | Vault | `vault kv put boutique/{dev/redis,dev/app,ci/cosign,harbor/pull} ...` | `vault kv metadata delete boutique/...` |
+| Kubernetes auth | Vault | `vault auth enable kubernetes` + `vault write auth/kubernetes/config ...` + `vault write auth/kubernetes/role/boutique ...` | `vault auth disable kubernetes` |
+| Reviewer SA + delegator | k8s | `kubectl apply -f gitops/security/vault-auth.yaml` | `kubectl delete -f gitops/security/vault-auth.yaml` |
+| SecretStore + ExternalSecret | k8s | `kubectl apply -f gitops/security/eso-dev.yaml` | `kubectl delete -f gitops/security/eso-dev.yaml` |
+| `boutique-security` namespace | k8s | included in `vault-auth.yaml` | `kubectl delete ns boutique-security` |
+
+Existing `secret/` mount and all other Vault paths untouched.
+
+## Phase 7+ — (empty; populated as objects are created)

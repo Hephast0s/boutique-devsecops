@@ -85,4 +85,16 @@ one-time local provisioning was intentionally not completed. No upstream file wa
 
 Additive only: no existing namespace/Harbor project/ingress was modified. `loadgenerator` excluded.
 
-## Phase 4+ — (empty; populated as objects are created)
+## Phase 4 — Jenkins CI
+
+| Action | System | Exact create | Exact remove |
+|---|---|---|---|
+| CI namespace + SA + RBAC | k8s | `kubectl apply -f ci/k8s/boutique-ci.yaml` | `kubectl delete ns boutique-ci` |
+| Harbor push secret | k8s | `kubectl create secret docker-registry harbor-push -n boutique-ci ... --dry-run=client -o yaml \| kubectl apply -f -` | `kubectl -n boutique-ci delete secret harbor-push` |
+| Jenkins job | Jenkins | `curl .../createItem?name=boutique-app-ci` | `curl .../job/boutique-app-ci/doDelete` |
+| Build image | Harbor | `Kaniko → 192.168.1.8:30082/boutique/frontend:v0.10.6-<sha>-b<N>` | delete artifact in Harbor |
+
+No existing Jenkins job/credential/config was modified. Controller SA granted a namespace-scoped Role in
+`boutique-ci` only.
+
+## Phase 5+ — (empty; populated as objects are created)

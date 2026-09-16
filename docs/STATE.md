@@ -4,10 +4,12 @@
 > Last updated: end of Phase 1.
 
 ## CURRENT
-- Phase: **3 — COMPLETE** (baseline deployed to `boutique-dev`). See `docs/phases/PHASE-3-REPORT.md`.
-- Next: **Phase 4** (Jenkins CI) — Jenkins is up; needs an API token (CR-007) to create jobs/agents.
-- Writes so far: Harbor project `boutique` (12 mirrored images), namespace `boutique-dev` (11 workloads +
-  ingress). No existing object modified. Repo work is committed on `phase-*` branches, merged to `devsecops`.
+- Phase: **4 — COMPLETE (core)** (Jenkins CI working; frontend built+ pushed by Kaniko). See
+  `docs/phases/PHASE-4-REPORT.md`.
+- Next: **Phase 5** (security gates, SBOM, signing/attestation) — needs a **Vault token** (CR-005) for the
+  cosign key; install permissions for Falco/Trivy Operator still open (CR-003).
+- Writes so far: Harbor project `boutique` (13 artifacts), `boutique-dev` (11 workloads + ingress),
+  `boutique-ci` (ns/SA/RBAC/secret), Jenkins job `boutique-app-ci`.
 
 ## NEXT ACTION WHEN UNBLOCKED
 1. Operator decision needed on `docs/CHANGE_REQUESTS.md` CR-001 (Jenkins up). Phase 2 can proceed on GitHub now.

@@ -1,0 +1,247 @@
+# Kyverno policies scoped to the boutique platform only.
+# Scoping: namespaceSelector matches app.kubernetes.io/part-of=online-boutique, which is set on every
+# boutique-* namespace. No existing policy (hephastos-scoped) is modified.
+#
+# Rollout: validationFailureAction Audit first, reviewed, then flipped to Enforce.
+# NOTE: verifyImages mutateDigest requires Enforce; set to true when flipping.
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: boutique-verify-images
+  labels: {app.kubernetes.io/part-of: online-boutique}
+spec:
+  validationFailureAction: Audit
+  background: false
+  rules:
+    - name: verify-cosign-signature
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+              namespaceSelector:
+                matchLabels:
+                  app.kubernetes.io/part-of: online-boutique
+      verifyImages:
+        - imageReferences:
+            - "192.168.1.8:30082/boutique/*"
+          mutateDigest: false
+          verifyDigest: true
+          required: true
+          attestors:
+            - entries:
+                - keys:
+                    publicKeys: |-
+                      -----BEGIN PUBLIC KEY-----
+                      MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEDnpGxyU6JiAmz3A8g0MZLyfc7LtW
+                      BGbKvWmnTH1Ymoah6sAA0eu0PYxgJcRJ0CUjBbTMFHHubosUdRoyecZx3w==
+                      -----END PUBLIC KEY-----
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: boutique-restrict-registry
+  labels: {app.kubernetes.io/part-of: online-boutique}
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: only-boutique-harbor
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+              namespaceSelector:
+                matchLabels:
+                  app.kubernetes.io/part-of: online-boutique
+      validate:
+        message: "Images must come from the Harbor project boutique (192.168.1.8:30082/boutique/)."
+        foreach:
+          - list: "request.object.spec.containers"
+            deny:
+              conditions:
+                all:
+                  - key: "{{ images.containers.\"{{element.name}}\".registry || '' }}"
+                    operator: NotEquals
+                    value: "192.168.1.8:30082"
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: boutique-require-digest
+  labels: {app.kubernetes.io/part-of: online-boutique}
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: forbid-latest-tag
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+              namespaceSelector:
+                matchLabels:
+                  app.kubernetes.io/part-of: online-boutique
+      validate:
+        message: "The :latest tag is forbidden."
+        foreach:
+          - list: "request.object.spec.containers"
+            deny:
+              conditions:
+                any:
+                  - key: "{{ images.containers.\"{{element.name}}\".tag || '' }}"
+                    operator: Equals
+                    value: "latest"
+    - name: require-digest
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+              namespaceSelector:
+                matchLabels:
+                  app.kubernetes.io/part-of: online-boutique
+      validate:
+        message: "Images must be pinned by digest (@sha256:...)."
+        pattern:
+          spec:
+            containers:
+              - (name): "*"
+                image: "*@sha256:?*"
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: boutique-restricted
+  labels: {app.kubernetes.io/part-of: online-boutique}
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: pod-security-restricted
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+              namespaceSelector:
+                matchLabels:
+                  app.kubernetes.io/part-of: online-boutique
+      validate:
+        message: "Pods must meet the restricted security profile (non-root, no priv-esc, drop ALL, RO rootfs, seccomp RuntimeDefault, no host namespaces/hostPath)."
+        pattern:
+          spec:
+            =(hostNetwork): false
+            =(hostPID): false
+            =(hostIPC): false
+            securityContext:
+              runAsNonRoot: true
+              seccompProfile:
+                type: RuntimeDefault
+            containers:
+              - (name): "*"
+                securityContext:
+                  privileged: false
+                  allowPrivilegeEscalation: false
+                  readOnlyRootFilesystem: true
+                  capabilities:
+                    drop:
+                      - ALL
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: boutique-require-resources
+  labels: {app.kubernetes.io/part-of: online-boutique}
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: require-requests-and-limits
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+              namespaceSelector:
+                matchLabels:
+                  app.kubernetes.io/part-of: online-boutique
+      validate:
+        message: "Every container must declare CPU and memory requests and limits."
+        pattern:
+          spec:
+            containers:
+              - (name): "*"
+                resources:
+                  requests: {cpu: "?*", memory: "?*"}
+                  limits: {cpu: "?*", memory: "?*"}
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: boutique-require-probes
+  labels: {app.kubernetes.io/part-of: online-boutique}
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: require-liveness-and-readiness
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+              namespaceSelector:
+                matchLabels:
+                  app.kubernetes.io/part-of: online-boutique
+      validate:
+        message: "Every container must declare liveness and readiness probes."
+        deny:
+          conditions:
+            any:
+              - key: "{{ request.object.spec.containers[?!livenessProbe || !readinessProbe] | length(@) }}"
+                operator: GreaterThan
+                value: 0
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: boutique-require-labels
+  labels: {app.kubernetes.io/part-of: online-boutique}
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: require-standard-labels
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+              namespaceSelector:
+                matchLabels:
+                  app.kubernetes.io/part-of: online-boutique
+      validate:
+        message: "Pods must carry the standard app.kubernetes.io/part-of label."
+        pattern:
+          metadata:
+            labels:
+              app.kubernetes.io/part-of: "online-boutique"
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: boutique-sa-token
+  labels: {app.kubernetes.io/part-of: online-boutique}
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: no-automount-sa-token
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+              namespaceSelector:
+                matchLabels:
+                  app.kubernetes.io/part-of: online-boutique
+      validate:
+        message: "automountServiceAccountToken must be false unless explicitly annotated."
+        pattern:
+          spec:
+            =(automountServiceAccountToken): false

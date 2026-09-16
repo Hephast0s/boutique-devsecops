@@ -16,6 +16,9 @@ patches:
         value:
           type: RuntimeDefault
       - op: add
+        path: /spec/template/metadata/labels/app.kubernetes.io~1part-of
+        value: online-boutique
+      - op: add
         path: /spec/template/spec/nodeSelector
         value:
           node-type: worker

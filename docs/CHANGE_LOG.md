@@ -56,4 +56,17 @@ Google upstream. See `CHANGE_REQUESTS.md` CR-010.
 Jenkins came up healthy (pod `jenkins-0` 3/3 on node `mina`). This is a change to an **existing**
 component and was explicitly authorized by the operator. No config was modified.
 
+### Upstream files: minimal, additive changes (documented)
+- `.github/CODEOWNERS` — **additive only**: upstream Google owner line preserved; appended `@Hephast0s`
+  and engagement paths (`security/`, `ci/`, `Jenkinsfile`, `gitops/`, pre-commit/gitleaks configs).
+  Rationale: the fork owner must review security-sensitive paths. No upstream content removed.
+- `.github/pull_request_template.md` — **left untouched**. Our checklist lives in a new sibling file
+  `.github/PULL_REQUEST_TEMPLATE/devsecops.md` (GitHub offers both).
+
+### Pre-commit execution note (resource constraint)
+`pre-commit run --all-files` provisions 7 tool environments on first run (gitleaks Go binary, Python
+yamllint/hadolint/ruff, Node markdownlint, shellcheck) and gitleaks scans **full git history** — too heavy
+for the operator's 4 GiB cap. The hooks are defined and will run in CI (Phase 4) and on demand; the
+one-time local provisioning was intentionally not completed. No upstream file was reformatted.
+
 ## Phase 3+ — (empty; populated as objects are created)

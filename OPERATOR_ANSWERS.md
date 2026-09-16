@@ -16,7 +16,7 @@ Legend: `CONFIRMED` (real output) · `DISCOVERED` (found read-only in Phase 1) �
   docker 29.1.3, trivy 0.72.0, grype 0.116.1, cosign v2.6.4, jq 1.8.1, yq v4.53.3, go 1.24.2,
   node v22.23.1, npm 10.9.8, python3 3.14.4, openssl 3.5.5, curl, wget.
   MISSING: kustomize, syft, gitleaks, semgrep, hadolint, buildkit/kaniko, nerdctl, java, mvn, gradle, dotnet.
-- may_install_local_tools: MISSING (interim: ephemeral `docker run`, no host install)
+- may_install_local_tools: CONFIRMED **yes** (operator, 2026-09-16) — under a **4 GiB total RAM cap** for all tooling/components this engagement adds.
 - local_internet_access: DISCOVERED yes (host egress verified)
 
 ## CLUSTER EGRESS
@@ -26,8 +26,8 @@ Legend: `CONFIRMED` (real output) · `DISCOVERED` (found read-only in Phase 1) �
 - dockerhub_credentials: MISSING (anonymous; rate-limited)
 
 ## PLATFORM COMPONENTS (all DISCOVERED unless noted)
-- gitea_url: `http://192.168.1.8:30080` — **DOWN (replicas 0)**; gitea_org/token MISSING
-- git_commit_identity: MISSING (GitHub account = `Hephast0s`/Marshal)
+- gitea_url: **ABANDONED** — operator will not run Gitea; source of truth is **GitHub** (2026-09-16)
+- git_commit_identity: CONFIRMED `Marshal <Hephast0s@users.noreply.github.com>` (GitHub account Hephast0s)
 - jenkins_url: `http://192.168.1.8:30081` — **DOWN (replicas 0)**; api_token MISSING
 - jenkins_may_install_plugins / jenkins_k8s_plugin_configured: MISSING (cannot inspect while down)
 - harbor_url: `http://harbor.192.168.1.8.nip.io` (core NodePort 30082); v2.15.1 healthy, Trivy on
@@ -58,6 +58,10 @@ Legend: `CONFIRMED` (real output) · `DISCOVERED` (found read-only in Phase 1) �
 - may_run_zap_jobs: MISSING
 - may_install_buildkit_or_kaniko: MISSING
 - Loki install (not in Section 0): MISSING decision
+
+## RESOURCE BUDGET (operator directive, 2026-09-16)
+- Max total RAM added by this engagement (tool containers + any new cluster components): **4 GiB**.
+- Existing platform components are already in the measured baseline; do not exceed the cap without asking.
 
 ## SIGNING IDENTITY
 - gpg_signing_owner / gpg_key_id / gpg_key_on_agent_machine / cosign_key_strategy: MISSING

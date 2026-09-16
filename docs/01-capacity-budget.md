@@ -66,7 +66,15 @@ running** and already counted in the measured usage — they cost nothing new.
   (staging/prod) are the chosen availability control instead.
 - **shoppingassistantservice** — never deployed (GCP dependency).
 
-## 5. Scheduling plan (no node label/taint changes — rule 1.1)
+## 5. Operator resource cap (2026-09-16)
+
+The operator authorized installing/running tools but set a hard cap: **this engagement may add at most
+4 GiB RAM in total** (tool containers + new cluster components). Reconciliation:
+Falco (~1.5 Gi) + Trivy Operator (256 Mi) + ZAP on-demand (~1 Gi) ≈ 2.75 GiB, leaving headroom.
+**Loki is the first component to drop** if the cap is approached; if Falco+TrivyOperator+Loki were all
+installed simultaneously they would exceed 4 GiB, so Loki is deferred pending a separate decision.
+
+## 6. Scheduling plan (no node label/taint changes — rule 1.1)
 
 - **mina (control-plane):** CI agents, Jenkins controller, Trivy Operator, and existing platform stack.
   High-memory builds (adservice, cartservice) pinned here via pod-template nodeSelector
@@ -75,7 +83,7 @@ running** and already counted in the measured usage — they cost nothing new.
   `topologySpreadConstraints` so replicas of the same env are not co-located when scaled beyond 1.
 - No node labels or taints are added; only existing labels (`node-type=worker`, `kubernetes.io/hostname`) are used.
 
-## 6. Jenkins build-agent memory plan
+## 7. Jenkins build-agent memory plan
 
 - Pod templates set **requests = 50% of limit** to improve packing; limits: go/node/python 1 Gi,
   dotnet 1.5 Gi, java-gradle 2 Gi.

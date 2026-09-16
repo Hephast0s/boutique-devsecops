@@ -5,19 +5,20 @@
 
 ## CURRENT
 - Phase: **1 — COMPLETE** (infrastructure discovery, read-only). See `docs/phases/PHASE-1-REPORT.md`.
-- Next: **Phase 2** (Git strategy/repos) — **BLOCKED**: Gitea is scaled to 0 and Jenkins is scaled to 0.
+- Next: **Phase 2** (Git strategy/repos) — now on **GitHub** (operator dropped Gitea). Jenkins still down → Phase 4 blocker.
 - Writes so far: one temporary `boutique-preflight` namespace (created + deleted, proven). No retained
   cluster/remote objects. Repo changes are committed to the GitHub fork (Gitea down).
 
 ## NEXT ACTION WHEN UNBLOCKED
-1. Operator acts on `docs/CHANGE_REQUESTS.md` CR-001 (Jenkins up) and CR-002 (Gitea up).
-2. Start Phase 2: create Gitea repos `boutique-app`/`boutique-gitops`/`boutique-jenkins-library`,
-   protect `main`, GPG identities, pre-commit controls.
+1. Operator decision needed on `docs/CHANGE_REQUESTS.md` CR-001 (Jenkins up). Phase 2 can proceed on GitHub now.
+2. Start Phase 2: GitHub repos `boutique-gitops` / `boutique-jenkins-library` (+ app repo), protect `main`,
+   GPG identities, pre-commit controls.
 3. Never create `boutique-*` cluster objects until stateful backups are confirmed (CR-009, rule 1.11).
 
 ## BLOCKED — on operator (details in docs/CHANGE_REQUESTS.md)
 - **CR-001** Jenkins replicas=0 → blocks Phases 2 & 4.
-- **CR-002** Gitea replicas=0 → blocks Phase 2 (interim: push to GitHub fork).
+- **CR-002 RESOLVED** — Gitea dropped; GitHub is the source of truth (CR-010 resolved too).
+- **Resource cap (operator):** this engagement may add at most **4 GiB RAM total**.
 - **CR-003** install permissions: falco / trivy-operator / Loki (Loki absent).
 - **CR-004** `may_install_local_tools` — missing syft/gitleaks/semgrep/hadolint/kustomize/dotnet/java.
 - **CR-005..008** Vault token, Harbor robot creds, Jenkins API token, Gitea admin token.

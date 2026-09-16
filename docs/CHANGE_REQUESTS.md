@@ -12,14 +12,9 @@ engagement does not own (rule 1.1) or because a Section 0 permission is missing.
 - **Rollback:** `kubectl -n jenkins scale statefulset jenkins --replicas=0`
 - **Risk:** resource pressure if scheduled on a node without headroom; prefer node `mina`.
 
-## CR-002 — Scale Gitea back up (BLOCKING for Phase 2)
-- **Observed:** `gitea`, `gitea-postgresql-ha-pgpool` deployments and both statefulsets → `replicas=0`.
-- **Need:** Gitea running to create `boutique-app` / `boutique-gitops` / `boutique-jenkins-library`.
-- **Proposed commands:** `kubectl -n gitea scale deploy/gitea --replicas=1` (+ the pgpool/postgresql/valkey
-  backends as needed per the chart's original replica counts — operator knows the intended values).
-- **Blast radius:** starts the existing Gitea stack (~1–2 Gi). No config change.
-- **Rollback:** scale back to 0.
-- **Interim:** until then, pushes go to the GitHub fork `MinaC4/microservices-demo` (operator-directed).
+## CR-002 — Gitea — RESOLVED (will not be used)
+Operator decision 2026-09-16: **Gitea will not be started.** All Git work happens on **GitHub**.
+Phase 2 therefore targets GitHub repos + branch protection, not Gitea. No Gitea action needed.
 
 ## CR-003 — Install permissions still unanswered (Section 0)
 - `may_install_falco` — needed for Phase 9 runtime detection (est. ~512 Mi × 3 nodes).
@@ -50,7 +45,12 @@ engagement does not own (rule 1.1) or because a Section 0 permission is missing.
   covering **Vault, Gitea, Harbor, and `JENKINS_HOME`** exists and is current before the first write.
   Taking these backups is the operator's action, not the agent's.
 
-## CR-010 — Remote deviation record
-- Operator instructed "push every change to the repo". Gitea is down, so pushes go to the GitHub fork
-  `MinaC4/microservices-demo` (not the Google upstream). Recorded as an accepted deviation in
-  `CHANGE_LOG.md`. Confirm this remains the intent once Gitea is restored.
+## CR-010 — RESOLVED — GitHub is the source of truth
+Operator decision 2026-09-16: the work is on **GitHub**, not Gitea. Pushes go to
+`github.com/MinaC4/microservices-demo` (operator's fork — not the Google upstream) and to new GitHub
+repos for GitOps/library. The Gitea-first plan in the original engagement is superseded.
+
+## CR-011 — Resource cap
+Operator directive 2026-09-16: total RAM added by this engagement must stay **≤ 4 GiB**
+(tooling + any new cluster components). This constrains Falco + Trivy Operator + Loki + ZAP to fit
+within 4 GiB combined; Loki is the first thing to drop if the cap is hit.

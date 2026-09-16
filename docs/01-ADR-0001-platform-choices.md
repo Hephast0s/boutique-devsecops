@@ -64,15 +64,14 @@ Two components are **installed but scaled to zero** (Jenkins, Gitea), and two pl
   `*-eso` name convention so kustomize/Helm never co-manage the same object (a lesson the operator hit before).
 - Consequence: no long-lived static Secret is authored in Git; rotation is demonstrated in Phase 6.
 
-## Decision 7 — Source-of-truth remote (interim): GitHub fork, not Gitea
+## Decision 7 — Source of truth: **GitHub** (Gitea abandoned)
 
-- Context: the engagement plans three Gitea repos, but **Gitea is scaled to 0**. The operator directly
-  instructed "push every change to the repo".
-- Decision: push to the existing `origin` = `github.com/MinaC4/microservices-demo.git` (the operator's own
-  fork — **not** the Google upstream) as an interim source of truth until Gitea is restored, then mirror
-  to Gitea `boutique-app` in Phase 2.
-- Consequence: deviates from the original Gitea-first plan; recorded in `CHANGE_LOG.md`. The engagement
-  still forbids pushing to the **upstream** Google repository.
+- Context: the engagement originally planned three Gitea repos, but Gitea is scaled to 0 and the operator
+  decided (2026-09-16) that **Git work happens on GitHub**.
+- Decision: `github.com/MinaC4/microservices-demo` is the app repo; new GitHub repos are created for
+  `boutique-gitops` and `boutique-jenkins-library`. Gitea is dropped from the design entirely.
+- Consequence: replaces the Gitea-first plan; the engagement still forbids pushing to the **Google
+  upstream** repository. Git identity is `Marshal <Hephast0s@users.noreply.github.com>`.
 
 ## Open blocker (not an ADR decision)
 

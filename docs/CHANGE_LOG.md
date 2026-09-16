@@ -148,4 +148,14 @@ Existing objects changed: none. Gmail App Password stored only in Vault / k8s se
 Existing Kyverno policies (hephastos-scoped) untouched. `boutique-verify-images` kept in Audit
 (CR-KYVERNO-1).
 
-## Phase 9+ — (empty; populated as objects are created)
+## Phase 9 — Network segmentation
+
+| Action | System | Exact create | Exact remove |
+|---|---|---|---|
+| NetworkPolicies (14/env) | k8s | via `boutique-network` component in overlays (Argo) | remove component / `kubectl -n <env> delete netpol -l app.kubernetes.io/part-of=online-boutique` |
+| Argo repo-server resources (operator-directed, CR-ARGO-1) | k8s (argocd) | `kubectl -n argocd patch deploy argocd-repo-server` (1 replica, 1 CPU/1Gi) | `kubectl -n argocd rollout undo deploy/argocd-repo-server` |
+
+Existing objects changed: Argo CD `argocd-repo-server` (approved/operator-directed, reversible). All
+other objects are new.
+
+## Phase 10+ — (empty; populated as objects are created)

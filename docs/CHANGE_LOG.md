@@ -137,4 +137,15 @@ Existing `secret/` mount and all other Vault paths untouched.
 Existing objects changed: none. Gmail App Password stored only in Vault / k8s secret `smtp-eso`
 (never in Git). **Rotate it after testing** (it was shared in chat).
 
-## Phase 8+ — (empty; populated as objects are created)
+## Phase 8 — Admission control (Kyverno)
+
+| Action | System | Exact create | Exact remove |
+|---|---|---|---|
+| 8 ClusterPolicies | k8s | `kubectl apply -f gitops/policies/boutique-policies.yaml` | `kubectl delete -f gitops/policies/boutique-policies.yaml` |
+| Signed all deployed images | Harbor | `cosign sign --key security/cosign.key <img>@sha256:...` | delete signature artifacts |
+| Mailpit mirror+sign | Harbor | `docker push 192.168.1.8:30082/boutique/mailpit@...; cosign sign ...` | delete artifact |
+
+Existing Kyverno policies (hephastos-scoped) untouched. `boutique-verify-images` kept in Audit
+(CR-KYVERNO-1).
+
+## Phase 9+ — (empty; populated as objects are created)

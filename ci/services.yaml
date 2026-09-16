@@ -1,0 +1,160 @@
+# ci/services.yaml — single source of truth for the Jenkins CI matrix.
+# Verified against the repository during Phase 0 (read-only).
+# Fields:
+#   name         service name (also the image name in Harbor: boutique/<name>)
+#   context      Docker build context (authoritative: skaffold.yaml)
+#   dockerfile   Dockerfile path relative to repo root
+#   language     toolchain used by the Jenkins pod agent
+#   port         container port
+#   protocol     http | grpc | none
+#   build        build command run inside the build toolchain stage (image build is separate)
+#   test         unit-test command; null = no automated tests (must be explicitly waived)
+#   testDir      directory the test command must run from
+#   deploy       true = deployed to the boutique-* environments
+#   scanOnly     true = security-scanned but never deployed (GCP dependency)
+#   notes        build/runtime caveats that affect CI
+
+services:
+  - name: frontend
+    context: src/frontend
+    dockerfile: src/frontend/Dockerfile
+    language: go
+    port: 8080
+    protocol: http
+    build: "go build ./..."
+    test: "go test ./..."
+    testDir: src/frontend
+    deploy: true
+    notes: "mustMapEnv panics if any of 8 *_SERVICE_ADDR vars missing, incl. SHOPPING_ASSISTANT_SERVICE_ADDR"
+
+  - name: productcatalogservice
+    context: src/productcatalogservice
+    dockerfile: src/productcatalogservice/Dockerfile
+    language: go
+    port: 3550
+    protocol: grpc
+    build: "go build ./..."
+    test: "go test ./..."
+    testDir: src/productcatalogservice
+    deploy: true
+    notes: "go 1.25.8; distroless final is unpinned in-source"
+
+  - name: shippingservice
+    context: src/shippingservice
+    dockerfile: src/shippingservice/Dockerfile
+    language: go
+    port: 50051
+    protocol: grpc
+    build: "go build ./..."
+    test: "go test ./..."
+    testDir: src/shippingservice
+    deploy: true
+
+  - name: checkoutservice
+    context: src/checkoutservice
+    dockerfile: src/checkoutservice/Dockerfile
+    language: go
+    port: 5050
+    protocol: grpc
+    build: "go build ./..."
+    test: "go test ./..."
+    testDir: src/checkoutservice
+    deploy: true
+    notes: "transaction fan-out hub; money_test.go exists but upstream CI never ran it"
+
+  - name: cartservice
+    context: src/cartservice/src
+    dockerfile: src/cartservice/src/Dockerfile
+    language: dotnet
+    port: 7070
+    protocol: grpc
+    build: "dotnet publish src/cartservice.csproj -c Release"
+    test: "dotnet test src/cartservice/"
+    testDir: src/cartservice
+    deploy: true
+    notes: "BUILD CONTEXT IS src/cartservice/src (not src/cartservice); xUnit tests live one level up"
+
+  - name: currencyservice
+    context: src/currencyservice
+    dockerfile: src/currencyservice/Dockerfile
+    language: node
+    port: 7000
+    protocol: grpc
+    build: "npm install --only=production"
+    test: null
+    testDir: src/currencyservice
+    deploy: true
+    notes: "npm test is a create-react-app stub that exits 1; no tests exist — needs waiver or new tests"
+
+  - name: paymentservice
+    context: src/paymentservice
+    dockerfile: src/paymentservice/Dockerfile
+    language: node
+    port: 50051
+    protocol: grpc
+    build: "npm install --only=production"
+    test: null
+    testDir: src/paymentservice
+    deploy: true
+    notes: "npm test stub exits 1; simulated charge in charge.js only — high-value place to add tests"
+
+  - name: emailservice
+    context: src/emailservice
+    dockerfile: src/emailservice/Dockerfile
+    language: python
+    port: 8080
+    protocol: grpc
+    build: "pip install -r requirements.txt"
+    test: null
+    testDir: src/emailservice
+    deploy: true
+    notes: "service port is 5000 -> container 8080; requirements pin rsa==4.9 (fixed in 4.9.1)"
+
+  - name: recommendationservice
+    context: src/recommendationservice
+    dockerfile: src/recommendationservice/Dockerfile
+    language: python
+    port: 8080
+    protocol: grpc
+    build: "pip install -r requirements.txt"
+    test: null
+    testDir: src/recommendationservice
+    deploy: true
+    notes: "does NOT degrade on catalog failure; frontend is the tolerant side"
+
+  - name: adservice
+    context: src/adservice
+    dockerfile: src/adservice/Dockerfile
+    language: java-gradle
+    port: 9555
+    protocol: grpc
+    build: "./gradlew downloadRepos installDist"
+    test: null
+    testDir: src/adservice
+    deploy: true
+    notes: "MEMORY PEAK. Gradle 8.14.5 + JDK 25; sourceCompatibility=21; budget >=2Gi and a Gradle cache"
+
+  - name: loadgenerator
+    context: src/loadgenerator
+    dockerfile: src/loadgenerator/Dockerfile
+    language: python
+    port: null
+    protocol: none
+    build: "pip install -r requirements.txt"
+    test: null
+    testDir: src/loadgenerator
+    deploy: false
+    notes: "client only; run as a time-boxed Job in Phase 10, never a standing Deployment"
+
+  - name: shoppingassistantservice
+    context: src/shoppingassistantservice
+    dockerfile: src/shoppingassistantservice/Dockerfile
+    language: python
+    port: 8080
+    protocol: http
+    build: "pip install -r requirements.txt"
+    test: null
+    testDir: src/shoppingassistantservice
+    deploy: false
+    scanOnly: true
+    notes: "OUT OF SCOPE for deployment: requires GCP Vertex AI + AlloyDB + Secret Manager. Scan only."

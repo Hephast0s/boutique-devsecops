@@ -27,3 +27,7 @@ pkg/
 release/wi-kubernetes-manifests.yaml
 vendor/
 gha-creds-*.json
+
+# DevSecOps engagement evidence: raw cluster exports are large; kept locally, not versioned
+docs/evidence/pre-engagement/all.yaml
+docs/evidence/pre-engagement/cluster-scoped.yaml

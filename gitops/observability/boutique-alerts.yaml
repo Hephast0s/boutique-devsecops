@@ -1,0 +1,32 @@
+# Alerts for the boutique platform. Selected by Prometheus (label release=prometheus; ruleNamespaceSelector={}).
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: boutique-alerts
+  namespace: boutique-security
+  labels:
+    release: prometheus
+    app.kubernetes.io/part_of: online-boutique
+spec:
+  groups:
+    - name: boutique.rules
+      rules:
+        - alert: BoutiqueDeploymentReplicasMismatch
+          expr: kube_deployment_spec_replicas{namespace=~"boutique-.*"} != kube_deployment_status_replicas_available{namespace=~"boutique-.*"}
+          for: 5m
+          labels: {severity: warning, part_of: online-boutique}
+          annotations:
+            summary: "Deployment {{ $labels.namespace }}/{{ $labels.deployment }} replica mismatch"
+            description: "desired {{ $value }} vs available; investigate the rollout."
+        - alert: BoutiquePodCrashLooping
+          expr: increase(kube_pod_container_status_restarts_total{namespace=~"boutique-.*"}[10m]) > 3
+          for: 5m
+          labels: {severity: warning, part_of: online-boutique}
+          annotations:
+            summary: "Pod {{ $labels.namespace }}/{{ $labels.pod }} is crash-looping"
+        - alert: BoutiquePodNotReady
+          expr: sum by (namespace, pod) (kube_pod_status_ready{namespace=~"boutique-.*",condition="true"} == 0) > 0
+          for: 10m
+          labels: {severity: warning, part_of: online-boutique}
+          annotations:
+            summary: "Pod {{ $labels.namespace }}/{{ $labels.pod }} not ready for 10m"

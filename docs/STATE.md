@@ -4,12 +4,12 @@
 > Last updated: end of Phase 1.
 
 ## CURRENT
-- Phase: **6 — COMPLETE (core)** (Vault scoped mount + k8s auth + ESO delivery + rotation + denial).
-  See `docs/phases/PHASE-6-REPORT.md`.
-- Next: **Phase 7** (GitOps CD, dev→staging→prod) — Argo CD chosen; create a new Argo Project +
-  Applications scoped to `boutique-*`.
-- Writes so far: Harbor project `boutique`, `boutique-dev`, `boutique-ci`, `boutique-security`,
-  Jenkins job, cosign signatures, Vault `boutique/` mount, ESO SecretStore/ExternalSecret.
+- Phase: **7 — COMPLETE** (GitOps CD dev/staging/prod) + email delivery fixed. See
+  `docs/phases/PHASE-7-REPORT.md`.
+- Email: order confirmations now delivered to Gmail via SMTP (creds from Vault → ESO `smtp-eso`).
+- Next: **Phase 8** (Kyverno admission: verifyImages + restricted set, scoped to `boutique-*`).
+- Open CR: raise Argo CD `repo-server` resources (root cause of intermittent `DeadlineExceeded`).
+- Security action for operator: **rotate the Gmail App Password** (it was shared in chat).
 
 ## NEXT ACTION WHEN UNBLOCKED
 1. Operator decision needed on `docs/CHANGE_REQUESTS.md` CR-001 (Jenkins up). Phase 2 can proceed on GitHub now.

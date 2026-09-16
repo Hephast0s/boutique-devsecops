@@ -1,0 +1,101 @@
+# Pre-commit controls for the Online Boutique DevSecOps engagement.
+# Secrets, Dockerfiles, YAML, shell, Python, Markdown + commit hygiene.
+# Upstream generated code (protobuf, node_modules, lockfiles, static assets) is excluded — see docs/02-git-strategy.md.
+default_install_hook_types: [pre-commit, commit-msg]
+default_stages: [pre-commit]
+
+exclude: |
+  (?x)^(
+    src/.*/node_modules/.*|
+    src/.*/genproto/.*|
+    src/.*/.*_pb2\.py|
+    src/.*/.*\.pb\.go|
+    src/.*/go\.sum|
+    src/.*/package-lock\.json|
+    src/adservice/gradle/wrapper/.*|
+    src/frontend/static/.*|
+    release/.*\.yaml|
+    docs/img/.*|
+    \.deploystack/.*|
+    terraform/.*|
+    \.github/workflows/.*
+  )$
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+        args: ["--maxkb=2048"]
+      - id: check-merge-conflict
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: detect-private-key
+      - id: mixed-line-ending
+        args: ["--fix=lf"]
+      - id: check-yaml
+        args: ["--allow-multiple-documents"]
+      - id: check-executables-have-shebangs
+
+  # Secret scanning (the primary shift-left control)
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.0
+    hooks:
+      - id: gitleaks
+
+  # Dockerfile linting for all 12 Dockerfiles
+  - repo: https://github.com/AleksaC/hadolint-py
+    rev: v2.15.1
+    hooks:
+      - id: hadolint
+        args: ["--failure-threshold", "error"]
+
+  # YAML linting for engagement-authored YAML only
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.38.0
+    hooks:
+      - id: yamllint
+        args: ["-c", ".yamllint"]
+        files: ^(ci/|security/|tests/|docs/).*\.(ya?ml)$
+
+  # Shell linting for our scripts
+  - repo: https://github.com/koalaman/shellcheck-precommit
+    rev: v0.11.0
+    hooks:
+      - id: shellcheck
+        files: ^ci/scripts/.*\.sh$
+
+  # Markdown linting for engagement docs
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.49.1
+    hooks:
+      - id: markdownlint
+        args: ["--config", ".markdownlint.json"]
+        files: ^(README\.md|SECURITY\.md|CONTRIBUTING\.md|docs/(0[0-9]|1[0-3])-.*\.md|docs/[A-Z].*\.md|docs/phases/.*\.md)$
+
+  # Python lint/format for engagement-authored Python (tests/, security/)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.7
+    hooks:
+      - id: ruff
+        files: ^(ci/|security/|tests/).*\.py$
+      - id: ruff-format
+        files: ^(ci/|security/|tests/).*\.py$
+
+  # Local guard hooks
+  - repo: local
+    hooks:
+      - id: conventional-commit
+        name: conventional commit message
+        language: script
+        entry: ci/scripts/commit-msg.sh
+        stages: [commit-msg]
+      - id: forbidden-files
+        name: block secret-like filenames
+        language: script
+        entry: ci/scripts/forbidden-files.sh
+      - id: gofmt
+        name: gofmt (check only, never rewrites upstream files)
+        language: system
+        entry: bash -c 'out=$(gofmt -l "$@"); if [ -n "$out" ]; then echo "gofmt found unformatted files:"; echo "$out"; exit 1; fi' --
+        files: \.go$

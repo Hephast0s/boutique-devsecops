@@ -1,0 +1,19 @@
+# gitleaks configuration — extends the default ruleset with project allowlists.
+title = "online-boutique-devsecops"
+
+[extend]
+useDefault = true
+
+# The demo intentionally contains fake, publicly-known card numbers in the
+# payment service test fixtures. These are NOT secrets; allowlist them explicitly.
+[allowlist]
+description = "Known non-secret demo values (fake test card numbers)"
+regexes = [
+  '''4111[ -]?1111[ -]?1111[ -]?1111''',
+  '''5555[ -]?5555[ -]?5555[ -]?4444''',
+  '''4242[ -]?4242[ -]?4242[ -]?4242''',
+]
+paths = [
+  '''src/paymentservice/.*test.*''',
+  '''docs/evidence/.*''',
+]

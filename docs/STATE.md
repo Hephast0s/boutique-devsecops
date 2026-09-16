@@ -20,8 +20,13 @@
 - **CR-001** Jenkins replicas=0 → blocks Phases 2 & 4.
 - **CR-001 RESOLVED** — Jenkins scaled up (authorized), pod 3/3 on mina; anonymous API 403.
 - **CR-002 RESOLVED** — Gitea dropped; GitHub is the source of truth (CR-010 resolved too).
-- **Repo strategy (operator):** work on the current repo with **a branch per work-stream** and a
-  **final integrated branch** at the end. Integration branch: `devsecops`; work: `phase-<n>-*`.
+- **Repo strategy (operator):** new repo `github.com/Hephast0s/boutique-devsecops` (admin → branch
+  protection works). Branch per work-stream + a final integrated branch. Integration `devsecops`;
+  work `phase-<n>-*`. The old fork `MinaC4/microservices-demo` is kept as remote `fork` (backup).
+- **Branch protection ENABLED** on `main` + `devsecops`: PR required (1 review), linear history,
+  no force-push, no deletion, **signed commits required**.
+- **GPG:** CI-bot key `84DF9F67AAB13638` (ed25519, expires 2028-09-15) generated; public key at
+  `security/gpg-ci-bot.pub`; git configured to sign (`commit.gpgsign=true`). Operator human key still missing.
 - **Resource cap (operator):** this engagement may add at most **4 GiB RAM total**.
 - **CR-003** install permissions: falco / trivy-operator / Loki (Loki absent).
 - **CR-004** `may_install_local_tools` — missing syft/gitleaks/semgrep/hadolint/kustomize/dotnet/java.

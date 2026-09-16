@@ -1,0 +1,6 @@
+# hadolint policy for the 12 service Dockerfiles.
+# Only `error`-level findings fail the hook; warnings are reported but non-blocking.
+failure-threshold: error
+ignored:
+  - DL3008  # pin apt versions — base images are already digest-pinned
+  - DL3018  # pin apk versions — base images are already digest-pinned

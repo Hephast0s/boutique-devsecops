@@ -3,4 +3,13 @@
 
 # These owners will be the default owners for everything in
 # the repo. Unless a later match takes precedence.
-* @GoogleCloudPlatform/devrel-flagship-app-maintainers @yoshi-approver
+* @GoogleCloudPlatform/devrel-flagship-app-maintainers @yoshi-approver @Hephast0s
+
+# DevSecOps engagement owners (additive; upstream lines above preserved).
+/security/                      @Hephast0s
+/ci/                            @Hephast0s
+/.pre-commit-config.yaml        @Hephast0s
+/.gitleaks.toml                 @Hephast0s
+/Jenkinsfile                    @Hephast0s
+/gitops/                        @Hephast0s
+

@@ -14,6 +14,7 @@ components:
   - ../../../kustomize/components/container-images-registry
   - ../../../kustomize/components/without-loadgenerator
   - ../../components/boutique-hardening
+  - ../../components/boutique-network
 
 # Pin every image to an immutable digest in Harbor (threat R-01 / control C-PIN).
 images:

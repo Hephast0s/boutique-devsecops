@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+# Hardened network segmentation for a boutique environment.
+# default-deny + explicit allows per the call graph in docs/00-architecture.md.
+# DNS egress to CoreDNS is always allowed (classic footgun).
+resources:
+  - netpol-default-deny.yaml
+  - netpol-allow-dns.yaml
+  - netpol-app.yaml

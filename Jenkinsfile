@@ -78,6 +78,7 @@ spec:
         container('tools') {
           script {
             sh 'apk add --no-cache git >/dev/null 2>&1 || true'
+            sh 'git config --global --add safe.directory "*" || true'
             env.GIT_SHA = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
             echo "workspace=${WORKSPACE} git_sha=${env.GIT_SHA}"
             sh 'python3 -c "print(\'python ok\')"'

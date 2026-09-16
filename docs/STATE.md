@@ -4,10 +4,11 @@
 > Last updated: end of Phase 1.
 
 ## CURRENT
-- Phase: **10 — COMPLETE** (smoke 7/7 across envs; ZAP baseline FAIL-NEW=0; latency baseline). See
-  `docs/phases/PHASE-10-REPORT.md`.
-- Next: **Phase 11** (observability: ServiceMonitor/PodMonitor, Grafana dashboards, alerts).
-- Gaps: runtime security (CR-003), Loki absent, smoke hook not yet wired.
+- Phase: **12 & 13 — COMPLETE (with documented gaps)**. See `docs/phases/PHASE-12-13-REPORT.md`.
+- All phases 0–13 have been executed; each phase has a report with a Definition-of-Done checklist and
+  honest gaps. Open items are tracked in `docs/CHANGE_REQUESTS.md` (CR-003, CR-KYVERNO-1, JS-CR-1/2/3,
+  CR-WEB-1, CR-ALERT-1, CR-005..009).
+- `devsecops` is the integrated branch; the operator's "final" branch can be cut from it.
 
 ## NEXT ACTION WHEN UNBLOCKED
 1. Operator decision needed on `docs/CHANGE_REQUESTS.md` CR-001 (Jenkins up). Phase 2 can proceed on GitHub now.

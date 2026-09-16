@@ -1,0 +1,173 @@
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: online-boutique
+  title: Online Boutique
+  description: Google Online Boutique microservices, secured end-to-end (DevSecOps).
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+  links:
+    - url: https://github.com/Hephast0s/boutique-devsecops
+      title: Source (GitHub)
+    - url: http://192.168.1.8:30081/job/boutique-app-ci
+      title: Jenkins pipeline
+    - url: http://harbor.192.168.1.8.nip.io/harbor/projects/3/repositories
+      title: Harbor (project boutique)
+    - url: http://192.168.1.8:30085
+      title: Argo CD
+    - url: http://192.168.1.8:30084
+      title: Grafana
+spec:
+  owner: group:default/platform-team
+  domain: e-commerce
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: online-boutique-grpc
+  description: gRPC contract shared by the Online Boutique services (protos/demo.proto).
+  links:
+    - url: https://github.com/Hephast0s/boutique-devsecops/blob/devsecops/protos/demo.proto
+      title: demo.proto
+spec:
+  type: grpc
+  lifecycle: production
+  owner: group:default/platform-team
+  system: online-boutique
+  definition: |
+    # See protos/demo.proto for the full definition.
+    service Frontend {}       # HTTP only
+    service CheckoutService { rpc PlaceOrder(PlaceOrderRequest) returns (PlaceOrderResponse); }
+    service CartService { rpc AddItem(...); rpc GetCart(...); rpc EmptyCart(...); }
+    service ProductCatalogService { rpc ListProducts(...); rpc GetProduct(...); rpc SearchProducts(...); }
+    service CurrencyService { rpc GetSupportedCurrencies(...); rpc Convert(...); }
+    service ShippingService { rpc GetQuote(...); rpc ShipOrder(...); }
+    service PaymentService { rpc Charge(...); }
+    service EmailService { rpc SendOrderConfirmation(...); }
+    service RecommendationService { rpc ListRecommendations(...); }
+    service AdService { rpc GetAds(...); }
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: frontend
+  description: Web UI; only internet-facing service.
+  annotations:
+    backstage.io/kubernetes-namespace: boutique-prod
+    backstage.io/kubernetes-id: frontend
+    harbor.io/repository: boutique/frontend
+  links:
+    - {url: "http://boutique-prod.192.168.1.8.nip.io", title: prod}
+    - {url: "http://boutique-dev.192.168.1.8.nip.io", title: dev}
+spec:
+  type: website
+  lifecycle: production
+  owner: group:default/platform-team
+  system: online-boutique
+  dependsOn:
+    - component:productcatalogservice
+    - component:currencyservice
+    - component:cartservice
+    - component:recommendationservice
+    - component:shippingservice
+    - component:checkoutservice
+    - component:adservice
+  providesApis: [online-boutique-grpc]
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: checkoutservice
+  annotations: {backstage.io/kubernetes-namespace: boutique-prod, backstage.io/kubernetes-id: checkoutservice}
+spec:
+  type: service
+  lifecycle: production
+  owner: group:default/platform-team
+  system: online-boutique
+  dependsOn:
+    - component:cartservice
+    - component:productcatalogservice
+    - component:currencyservice
+    - component:shippingservice
+    - component:paymentservice
+    - component:emailservice
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: cartservice
+  annotations: {backstage.io/kubernetes-namespace: boutique-prod, backstage.io/kubernetes-id: cartservice}
+spec:
+  type: service
+  lifecycle: production
+  owner: group:default/platform-team
+  system: online-boutique
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: productcatalogservice
+  annotations: {backstage.io/kubernetes-namespace: boutique-prod, backstage.io/kubernetes-id: productcatalogservice}
+spec: {type: service, lifecycle: production, owner: group:default/platform-team, system: online-boutique}
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: currencyservice
+  annotations: {backstage.io/kubernetes-namespace: boutique-prod, backstage.io/kubernetes-id: currencyservice}
+spec: {type: service, lifecycle: production, owner: group:default/platform-team, system: online-boutique}
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: shippingservice
+  annotations: {backstage.io/kubernetes-namespace: boutique-prod, backstage.io/kubernetes-id: shippingservice}
+spec: {type: service, lifecycle: production, owner: group:default/platform-team, system: online-boutique}
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: paymentservice
+  annotations: {backstage.io/kubernetes-namespace: boutique-prod, backstage.io/kubernetes-id: paymentservice}
+spec: {type: service, lifecycle: production, owner: group:default/platform-team, system: online-boutique}
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: emailservice
+  annotations: {backstage.io/kubernetes-namespace: boutique-prod, backstage.io/kubernetes-id: emailservice}
+spec: {type: service, lifecycle: production, owner: group:default/platform-team, system: online-boutique}
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: recommendationservice
+  annotations: {backstage.io/kubernetes-namespace: boutique-prod, backstage.io/kubernetes-id: recommendationservice}
+spec:
+  type: service
+  lifecycle: production
+  owner: group:default/platform-team
+  system: online-boutique
+  dependsOn: [component:productcatalogservice]
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: adservice
+  annotations: {backstage.io/kubernetes-namespace: boutique-prod, backstage.io/kubernetes-id: adservice}
+spec: {type: service, lifecycle: production, owner: group:default/platform-team, system: online-boutique}
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: redis-cart
+  annotations: {backstage.io/kubernetes-namespace: boutique-prod, backstage.io/kubernetes-id: redis-cart}
+spec: {type: service, lifecycle: production, owner: group:default/platform-team, system: online-boutique}
+---
+# Scanned by CI but NOT deployed: requires Google Cloud (Vertex AI + AlloyDB).
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: shoppingassistantservice
+  description: "OUT OF SCOPE for deployment: requires Google Cloud (Vertex AI + AlloyDB + Secret Manager). Scanned by CI only."
+spec: {type: service, lifecycle: experimental, owner: group:default/platform-team, system: online-boutique}

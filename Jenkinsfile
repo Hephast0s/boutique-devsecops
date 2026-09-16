@@ -15,7 +15,7 @@ spec:
   containers:
     - name: jnlp
       image: jenkins/inbound-agent:3384.v60d89463d9e0-1
-      args: ['${computer.jnlpmac} ${computer.name}']
+      args: ['$(JENKINS_SECRET)', '$(JENKINS_NAME)']
       env:
         - name: JENKINS_URL
           value: "http://jenkins.jenkins.svc.cluster.local:8080/"

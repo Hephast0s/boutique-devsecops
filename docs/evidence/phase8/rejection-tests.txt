@@ -1,0 +1,81 @@
+### (a) non-boutique registry image
+Warning: would violate PodSecurity "restricted:latest": allowPrivilegeEscalation != false (container "bad-registry" must set securityContext.allowPrivilegeEscalation=false), unrestricted capabilities (container "bad-registry" must set securityContext.capabilities.drop=["ALL"]), runAsNonRoot != true (pod or container "bad-registry" must set securityContext.runAsNonRoot=true), seccompProfile (pod or container "bad-registry" must set securityContext.seccompProfile.type to "RuntimeDefault" or "Localhost")
+Error from server: admission webhook "validate.kyverno.svc-fail" denied the request: 
+
+resource Pod/boutique-dev/bad-registry was blocked due to the following policies 
+
+boutique-require-digest:
+  require-digest: 'validation error: Images must be pinned by digest (@sha256:...).
+    rule require-digest failed at path /spec/containers/0/image/'
+boutique-require-labels:
+  require-standard-labels: 'validation error: Pods must carry the standard app.kubernetes.io/part-of
+    label. rule require-standard-labels failed at path /metadata/labels/app.kubernetes.io/part-of/'
+boutique-require-probes:
+  require-liveness-and-readiness: Every container must declare liveness and readiness
+    probes.
+boutique-require-resources:
+  require-requests-and-limits: 'validation error: Every container must declare CPU
+    and memory requests and limits. rule require-requests-and-limits failed at path
+    /spec/containers/0/resources/limits/'
+boutique-restrict-registry:
+  only-boutique-harbor: 'validation failure: Images must come from the Harbor project
+    boutique (192.168.1.8:30082/boutique/).'
+boutique-restricted:
+  pod-security-restricted: 'validation error: Pods must meet the restricted security
+    profile (non-root, no priv-esc, drop ALL, RO rootfs, seccomp RuntimeDefault, no
+    host namespaces/hostPath). rule pod-security-restricted failed at path /spec/containers/0/securityContext/'
+
+### (b) :latest tag
+Warning: policy boutique-verify-images.verify-cosign-signature: failed to verify image 192.168.1.8:30082/boutique/frontend:latest: .attestors[0].entries[0].keys: invalid realm in www-authenticate: realm host "192.168.1.8" is a private or link-local address
+Warning: would violate PodSecurity "restricted:latest": allowPrivilegeEscalation != false (container "bad-latest" must set securityContext.allowPrivilegeEscalation=false), unrestricted capabilities (container "bad-latest" must set securityContext.capabilities.drop=["ALL"]), runAsNonRoot != true (pod or container "bad-latest" must set securityContext.runAsNonRoot=true), seccompProfile (pod or container "bad-latest" must set securityContext.seccompProfile.type to "RuntimeDefault" or "Localhost")
+Error from server: admission webhook "validate.kyverno.svc-fail" denied the request: 
+
+resource Pod/boutique-dev/bad-latest was blocked due to the following policies 
+
+boutique-require-digest:
+  forbid-latest-tag: 'validation failure: The :latest tag is forbidden.'
+  require-digest: 'validation error: Images must be pinned by digest (@sha256:...).
+    rule require-digest failed at path /spec/containers/0/image/'
+boutique-require-labels:
+  require-standard-labels: 'validation error: Pods must carry the standard app.kubernetes.io/part-of
+    label. rule require-standard-labels failed at path /metadata/labels/app.kubernetes.io/part-of/'
+boutique-require-probes:
+  require-liveness-and-readiness: Every container must declare liveness and readiness
+    probes.
+boutique-require-resources:
+  require-requests-and-limits: 'validation error: Every container must declare CPU
+    and memory requests and limits. rule require-requests-and-limits failed at path
+    /spec/containers/0/resources/limits/'
+boutique-restricted:
+  pod-security-restricted: 'validation error: Pods must meet the restricted security
+    profile (non-root, no priv-esc, drop ALL, RO rootfs, seccomp RuntimeDefault, no
+    host namespaces/hostPath). rule pod-security-restricted failed at path /spec/containers/0/securityContext/'
+boutique-verify-images:
+  verify-cosign-signature: missing digest for 192.168.1.8:30082/boutique/frontend:latest
+
+### (c) privileged
+Warning: policy boutique-verify-images.verify-cosign-signature: failed to verify image 192.168.1.8:30082/boutique/frontend@sha256:c06df08eccd78568a37292cfbe889df42fac48691b7fb05f2deeba0ae8d669ef: .attestors[0].entries[0].keys: invalid realm in www-authenticate: realm host "192.168.1.8" is a private or link-local address
+Error from server (Forbidden): error when creating "STDIN": pods "bad-priv" is forbidden: violates PodSecurity "baseline:latest": privileged (container "c" must not set securityContext.privileged=true)
+
+### (d) no limits
+Warning: policy boutique-verify-images.verify-cosign-signature: failed to verify image 192.168.1.8:30082/boutique/frontend@sha256:c06df08eccd78568a37292cfbe889df42fac48691b7fb05f2deeba0ae8d669ef: .attestors[0].entries[0].keys: invalid realm in www-authenticate: realm host "192.168.1.8" is a private or link-local address
+Error from server: error when creating "STDIN": admission webhook "validate.kyverno.svc-fail" denied the request: 
+
+resource Pod/boutique-dev/bad-limits was blocked due to the following policies 
+
+boutique-require-labels:
+  require-standard-labels: 'validation error: Pods must carry the standard app.kubernetes.io/part-of
+    label. rule require-standard-labels failed at path /metadata/labels/'
+boutique-require-probes:
+  require-liveness-and-readiness: Every container must declare liveness and readiness
+    probes.
+boutique-require-resources:
+  require-requests-and-limits: 'validation error: Every container must declare CPU
+    and memory requests and limits. rule require-requests-and-limits failed at path
+    /spec/containers/0/resources/limits/'
+boutique-restricted:
+  pod-security-restricted: 'validation error: Pods must meet the restricted security
+    profile (non-root, no priv-esc, drop ALL, RO rootfs, seccomp RuntimeDefault, no
+    host namespaces/hostPath). rule pod-security-restricted failed at path /spec/containers/0/securityContext/privileged/'
+boutique-verify-images:
+  verify-cosign-signature: unverified image 192.168.1.8:30082/boutique/frontend@sha256:c06df08eccd78568a37292cfbe889df42fac48691b7fb05f2deeba0ae8d669ef

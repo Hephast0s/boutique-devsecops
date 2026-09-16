@@ -4,12 +4,11 @@
 > Last updated: end of Phase 1.
 
 ## CURRENT
-- Phase: **7 — COMPLETE** (GitOps CD dev/staging/prod) + email delivery fixed. See
-  `docs/phases/PHASE-7-REPORT.md`.
-- Email: order confirmations now delivered to Gmail via SMTP (creds from Vault → ESO `smtp-eso`).
-- Next: **Phase 8** (Kyverno admission: verifyImages + restricted set, scoped to `boutique-*`).
-- Open CR: raise Argo CD `repo-server` resources (root cause of intermittent `DeadlineExceeded`).
-- Security action for operator: **rotate the Gmail App Password** (it was shared in chat).
+- Phase: **8 — COMPLETE** (Kyverno admission; 7 policies Enforce, verify-images Audit). See
+  `docs/phases/PHASE-8-REPORT.md`.
+- Next: **Phase 9** (network segmentation + Falco + Trivy Operator) — install permissions for Falco/Trivy
+  Operator still open (CR-003).
+- Open CRs: CR-KYVERNO-1 (private-IP registry realm), CR-ARGO-1 (repo-server resources).
 
 ## NEXT ACTION WHEN UNBLOCKED
 1. Operator decision needed on `docs/CHANGE_REQUESTS.md` CR-001 (Jenkins up). Phase 2 can proceed on GitHub now.

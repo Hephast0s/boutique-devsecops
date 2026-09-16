@@ -63,3 +63,20 @@ using it can control the node. Recommend removing them. Our pipeline does not us
 
 ## JS-CR-3 — `JENKINS_HOME` is a hostPath tied to node `mina` (Medium)
 Recommend migrating to a PVC and including it in Velero backups (ties to CR-009).
+
+## CR-KYVERNO-1 — Kyverno cannot verify signatures from the HTTP/private-IP Harbor (Medium)
+**Symptom:** `boutique-verify-images` (Audit) reports `invalid realm in www-authenticate: realm host
+"192.168.1.8" is a private or link-local address`; Kyverno/go-containerregistry refuses to follow an auth
+realm on a private IP. Enforcing the policy now would block every legitimate pod.
+**Options:**
+1. Point Harbor's registry token realm / external URL at a hostname (e.g. `harbor.192.168.1.8.nip.io`)
+   and supply Kyverno registry credentials; re-test. (Harbor config change.)
+2. Configure Kyverno with a registry credential (`imageRegistryCredentials`) so it does not negotiate the
+   realm. (Kyverno config / new secret in the kyverno namespace.)
+3. Serve Harbor with TLS from a trusted CA (larger change).
+**Decision needed:** which option, and approval to modify the shared component.
+
+## CR-ARGO-1 — Argo CD `repo-server` is under-resourced (Medium)
+`limits: cpu=50m, memory=64Mi`, 3 replicas, frequent OOM restarts → intermittent
+`kustomize build ... failed timeout after 1m30s` / `DeadlineExceeded`, apps flap to `Unknown`, syncs
+delay. Recommend raising CPU/memory (single shared component). Command in `docs/07-gitops.md`.

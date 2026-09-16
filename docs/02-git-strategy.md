@@ -2,8 +2,9 @@
 
 ## Model (operator-directed, 2026-09-16)
 
-Single repository (`github.com/MinaC4/microservices-demo`) with a **branch-per-work-stream** model and a
-**final integrated branch** at the end. This replaces the original three-Gitea-repo design (Gitea dropped).
+Single repository **`github.com/Hephast0s/boutique-devsecops`** (created for this engagement; admin access)
+with a **branch-per-work-stream** model and a **final integrated branch** at the end. The old fork
+`MinaC4/microservices-demo` is kept as remote `fork` for reference. This replaces the original three-Gitea-repo design.
 
 ```
 main                    protected trunk; only reviewed merges; never force-pushed
@@ -39,15 +40,15 @@ Promotion is **by digest**: CI builds and signs an image, then commits the diges
 Promotion dev → staging → prod copies the exact digest, never rebuilds. This is what makes "what runs in
 prod" provably identical to "what passed the gates".
 
-## Branch protection (GitHub)
+## Branch protection (GitHub) — ENFORCED
 
-Applied to `main` and `devsecops`:
+Active on **`main`** and **`devsecops`** (verified via the GitHub API on 2026-09-16):
 
-- Require a pull request before merging (no direct pushes).
-- Require status checks to pass (the Jenkins build once wired).
-- Require linear history; dismiss stale approvals.
-- Require signed commits.
-- Restrict force pushes and deletions.
+- Require a pull request before merging; 1 approving review; dismiss stale approvals.
+- Require linear history; required conversation resolution.
+- **Require signed commits.**
+- No force pushes; no branch deletion.
+- Status checks: not yet required (Jenkins contexts not wired yet) — to be enabled after Phase 4.
 
 ## The CI system never writes to the app layer
 

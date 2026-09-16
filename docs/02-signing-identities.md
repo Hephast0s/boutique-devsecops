@@ -8,10 +8,11 @@ revocation.
 | Identity | Purpose | Key | Status |
 |---|---|---|---|
 | Human (operator) | signs human commits + release tags | `gpg_key_id`: **MISSING** (operator has no GPG secret key on this host) | **pending operator** |
-| CI bot | signs CI commits that write digest pins to the GitOps layer | dedicated key generated for this engagement | to be generated in Phase 5 |
+| CI bot | signs commits while no human key exists; later signs CI digest-pin commits | `84DF9F67AAB13638` (ed25519, exp 2028-09-15), pubkey `security/gpg-ci-bot.pub` | **generated 2026-09-16** |
 
-Verified during Phase 1: `gpg --list-secret-keys` on the host is **empty**. The engagement therefore
-**cannot** produce human-signed commits yet, and must not fabricate a key claiming the operator's identity.
+Verified during Phase 1: `gpg --list-secret-keys` on the host was **empty**. A dedicated engagement key was
+then generated (it does **not** claim the operator's identity). Until the operator provides a key, commits
+are signed with the CI-bot key; this is recorded as a temporary measure, not the final model.
 
 ## Human identity (operator)
 

@@ -167,4 +167,13 @@ other objects are new.
 
 No cluster objects retained. ZAP findings triaged in `security/exceptions.yaml`.
 
-## Phase 11+ — (empty; populated as objects are created)
+## Phase 12/13 — Portal integration & documentation
+
+| Action | System | Exact create | Exact remove |
+|---|---|---|---|
+| Catalog + TechDocs files | git | `catalog-info.yaml`, `mkdocs.yml` | `rm` them |
+| Documentation set | git | `README.md`, `docs/{ARCHITECTURE,SECURITY,EVIDENCE,METRICS,COMPARISON,DEMO,INTERVIEW-NOTES}.md`, `docs/runbooks/*`, `docs/adr/*` | `rm` them |
+
+No cluster objects. Backstage registration pending CR-WEB-1.
+
+## (end)

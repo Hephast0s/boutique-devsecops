@@ -1,0 +1,17 @@
+site_name: Online Boutique DevSecOps
+docs_dir: docs
+nav:
+  - Architecture: ARCHITECTURE.md
+  - Security: SECURITY.md
+  - Threat model: 00-threat-model.md
+  - Supply chain: 05-supply-chain.md
+  - Secrets: 06-secrets-management.md
+  - GitOps: 07-gitops.md
+  - Policy as code: 08-policy-as-code.md
+  - Network security: 09-network-security.md
+  - Observability: 11-observability.md
+  - Evidence: EVIDENCE.md
+  - Metrics: METRICS.md
+  - Demo script: DEMO.md
+plugins:
+  - techdocs-core

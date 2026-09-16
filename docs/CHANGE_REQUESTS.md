@@ -76,7 +76,18 @@ realm on a private IP. Enforcing the policy now would block every legitimate pod
 3. Serve Harbor with TLS from a trusted CA (larger change).
 **Decision needed:** which option, and approval to modify the shared component.
 
-## CR-ARGO-1 — Argo CD `repo-server` is under-resourced (Medium)
-`limits: cpu=50m, memory=64Mi`, 3 replicas, frequent OOM restarts → intermittent
+## CR-ARGO-1 — Argo CD `repo-server` is under-resourced (Medium)`limits: cpu=50m, memory=64Mi`, 3 replicas, frequent OOM restarts → intermittent
 `kustomize build ... failed timeout after 1m30s` / `DeadlineExceeded`, apps flap to `Unknown`, syncs
 delay. Recommend raising CPU/memory (single shared component). Command in `docs/07-gitops.md`.
+
+## CR-WEB-1 — Register the catalog in Backstage (Low)
+Need permission/token to add a new **location** (`catalog-info.yaml`) to the existing Backstage portal
+without editing shared config. Catalog files are delivered; registration pending.
+
+## CR-ALERT-1 — Add an Alertmanager receiver for `boutique-alerts` (Low)
+The 3 boutique alerts load into the existing Prometheus. Notifications require a receiver in the existing
+Alertmanager (shared config). Until then the alerts are visible in Prometheus/Grafana only.
+
+## CR-006b — Harbor pull robot for the cluster (Low)
+The project `boutique` is public; a dedicated pull-only robot is recommended so the cluster pulls
+authenticated. Creation needs a Harbor token (CR-006).

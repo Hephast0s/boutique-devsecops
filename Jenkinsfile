@@ -76,12 +76,12 @@ spec:
     stage('1. Preflight') {
       steps {
         container('tools') {
-          sh '''
-            set -e
-            echo "workspace=$WORKSPACE"
-            git rev-parse --short HEAD
-            python3 -c "print('python ok')"
-          '''
+          script {
+            sh 'apk add --no-cache git >/dev/null 2>&1 || true'
+            env.GIT_SHA = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+            echo "workspace=${WORKSPACE} git_sha=${env.GIT_SHA}"
+            sh 'python3 -c "print(\'python ok\')"'
+          }
         }
       }
     }
@@ -118,7 +118,7 @@ spec:
         container('kaniko') {
           sh '''
             set -e
-            SHA=$(git rev-parse --short HEAD)
+            SHA="${GIT_SHA:-manual}"
             TAG="v0.10.6-${SHA}-b${BUILD_NUMBER}"
             for svc in $(echo "${BUILD_TARGET:-frontend}" | tr ',' ' '); do
               ctx="src/$svc"

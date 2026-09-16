@@ -132,6 +132,10 @@ class SMTPEmailService(BaseEmailService):
     host = os.environ.get('SMTP_HOST')
     port = int(os.environ.get('SMTP_PORT', '1025'))
     sender = os.environ.get('SMTP_FROM', 'no-reply@boutique.local')
+    user = os.environ.get('SMTP_USER')
+    password = os.environ.get('SMTP_PASSWORD')
+    use_tls = os.environ.get('SMTP_TLS', '').lower() in ('1', 'true', 'yes')
+    use_ssl = os.environ.get('SMTP_SSL', '').lower() in ('1', 'true', 'yes')
 
     msg = MIMEText(confirmation, 'html')
     msg['Subject'] = 'Your Confirmation Email'
@@ -139,7 +143,17 @@ class SMTPEmailService(BaseEmailService):
     msg['To'] = email
 
     try:
-      with smtplib.SMTP(host, port, timeout=10) as smtp:
+      if use_ssl:
+        smtp = smtplib.SMTP_SSL(host, port, timeout=20)
+      else:
+        smtp = smtplib.SMTP(host, port, timeout=20)
+      with smtp:
+        if use_tls and not use_ssl:
+          smtp.ehlo()
+          smtp.starttls()
+          smtp.ehlo()
+        if user:
+          smtp.login(user, password)
         smtp.sendmail(sender, [email], msg.as_string())
     except Exception as err:
       logger.error('failed to send order confirmation email to {}: {}'.format(email, err))

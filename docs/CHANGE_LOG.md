@@ -73,4 +73,16 @@ yamllint/hadolint/ruff, Node markdownlint, shellcheck) and gitleaks scans **full
 for the operator's 4 GiB cap. The hooks are defined and will run in CI (Phase 4) and on demand; the
 one-time local provisioning was intentionally not completed. No upstream file was reformatted.
 
-## Phase 3+ — (empty; populated as objects are created)
+## Phase 3 — Homelab-adapted baseline deployment (dev)
+
+| Action | System | Exact create | Exact remove |
+|---|---|---|---|
+| Create Harbor project `boutique` | Harbor API | `curl -X POST .../projects -d '{"project_name":"boutique","metadata":{"public":"true"}}'` | `curl -X DELETE .../projects/boutique` |
+| Mirror 12 images into Harbor | local docker | `docker pull <GAR> ; docker tag ; docker push 192.168.1.8:30082/boutique/<svc>:v0.10.6` | delete each Harbor repository/artifact |
+| Create namespace | k8s | `kubectl apply -f gitops/environments/dev` (includes namespace.yaml) | `kubectl delete ns boutique-dev` |
+| Deploy baseline | k8s | `kubectl apply -f /tmp/opencode/dev-render.yaml` | `kubectl delete -f /tmp/opencode/dev-render.yaml` |
+| Create ingress | k8s | included in overlay `ingress.yaml` | `kubectl -n boutique-dev delete ingress boutique-frontend` |
+
+Additive only: no existing namespace/Harbor project/ingress was modified. `loadgenerator` excluded.
+
+## Phase 4+ — (empty; populated as objects are created)

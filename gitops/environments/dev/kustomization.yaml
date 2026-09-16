@@ -1,0 +1,80 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Homelab baseline for the dev environment.
+# Built on the upstream kustomize/base; images are remapped to Harbor and PINNED BY DIGEST.
+namespace: boutique-dev
+
+resources:
+  - ../../../kustomize/base
+  - namespace.yaml
+  - ingress.yaml
+
+components:
+  - ../../../kustomize/components/container-images-registry
+  - ../../../kustomize/components/without-loadgenerator
+
+# Pin every image to an immutable digest in Harbor (threat R-01 / control C-PIN).
+images:
+  - name: CONTAINER_IMAGES_REGISTRY/adservice
+    newName: 192.168.1.8:30082/boutique/adservice
+    digest: sha256:f580c4853e896dd2083f0c270c4b7aa5feda6dd56058a93b87d0c88334a4c07d
+  - name: CONTAINER_IMAGES_REGISTRY/cartservice
+    newName: 192.168.1.8:30082/boutique/cartservice
+    digest: sha256:b5c29ddb3238474ea8d1842f07004fedeeae47f660627ab111a613a681cd0356
+  - name: CONTAINER_IMAGES_REGISTRY/checkoutservice
+    newName: 192.168.1.8:30082/boutique/checkoutservice
+    digest: sha256:ab40699b6d9e45c9a93b5427008f327fbe912465361e2ff7a1a1be7111e36134
+  - name: CONTAINER_IMAGES_REGISTRY/currencyservice
+    newName: 192.168.1.8:30082/boutique/currencyservice
+    digest: sha256:7b2f3f804555c926861d67cd22c1b7c9e32d46b81cf1a64dd3089ae424d73be9
+  - name: CONTAINER_IMAGES_REGISTRY/emailservice
+    newName: 192.168.1.8:30082/boutique/emailservice
+    digest: sha256:77fd45d411b3550cbd39e30bda83ed6ea23d87fd6e58e69cf9fa2808e003984d
+  - name: CONTAINER_IMAGES_REGISTRY/frontend
+    newName: 192.168.1.8:30082/boutique/frontend
+    digest: sha256:c06df08eccd78568a37292cfbe889df42fac48691b7fb05f2deeba0ae8d669ef
+  - name: CONTAINER_IMAGES_REGISTRY/paymentservice
+    newName: 192.168.1.8:30082/boutique/paymentservice
+    digest: sha256:735b6d3255e2c74b0135a95cfc2337987e492f24e163c0bb9a853635876993c4
+  - name: CONTAINER_IMAGES_REGISTRY/productcatalogservice
+    newName: 192.168.1.8:30082/boutique/productcatalogservice
+    digest: sha256:fb8568ecfc948717eb07746a6ce360fb8e5f906ae8a874cbad666891f0d21790
+  - name: CONTAINER_IMAGES_REGISTRY/recommendationservice
+    newName: 192.168.1.8:30082/boutique/recommendationservice
+    digest: sha256:5d8321f2d24132889f654f75308e541b0626e6ae0cbacf81b170e5eb0921b415
+  - name: CONTAINER_IMAGES_REGISTRY/shippingservice
+    newName: 192.168.1.8:30082/boutique/shippingservice
+    digest: sha256:8527bafff8c8776e345f2dca0641f6e8595b053ce67f9a5af66f5a85d9eaca9d
+  - name: CONTAINER_IMAGES_REGISTRY/redis
+    newName: 192.168.1.8:30082/boutique/redis
+    digest: sha256:9c3ecc609a8087c0f11c494fefaf37a8f7bf9a967631d4a0da8967a9810be354
+
+# Homelab hardening applied to every Deployment in the base.
+patches:
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+    patch: |-
+      - op: add
+        path: /spec/template/spec/automountServiceAccountToken
+        value: false
+      - op: add
+        path: /spec/template/spec/securityContext/seccompProfile
+        value:
+          type: RuntimeDefault
+      - op: add
+        path: /spec/template/spec/nodeSelector
+        value:
+          node-type: worker
+
+  # Replace the LoadBalancer with ClusterIP; ingress is the entry point (avoids node port-80 conflict).
+  - target:
+      version: v1
+      kind: Service
+      name: frontend-external
+    patch: |-
+      - op: replace
+        path: /spec/type
+        value: ClusterIP

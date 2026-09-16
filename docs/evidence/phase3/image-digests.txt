@@ -1,0 +1,15 @@
+adservice 192.168.1.8:30082/boutique/adservice@sha256:f580c4853e896dd2083f0c270c4b7aa5feda6dd56058a93b87d0c88334a4c07d size=109542757
+cartservice 192.168.1.8:30082/boutique/cartservice@sha256:b5c29ddb3238474ea8d1842f07004fedeeae47f660627ab111a613a681cd0356 size=17870221
+checkoutservice 192.168.1.8:30082/boutique/checkoutservice@sha256:ab40699b6d9e45c9a93b5427008f327fbe912465361e2ff7a1a1be7111e36134 size=7444601
+currencyservice 192.168.1.8:30082/boutique/currencyservice@sha256:7b2f3f804555c926861d67cd22c1b7c9e32d46b81cf1a64dd3089ae424d73be9 size=52621184
+loadgenerator 192.168.1.8:30082/boutique/loadgenerator@sha256:9bed9dec88ae439b9c10e3689dee57201aad47c9abb9faf04add562481482421 size=45592857
+paymentservice 192.168.1.8:30082/boutique/paymentservice@sha256:735b6d3255e2c74b0135a95cfc2337987e492f24e163c0bb9a853635876993c4 size=50988805
+productcatalogservice 192.168.1.8:30082/boutique/productcatalogservice@sha256:fb8568ecfc948717eb07746a6ce360fb8e5f906ae8a874cbad666891f0d21790 size=9779283
+recommendationservice 192.168.1.8:30082/boutique/recommendationservice@sha256:5d8321f2d24132889f654f75308e541b0626e6ae0cbacf81b170e5eb0921b415 size=40031253
+shippingservice 192.168.1.8:30082/boutique/shippingservice@sha256:8527bafff8c8776e345f2dca0641f6e8595b053ce67f9a5af66f5a85d9eaca9d size=7167231
+redis-cart 192.168.1.8:30082/boutique/redis@sha256:becdda6c7f4b3fb42e42fd7f120bbf5c54c4caaaf16f26da24e4563d2c1f0576 size=39026142
+emailservice 192.168.1.8:30082/boutique/emailservice@sha256:77fd45d411b3550cbd39e30bda83ed6ea23d87fd6e58e69cf9fa2808e003984d size=40686104
+frontend 192.168.1.8:30082/boutique/frontend@sha256:c06df08eccd78568a37292cfbe889df42fac48691b7fb05f2deeba0ae8d669ef size=12138803
+
+# CORRECTION (2026-09-16): redis-cart Harbor digest is sha256:9c3ecc609a8087c0f11c494fefaf37a8f7bf9a967631d4a0da8967a9810be354
+# (the redis-cart line above recorded the Docker Hub source digest returned by .RepoDigests[0])

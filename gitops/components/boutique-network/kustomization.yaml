@@ -8,3 +8,4 @@ resources:
   - netpol-default-deny.yaml
   - netpol-allow-dns.yaml
   - netpol-app.yaml
+  - netpol-scanner.yaml

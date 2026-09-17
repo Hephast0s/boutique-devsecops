@@ -53,3 +53,16 @@ Real numbers captured during the engagement (no estimates).
 - 0 runtime-detection rules (Falco not installed) — CR-003.
 - 0 continuous in-cluster vulnerability reports (Trivy Operator not installed) — CR-003.
 - 1 of 5 target Grafana dashboards has data (missing exporters/Trivy Operator/Loki).
+
+## Additional measured outcomes (latest)
+
+| Item | Value |
+|---|---|
+| CI-signed services (SBOM+sign+attest+verify) | **3** (frontend, productcatalogservice, checkoutservice) |
+| checkoutservice SBOM | 997 components |
+| kube-bench (control-plane, k3s) | 9 PASS / 7 FAIL / 37 WARN |
+| Prometheus alert firing | `BoutiqueDeploymentReplicasMismatch` fired on a faulty workload (evidence: `docs/evidence/phase11/alert-firing.txt`) |
+| Harbor project config | immutable tag rule (`v*`) + retention (keep last 10) + pull robot |
+| Trivy Operator config-audit reports | 119 (+1 exposed secret) |
+| Jenkins CI branch tracking | fixed to `devsecops` (was pointing at a deleted branch) |
+| CI agents vs admission policy | `boutique-ci` unlabelled so app policies don't block agents |

@@ -176,4 +176,14 @@ No cluster objects retained. ZAP findings triaged in `security/exceptions.yaml`.
 
 No cluster objects. Backstage registration pending CR-WEB-1.
 
+## Phase 4/5 — CI gate completion (continuous)
+
+| Action | System | Notes |
+|---|---|---|
+| Add CI gates 3b/5b/6b/6c/6d/7b | git | hadolint, Go+.NET unit tests, SCA-source, IaC, license, exception-expiry |
+| Add pod containers hadolint/golang/dotnet | git | toolchain agents for the new stages |
+| App fix: `src/checkoutservice/main.go:240` | git | `status.Errorf(codes.Internal, err.Error())` → `"%s", err` (non-constant format string, found by the unit-test gate) |
+
+Build **#17 SUCCESS** with the full gate set; evidence `docs/evidence/phase4/console-build17-full-gates.txt`.
+
 ## (end)

@@ -51,6 +51,10 @@ commit ─► Jenkins (pod agents) ─► Kaniko ─► Harbor (digest, immutabl
                                          └─ Prometheus / Grafana
 ```
 
+**Application architecture (upstream):**
+
+[![Architecture of microservices](docs/img/architecture-diagram.png)](docs/img/architecture-diagram.png)
+
 ## Environments
 
 | Environment | Namespace | URL | Sync |
@@ -58,6 +62,12 @@ commit ─► Jenkins (pod agents) ─► Kaniko ─► Harbor (digest, immutabl
 | dev | `boutique-dev` | http://boutique-dev.192.168.1.8.nip.io/ | automated (prune + self-heal) |
 | staging | `boutique-staging` | http://boutique-staging.192.168.1.8.nip.io/ | automated |
 | prod | `boutique-prod` | http://boutique-prod.192.168.1.8.nip.io/ | **manual** + PDBs |
+
+## Screenshots
+
+| Home Page | Checkout Screen |
+|---|---|
+| [![Screenshot of store homepage](docs/img/online-boutique-frontend-1.png)](docs/img/online-boutique-frontend-1.png) | [![Screenshot of checkout screen](docs/img/online-boutique-frontend-2.png)](docs/img/online-boutique-frontend-2.png) |
 
 ## Security controls 🔐
 

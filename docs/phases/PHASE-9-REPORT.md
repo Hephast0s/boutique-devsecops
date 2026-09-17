@@ -45,3 +45,21 @@ Full transcript: docs/evidence/phase9/netpol-tests.txt
 ## 5. Next
 
 Phase 10 — smoke tests + DAST (ZAP) + load. Runtime-security installs remain blocked on CR-003.
+
+---
+
+## Addendum (runtime security executed)
+
+- **Trivy Operator installed** (`trivy-system`): ConfigAuditReports (119) and ExposedSecretReports (1)
+  are produced for `boutique-*`. Vulnerability scanning **disabled** (drove node CPU to ~70% and its DB
+  init did not complete; capacity). A narrow Kyverno exclusion for `managed-by=trivy-operator` and a
+  scanner egress NetworkPolicy were added.
+- **Falco installed, detected 12 real events** (`Contact K8S API Server From Container`), then entered
+  `CrashLoopBackOff` on 2/3 nodes due to a driver bug (`could not parse param … openat` + a container-plugin
+  panic); legacy `ebpf` is unsupported by the chart. **Falco uninstalled**, cluster verified stable.
+  Custom rules authored at `security/falco/boutique-rules.yaml`.
+- Full write-up: `docs/09-runtime-security.md`.
+
+DoD update: **Trivy Operator reports visible = ✅ (config/secret)**; **≥3 Falco rules firing = ❌ blocked**
+(kernel/driver), documented with evidence.
+

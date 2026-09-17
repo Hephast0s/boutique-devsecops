@@ -75,6 +75,10 @@ realm on a private IP. Enforcing the policy now would block every legitimate pod
    realm. (Kyverno config / new secret in the kyverno namespace.)
 3. Serve Harbor with TLS from a trusted CA (larger change).
 **Decision needed:** which option, and approval to modify the shared component.
+**Attempted 2026-09-17:** the registry realm is `http://192.168.1.8:30082/service/token`. Adding
+`imageRegistryCredentials.allowInsecureRegistry: true` was accepted by Kyverno but **did not help** — the
+realm check lives in the auth transport, not the TLS config. The only viable fixes are changing the
+registry's realm host (Harbor config) or serving it over TLS with a trusted CA.
 
 ## CR-ARGO-1 — Argo CD `repo-server` is under-resourced (Medium)`limits: cpu=50m, memory=64Mi`, 3 replicas, frequent OOM restarts → intermittent
 `kustomize build ... failed timeout after 1m30s` / `DeadlineExceeded`, apps flap to `Unknown`, syncs
@@ -91,3 +95,13 @@ Alertmanager (shared config). Until then the alerts are visible in Prometheus/Gr
 ## CR-006b — Harbor pull robot for the cluster (Low)
 The project `boutique` is public; a dedicated pull-only robot is recommended so the cluster pulls
 authenticated. Creation needs a Harbor token (CR-006).
+
+## CR-003 — Runtime security / scanning — PARTIALLY RESOLVED
+- **Trivy Operator INSTALLED** (`trivy-system`); ConfigAuditReports + ExposedSecretReports produced for
+  `boutique-*`. Vulnerability scanning disabled (capacity: node CPU hit ~70%, DB init did not complete).
+  Re-enable if the cluster is expanded, or run `trivy image` in CI only (already done).
+- **Falco ATTEMPTED, REMOVED** — detected 12 events then crash-looped (driver parse error + container
+  plugin panic) on kernel 7.0.0; legacy ebpf unsupported by the chart. Needs a different Falco
+  version/driver or a runtime-security alternative. Evidence in `docs/09-runtime-security.md`.
+- **Loki NOT installed** — capacity; log aggregation remains a gap.
+- **kube-bench NOT run** (privileged one-shot).

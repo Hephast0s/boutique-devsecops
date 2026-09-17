@@ -96,6 +96,14 @@ Alertmanager (shared config). Until then the alerts are visible in Prometheus/Gr
 The project `boutique` is public; a dedicated pull-only robot is recommended so the cluster pulls
 authenticated. Creation needs a Harbor token (CR-006).
 
+## CR-JENKINS-METRICS-1 — Install the Jenkins Prometheus plugin (Low)
+The delivery/DORA and pipeline-health Grafana dashboards need Jenkins metrics. The `prometheus` plugin is
+**not installed** (verified: `/prometheus/` → 404). Installing it modifies the Jenkins plugin set and
+requires a restart (shared config) → needs approval. Endpoint would then be scraped via a ServiceMonitor.
+
+## CR-LOKI-1 — Install Loki for centralized logs (Medium)
+Loki is absent; Falco/application logs are not aggregated. Subject to the 4 GiB cap review.
+
 ## CR-003 — Runtime security / scanning — PARTIALLY RESOLVED
 - **Trivy Operator INSTALLED** (`trivy-system`); ConfigAuditReports + ExposedSecretReports produced for
   `boutique-*`. Vulnerability scanning disabled (capacity: node CPU hit ~70%, DB init did not complete).

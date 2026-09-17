@@ -56,6 +56,21 @@ spec:
       command: ['sleep']
       args: ['3600']
       resources: {requests: {cpu: "50m", memory: "256Mi"}, limits: {cpu: "1000m", memory: "1Gi"}}
+    - name: hadolint
+      image: hadolint/hadolint:latest-debian
+      command: ['sleep']
+      args: ['3600']
+      resources: {requests: {cpu: "20m", memory: "64Mi"}, limits: {cpu: "200m", memory: "256Mi"}}
+    - name: golang
+      image: golang:1.27.0-alpine
+      command: ['sleep']
+      args: ['3600']
+      resources: {requests: {cpu: "50m", memory: "256Mi"}, limits: {cpu: "1000m", memory: "1Gi"}}
+    - name: dotnet
+      image: mcr.microsoft.com/dotnet/sdk:10.0.100-noble
+      command: ['sleep']
+      args: ['3600']
+      resources: {requests: {cpu: "50m", memory: "256Mi"}, limits: {cpu: "1000m", memory: "1Gi"}}
   volumes:
     - name: docker-config
       secret: {secretName: harbor-push, items: [{key: .dockerconfigjson, path: config.json}]}
@@ -100,6 +115,20 @@ spec:
       } }
     }
 
+    stage('3b. Dockerfile Lint (hadolint)') {
+      when { expression { return env.BUILD_TARGET != '' } }
+      steps { container('hadolint') {
+        sh '''
+          set -e
+          for svc in $(echo "${BUILD_TARGET:-frontend}" | tr ',' ' '); do
+            ctx="src/$svc"; [ "$svc" = "cartservice" ] && ctx="src/cartservice/src"
+            echo "== hadolint $svc =="
+            hadolint --failure-threshold error "$WORKSPACE/$ctx/Dockerfile"
+          done
+        '''
+      } }
+    }
+
     stage('4. Build & Push (Kaniko)') {
       when { expression { return env.BUILD_TARGET != '' } }
       steps { container('kaniko') { script {
@@ -136,6 +165,26 @@ spec:
       } }
     }
 
+    stage('5b. Unit Tests (Go + .NET)') {
+      steps {
+        container('golang') {
+          sh '''
+            set -e
+            for svc in frontend productcatalogservice shippingservice checkoutservice; do
+              echo "== go test src/$svc =="
+              (cd "$WORKSPACE/src/$svc" && go test ./...)
+            done
+          '''
+        }
+        container('dotnet') {
+          sh '''
+            echo "== dotnet test src/cartservice =="
+            dotnet test "$WORKSPACE/src/cartservice/" --nologo
+          '''
+        }
+      }
+    }
+
     stage('6. Image Scan (Trivy, gate)') {
       when { expression { return env.BUILD_TARGET != '' } }
       steps { container('trivy') {
@@ -153,6 +202,38 @@ spec:
       } }
     }
 
+    stage('6b. SCA — source (Trivy fs)') {
+      when { expression { return env.BUILD_TARGET != '' } }
+      steps { container('trivy') {
+        sh '''
+          for svc in $(echo "${BUILD_TARGET:-frontend}" | tr ',' ' '); do
+            echo "== trivy fs $svc =="
+            trivy fs --scanners vuln --format json -o "$WORKSPACE/scan/$svc.fs.json" \
+              --severity CRITICAL,HIGH --ignore-unfixed "$WORKSPACE/src/$svc" || true
+          done
+          echo "SCA reports: $(ls scan/*.fs.json 2>/dev/null | wc -l) (report-only during first week)"
+        '''
+      } }
+    }
+
+    stage('6c. IaC & manifests (Trivy config)') {
+      steps { container('trivy') {
+        sh 'trivy config --format json -o "$WORKSPACE/reports/iac.json" "$WORKSPACE/gitops" "$WORKSPACE/kustomize" || true; echo "iac report written"'
+      } }
+    }
+
+    stage('6d. License Scan (Trivy)') {
+      when { expression { return env.BUILD_TARGET != '' } }
+      steps { container('trivy') {
+        sh '''
+          for svc in $(echo "${BUILD_TARGET:-frontend}" | tr ',' ' '); do
+            trivy fs --scanners license --format json -o "$WORKSPACE/reports/license-$svc.json" "$WORKSPACE/src/$svc" || true
+          done
+          echo "license reports: $(ls reports/license-*.json 2>/dev/null | wc -l)"
+        '''
+      } }
+    }
+
     stage('7. SAST (Semgrep)') {
       when { expression { return env.BUILD_TARGET != '' } }
       steps { container('semgrep') {
@@ -161,6 +242,22 @@ spec:
             semgrep --config p/default --json -o "reports/semgrep-$svc.json" "src/$svc" 2>/dev/null || true
           done
           echo "semgrep reports: $(ls reports/semgrep-*.json 2>/dev/null | wc -l)"
+        '''
+      } }
+    }
+
+    stage('7b. Exception Expiry Gate') {
+      steps { container('tools') {
+        sh '''
+          python3 -c "
+import re, datetime, sys
+s = open('security/exceptions.yaml').read()
+exp = re.findall(r'expires:\\s*([0-9]{4}-[0-9]{2}-[0-9]{2})', s)
+today = datetime.date.today()
+bad = [e for e in exp if datetime.date.fromisoformat(e) < today]
+print('exceptions:', len(exp), 'expired:', bad)
+sys.exit(1 if bad else 0)
+"
         '''
       } }
     }

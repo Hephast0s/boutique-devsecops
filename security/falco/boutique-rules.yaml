@@ -1,0 +1,60 @@
+# Custom Falco rules for the Online Boutique platform (authored; see deployment status below).
+# Intended for pods in boutique-* namespaces. These rules were NOT deployed because Falco is unstable
+# on this homelab kernel (see docs/09-runtime-security.md). Kept as a ready-to-use rule set.
+- rule: Boutique Shell Spawned In Container
+  desc: A shell was spawned in a boutique container (most are distroless; this should never happen).
+  condition: >
+    spawned_process and container and
+    k8s.ns.name in (boutique-dev, boutique-staging, boutique-prod) and
+    proc.name in (sh, bash, ash, dash, zsh)
+  output: >
+    Shell spawned in boutique container (user=%user.name pod=%k8s.pod.name ns=%k8s.ns.name
+    cmd=%proc.cmdline parent=%proc.pname image=%container.image.repository)
+  priority: WARNING
+  tags: [boutique, shell, mitre_execution]
+
+- rule: Boutique Unexpected Outbound Connection From Payment Or Checkout
+  desc: paymentservice/checkoutservice making an outbound connection to a non-cluster peer.
+  condition: >
+    outbound and container and
+    k8s.ns.name in (boutique-dev, boutique-staging, boutique-prod) and
+    k8s.pod.label.app in (paymentservice, checkoutservice) and
+    not fd.sip in ("10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16")
+  output: >
+    Unexpected outbound connection from money path (pod=%k8s.pod.name ns=%k8s.ns.name
+    command=%proc.cmdline connection=%fd.name)
+  priority: WARNING
+  tags: [boutique, network, mitre_exfiltration]
+
+- rule: Boutique Service Account Token Read
+  desc: A process read the Kubernetes service account token inside a boutique container.
+  condition: >
+    open_read and container and
+    k8s.ns.name in (boutique-dev, boutique-staging, boutique-prod) and
+    fd.name endswith "/serviceaccount/token"
+  output: >
+    Service account token read (pod=%k8s.pod.name ns=%k8s.ns.name proc=%proc.name)
+  priority: WARNING
+  tags: [boutique, credential_access, mitre_credential_access]
+
+- rule: Boutique Package Manager Execution
+  desc: A package manager ran in a boutique container (supply-chain / post-exploitation signal).
+  condition: >
+    spawned_process and container and
+    k8s.ns.name in (boutique-dev, boutique-staging, boutique-prod) and
+    proc.name in (apk, apt, apt-get, yum, dnf, pip, npm, gem)
+  output: >
+    Package manager executed in boutique container (pod=%k8s.pod.name ns=%k8s.ns.name cmd=%proc.cmdline)
+  priority: WARNING
+  tags: [boutique, mitre_execution]
+
+- rule: Boutique Possible Crypto Mining
+  desc: Known miner process names or stratum connections in a boutique container.
+  condition: >
+    ((spawned_process and container and proc.name in (xmrig, minerd, minergate)) or
+     (outbound and container and fd.sport in (3333, 4444, 5555, 7777, 14444))) and
+    k8s.ns.name in (boutique-dev, boutique-staging, boutique-prod)
+  output: >
+    Possible crypto mining in boutique container (pod=%k8s.pod.name ns=%k8s.ns.name cmd=%proc.cmdline)
+  priority: CRITICAL
+  tags: [boutique, cryptomining, mitre_resource_hijacking]

@@ -1,34 +1,57 @@
-# 09 — Runtime Security (status)
-
-This document records the runtime-security layer honestly, including what is **blocked** and why.
+# 09 — Runtime Security (final status)
 
 ## Implemented
 
 - **Network segmentation** enforced (see `09-network-security.md`) — proven with allowed/blocked tests.
-- **Admission control** enforced (Phase 8) — `boutique-*` pods must be non-root, drop ALL caps,
-  read-only rootfs, seccomp RuntimeDefault, resource-bounded, probe-guarded, digest-pinned from Harbor.
+- **Admission control** enforced (Phase 8).
+- **Trivy Operator** installed (`trivy-system`, v0.36.0 chart) — **ConfigAuditReports and
+  ExposedSecretReports are being produced** for the boutique namespaces (119 config-audit reports at the
+  time of writing, 1 exposed-secret report). Vulnerability scanning was **disabled** after it drove node
+  CPU to ~70% and its DB-download init containers did not complete within a reasonable window on this
+  3-node cluster (recorded below and in `docs/CHANGE_REQUESTS.md`).
 
-## Blocked — awaiting install permission (CR-003)
+```
+trivy-operator (trivy-system): Running, targetNamespaces=boutique-dev,boutique-staging,boutique-prod
+configauditreports (boutique-*): 119
+exposedsecretreports (boutique-*): 1
+vulnerabilityScannerEnabled=false  (capacity)
+```
 
-| Component | Purpose | Blocker |
-|---|---|---|
-| **Falco** (+ falcosidekick) | runtime detection (shell spawn, unexpected egress, SA-token read, crypto-miners) | `may_install_falco` unanswered; adds ~512 Mi/node (DaemonSet) |
-| **Trivy Operator** | continuous VulnerabilityReports/ConfigAuditReports per workload + Prometheus metrics | `may_install_trivy_operator` unanswered; spawns scan Jobs (resource cost) |
-| **kube-bench** | CIS benchmark of the k3s nodes (one-shot Job) | needs host access; one-shot but privileged |
+## Falco — attempted, not usable on this homelab (honest outcome)
 
-These are **not installed** because they add cluster-scoped components and would exceed the operator's
-4 GiB resource cap if installed together without review. Installing them requires an explicit decision;
-the design (rule sets, scoping to `boutique-*`, Loki absence) is captured so they can be added quickly.
+Falco was installed (`falco/falco`, chart → image `falcosecurity/falco:0.44.1`) with the `modern_ebpf`
+driver. It **started and detected real events** — the log recorded:
 
-## Consequence (stated honestly)
+```
+Events detected: 12
+Rule counts by severity: NOTICE: 12
+Triggered rules by rule name: Contact K8S API Server From Container: 12
+```
 
-There is currently **no runtime detection** for malicious in-container behaviour, and **no continuous
-in-cluster vulnerability scanning**. These are real gaps versus the target design; the compensating
-controls are admission policy (Phase 8), image scanning in CI (Phase 5), and network segmentation
-(Phase 9.1). The gaps are tracked in `docs/CHANGE_REQUESTS.md` (CR-003).
+However, the DaemonSet then entered `CrashLoopBackOff` on 2 of 3 nodes with a driver bug:
 
-## Note on Loki
+```
+libpman: disabled BPF iterators (not running in the root PID namespace, ...)
+Error: could not parse param 2 (name) for event 60208 of type 307 (openat), ...
+```
 
-Log aggregation is also absent (no Loki in the cluster). If Falco is added, its alerts would be routed
-to Alertmanager webhook / archived files rather than Loki, unless Loki is installed too (also under the
-4 GiB cap review).
+and a Go panic in the container-plugin fetcher (`fetcher.go:107`). The legacy `driver.kind=ebpf` is no
+longer supported by the chart. Because a crash-looping DaemonSet adds noise and resource pressure without
+reliable detection, **Falco was uninstalled**; the cluster was verified stable afterwards (all
+environments HTTP 200).
+
+Custom rules authored and ready: `security/falco/boutique-rules.yaml` (shell spawn, money-path egress,
+SA-token read, package manager, crypto-mining).
+
+## Honest gaps
+
+| Component | Status |
+|---|---|
+| Falco runtime detection | **not running** — kernel/driver incompatibility on this homelab (evidence above) |
+| Trivy Operator vulnerability scanning | **disabled** — capacity (recorded) |
+| Trivy Operator config/secret auditing | ✅ working |
+| Loki log aggregation | **not installed** — capacity |
+| kube-bench | not run (privileged one-shot) |
+
+Compensating controls: admission policy (Phase 8), CI image scanning (Phase 5), network segmentation
+(Phase 9.1), Trivy Operator config auditing.

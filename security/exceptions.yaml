@@ -1,0 +1,42 @@
+# security/exceptions.yaml — accepted risks (single source of truth)
+#
+# Schema per entry:
+#   id:            unique id (e.g. CVE-2024-12345, ZAP-10202)
+#   type:          cve | semgrep | secret | iac | license | dast
+#   identifier:    tool-specific id / rule / package
+#   justification: why it is accepted
+#   owner:         who owns the exception
+#   expires:       ISO date; past this date the build FAILS
+#
+# Tool ignore files (.trivyignore, .gitleaksignore, semgrep ignores) are GENERATED from this file.
+# Do not hand-edit the tool ignore files.
+
+exceptions:
+  # --- ZAP baseline (staging), triaged 2026-09-16 ---
+  - id: ZAP-10202
+    type: dast
+    identifier: "Absence of Anti-CSRF Tokens"
+    justification: >
+      The demo frontend is stateless and uses a non-authenticated session cookie for a shopping cart;
+      there is no privileged state transition to protect. CSRF tokens are tracked as a hardening item
+      for any future authenticated flows.
+    owner: Hephast0s
+    expires: 2027-03-31
+  - id: ZAP-10112
+    type: dast
+    identifier: "Session Management Response Identified"
+    justification: Session cookie is intentionally set; flagged as informational. No sensitive session.
+    owner: Hephast0s
+    expires: 2027-03-31
+  - id: ZAP-90003
+    type: dast
+    identifier: "Sub Resource Integrity Attribute Missing"
+    justification: Assets are served same-origin by the frontend; SRI adds little here. Backlog item.
+    owner: Hephast0s
+    expires: 2027-03-31
+  - id: ZAP-90004
+    type: dast
+    identifier: "Cross-Origin-Embedder-Policy Header Missing or Invalid"
+    justification: Hardening header; not required for this demo. Tracked with security headers work.
+    owner: Hephast0s
+    expires: 2027-03-31

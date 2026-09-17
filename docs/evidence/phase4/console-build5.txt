@@ -1,0 +1,329 @@
+Started by user Jenkins Admin
+Obtained Jenkinsfile from git https://github.com/Hephast0s/boutique-devsecops.git
+[Pipeline] Start of Pipeline
+[Pipeline] podTemplate
+[Pipeline] {
+[Pipeline] node
+Created Pod: kubernetes boutique-ci/boutique-app-ci-5-03cf6-zfv78-dljqb
+[PodInfo] boutique-ci/boutique-app-ci-5-03cf6-zfv78-dljqb
+	Container [gitleaks] waiting [ContainerCreating] No message
+	Container [jnlp] waiting [ContainerCreating] No message
+	Container [kaniko] waiting [ContainerCreating] No message
+	Container [tools] waiting [ContainerCreating] No message
+	Pod [Pending][ContainersNotReady] containers with unready status: [jnlp tools gitleaks kaniko]
+[PodInfo] boutique-ci/boutique-app-ci-5-03cf6-zfv78-dljqb
+	Container [gitleaks] waiting [ContainerCreating] No message
+	Container [jnlp] waiting [ContainerCreating] No message
+	Container [kaniko] waiting [ContainerCreating] No message
+	Container [tools] waiting [ContainerCreating] No message
+	Pod [Pending][ContainersNotReady] containers with unready status: [jnlp tools gitleaks kaniko]
+Agent boutique-app-ci-5-03cf6-zfv78-dljqb is provisioned from template boutique-app-ci_5-03cf6-zfv78
+---
+apiVersion: "v1"
+kind: "Pod"
+metadata:
+  annotations:
+    kubernetes.jenkins.io/last-refresh: "1789566078454"
+    buildUrl: "http://jenkins.jenkins.svc.cluster.local:8080/job/boutique-app-ci/5/"
+    runUrl: "job/boutique-app-ci/5/"
+  labels:
+    jenkins/jenkins-jenkins-agent: "true"
+    jenkins/label-digest: "8508680ade1071990c53fb6f1be6a91ed3aa6f9e"
+    jenkins/label: "boutique-app-ci_5-03cf6"
+    kubernetes.jenkins.io/controller: "http___jenkins_jenkins_svc_cluster_local_8080x"
+  name: "boutique-app-ci-5-03cf6-zfv78-dljqb"
+  namespace: "boutique-ci"
+spec:
+  containers:
+  - args:
+    - "$(JENKINS_SECRET)"
+    - "$(JENKINS_NAME)"
+    env:
+    - name: "JENKINS_SECRET"
+      value: "********"
+    - name: "JENKINS_TUNNEL"
+      value: "jenkins-agent.jenkins.svc.cluster.local:50000"
+    - name: "JENKINS_AGENT_NAME"
+      value: "boutique-app-ci-5-03cf6-zfv78-dljqb"
+    - name: "REMOTING_OPTS"
+      value: "-noReconnectAfter 1d"
+    - name: "JENKINS_NAME"
+      value: "boutique-app-ci-5-03cf6-zfv78-dljqb"
+    - name: "JENKINS_AGENT_WORKDIR"
+      value: "/home/jenkins/agent"
+    - name: "JENKINS_URL"
+      value: "http://jenkins.jenkins.svc.cluster.local:8080/"
+    image: "jenkins/inbound-agent:3384.v60d89463d9e0-1"
+    name: "jnlp"
+    resources:
+      limits:
+        cpu: "500m"
+        memory: "512Mi"
+      requests:
+        cpu: "100m"
+        memory: "256Mi"
+    volumeMounts:
+    - mountPath: "/home/jenkins/agent"
+      name: "workspace-volume"
+      readOnly: false
+  - args:
+    - "3600"
+    command:
+    - "sleep"
+    image: "python:3.14-alpine"
+    name: "tools"
+    resources:
+      limits:
+        cpu: "500m"
+        memory: "512Mi"
+      requests:
+        cpu: "50m"
+        memory: "128Mi"
+    volumeMounts:
+    - mountPath: "/home/jenkins/agent"
+      name: "workspace-volume"
+      readOnly: false
+  - args:
+    - "3600"
+    command:
+    - "sleep"
+    image: "ghcr.io/gitleaks/gitleaks:v8.30.0"
+    name: "gitleaks"
+    resources:
+      limits:
+        cpu: "500m"
+        memory: "512Mi"
+      requests:
+        cpu: "50m"
+        memory: "128Mi"
+    volumeMounts:
+    - mountPath: "/home/jenkins/agent"
+      name: "workspace-volume"
+      readOnly: false
+  - args:
+    - "3600"
+    command:
+    - "sleep"
+    image: "gcr.io/kaniko-project/executor:v1.23.2-debug"
+    name: "kaniko"
+    resources:
+      limits:
+        cpu: "1500m"
+        memory: "2Gi"
+      requests:
+        cpu: "200m"
+        memory: "512Mi"
+    volumeMounts:
+    - mountPath: "/kaniko/.docker"
+      name: "docker-config"
+    - mountPath: "/home/jenkins/agent"
+      name: "workspace-volume"
+      readOnly: false
+  nodeSelector:
+    kubernetes.io/os: "linux"
+  restartPolicy: "Never"
+  serviceAccountName: "jenkins-agent"
+  volumes:
+  - name: "docker-config"
+    secret:
+      items:
+      - key: ".dockerconfigjson"
+        path: "config.json"
+      secretName: "harbor-push"
+  - emptyDir:
+      medium: ""
+    name: "workspace-volume"
+
+Running on boutique-app-ci-5-03cf6-zfv78-dljqb in /home/jenkins/agent/workspace/boutique-app-ci
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Declarative: Checkout SCM)
+[Pipeline] checkout
+The recommended git tool is: git
+No credentials specified
+Cloning the remote Git repository
+Cloning repository https://github.com/Hephast0s/boutique-devsecops.git
+ > git init /home/jenkins/agent/workspace/boutique-app-ci # timeout=10
+Fetching upstream changes from https://github.com/Hephast0s/boutique-devsecops.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.47.3'
+ > git fetch --tags --force --progress -- https://github.com/Hephast0s/boutique-devsecops.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git config remote.origin.url https://github.com/Hephast0s/boutique-devsecops.git # timeout=10
+ > git config --add remote.origin.fetch +refs/heads/*:refs/remotes/origin/* # timeout=10
+Avoid second fetch
+Checking out Revision 1139de7b94b869dee2e4824b0895c754935d9d43 (refs/remotes/origin/phase-4-ci)
+ > git rev-parse refs/remotes/origin/phase-4-ci^{commit} # timeout=10
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f 1139de7b94b869dee2e4824b0895c754935d9d43 # timeout=10
+Commit message: "ci(jenkins): set git safe.directory for cross-container workspace"
+ > git rev-list --no-walk ecccfa476aaaa20c7110745dd87f3a2fa4e3247b # timeout=10
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] container
+[Pipeline] {
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] timeout
+Timeout set to expire in 30 min
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (1. Preflight)
+[Pipeline] container
+[Pipeline] {
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
++ apk add --no-cache git
+[Pipeline] sh
++ git config --global --add safe.directory '*'
+[Pipeline] sh
++ git rev-parse --short HEAD
+[Pipeline] echo
+workspace=/home/jenkins/agent/workspace/boutique-app-ci git_sha=1139de7b
+[Pipeline] sh
++ python3 -c 'print('"'"'python ok'"'"')'
+python ok
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (2. Change Detection)
+[Pipeline] container
+[Pipeline] {
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
++ bash ci/scripts/detect-changes.sh origin/devsecops
+/home/jenkins/agent/workspace/boutique-app-ci@tmp/durable-46683fef/script.sh.copy: line 1: bash: not found
++ true
+[Pipeline] echo
+changed services: (none)
+[Pipeline] echo
+build target: frontend
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (3. Secret Scan (gitleaks))
+[Pipeline] container
+[Pipeline] {
+[Pipeline] sh
++ set -e
++ gitleaks dir . --config .gitleaks.toml --redact --no-banner --exit-code 1
+[90m1:42PM[0m [32mINF[0m [1mscanned ~1564312 bytes (1.56 MB) in 3.48s[0m
+[90m1:42PM[0m [32mINF[0m [1mno leaks found[0m
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (4. Build & Push (Kaniko))
+[Pipeline] container
+[Pipeline] {
+[Pipeline] sh
++ set -e
++ SHA=1139de7b
++ TAG=v0.10.6-1139de7b-b5
++ echo frontend
++ tr , ' '
++ ctx=src/frontend
++ '[' frontend '=' cartservice ]
++ echo '== building frontend from src/frontend =='
+== building frontend from src/frontend ==
++ /kaniko/executor '--context=dir:///home/jenkins/agent/workspace/boutique-app-ci/src/frontend' '--dockerfile=/home/jenkins/agent/workspace/boutique-app-ci/src/frontend/Dockerfile' '--destination=192.168.1.8:30082/boutique/frontend:v0.10.6-1139de7b-b5' '--digest-file=/home/jenkins/agent/workspace/boutique-app-ci/digest-frontend.txt' '--cache=false' '--verbosity=info'
+[36mINFO[0m[0002] Resolved base name golang:1.27.0-alpine@sha256:4c9fe60190a2a3350ddc51de80d0224b8a6698d12bdfc999fee45ea9d6c46dbc to builder 
+[36mINFO[0m[0002] Using dockerignore file: /home/jenkins/agent/workspace/boutique-app-ci/src/frontend/.dockerignore 
+[36mINFO[0m[0002] Retrieving image manifest golang:1.27.0-alpine@sha256:4c9fe60190a2a3350ddc51de80d0224b8a6698d12bdfc999fee45ea9d6c46dbc 
+[36mINFO[0m[0002] Retrieving image golang:1.27.0-alpine@sha256:4c9fe60190a2a3350ddc51de80d0224b8a6698d12bdfc999fee45ea9d6c46dbc from registry index.docker.io 
+[36mINFO[0m[0004] Retrieving image manifest gcr.io/distroless/static 
+[36mINFO[0m[0004] Retrieving image gcr.io/distroless/static from registry gcr.io 
+[36mINFO[0m[0006] Built cross stage deps: map[0:[/go/bin/frontend]] 
+[36mINFO[0m[0006] Retrieving image manifest golang:1.27.0-alpine@sha256:4c9fe60190a2a3350ddc51de80d0224b8a6698d12bdfc999fee45ea9d6c46dbc 
+[36mINFO[0m[0006] Returning cached image manifest              
+[36mINFO[0m[0006] Executing 0 build triggers                   
+[36mINFO[0m[0006] Building stage 'golang:1.27.0-alpine@sha256:4c9fe60190a2a3350ddc51de80d0224b8a6698d12bdfc999fee45ea9d6c46dbc' [idx: '0', base-idx: '-1'] 
+[36mINFO[0m[0006] Unpacking rootfs as cmd COPY go.mod go.sum ./ requires it. 
+[36mINFO[0m[0060] ARG TARGETOS=linux                           
+[36mINFO[0m[0060] ARG TARGETARCH=amd64                         
+[36mINFO[0m[0060] WORKDIR /src                                 
+[36mINFO[0m[0060] Cmd: workdir                                 
+[36mINFO[0m[0060] Changed working directory to /src            
+[36mINFO[0m[0060] Creating directory /src with uid -1 and gid -1 
+[36mINFO[0m[0060] Taking snapshot of files...                  
+[36mINFO[0m[0061] COPY go.mod go.sum ./                        
+[36mINFO[0m[0061] Taking snapshot of files...                  
+[36mINFO[0m[0061] RUN go mod download                          
+[36mINFO[0m[0061] Initializing snapshotter ...                 
+[36mINFO[0m[0061] Taking snapshot of full filesystem...        
+[36mINFO[0m[0063] Cmd: /bin/sh                                 
+[36mINFO[0m[0063] Args: [-c go mod download]                   
+[36mINFO[0m[0063] Running: [/bin/sh -c go mod download]        
+[36mINFO[0m[0114] Taking snapshot of full filesystem...        
+[36mINFO[0m[0130] COPY . .                                     
+[36mINFO[0m[0130] Taking snapshot of files...                  
+[36mINFO[0m[0130] ARG SKAFFOLD_GO_GCFLAGS                      
+[36mINFO[0m[0130] RUN GOOS=${TARGETOS} GOARCH=${TARGETARCH} CGO_ENABLED=0 go build -ldflags="-s -w" -gcflags="${SKAFFOLD_GO_GCFLAGS}" -o /go/bin/frontend . 
+[36mINFO[0m[0130] Cmd: /bin/sh                                 
+[36mINFO[0m[0130] Args: [-c GOOS=${TARGETOS} GOARCH=${TARGETARCH} CGO_ENABLED=0 go build -ldflags="-s -w" -gcflags="${SKAFFOLD_GO_GCFLAGS}" -o /go/bin/frontend .] 
+[36mINFO[0m[0130] Running: [/bin/sh -c GOOS=${TARGETOS} GOARCH=${TARGETARCH} CGO_ENABLED=0 go build -ldflags="-s -w" -gcflags="${SKAFFOLD_GO_GCFLAGS}" -o /go/bin/frontend .] 
+[36mINFO[0m[0206] Taking snapshot of full filesystem...        
+[36mINFO[0m[0217] Saving file go/bin/frontend for later use    
+[36mINFO[0m[0217] Deleting filesystem...                       
+[36mINFO[0m[0217] Retrieving image manifest gcr.io/distroless/static 
+[36mINFO[0m[0217] Returning cached image manifest              
+[36mINFO[0m[0217] Executing 0 build triggers                   
+[36mINFO[0m[0217] Building stage 'gcr.io/distroless/static' [idx: '1', base-idx: '-1'] 
+[36mINFO[0m[0217] Unpacking rootfs as cmd COPY --from=builder /go/bin/frontend /src/server requires it. 
+[36mINFO[0m[0225] WORKDIR /src                                 
+[36mINFO[0m[0225] Cmd: workdir                                 
+[36mINFO[0m[0225] Changed working directory to /src            
+[36mINFO[0m[0225] Creating directory /src with uid 0 and gid 0 
+[36mINFO[0m[0225] Taking snapshot of files...                  
+[36mINFO[0m[0225] COPY --from=builder /go/bin/frontend /src/server 
+[36mINFO[0m[0225] Taking snapshot of files...                  
+[36mINFO[0m[0225] COPY ./templates ./templates                 
+[36mINFO[0m[0226] Taking snapshot of files...                  
+[36mINFO[0m[0226] COPY ./static ./static                       
+[36mINFO[0m[0226] Taking snapshot of files...                  
+[36mINFO[0m[0226] ENV GOTRACEBACK=single                       
+[36mINFO[0m[0226] EXPOSE 8080                                  
+[36mINFO[0m[0226] Cmd: EXPOSE                                  
+[36mINFO[0m[0226] Adding exposed port: 8080/tcp                
+[36mINFO[0m[0226] ENTRYPOINT ["/src/server"]                   
+[36mINFO[0m[0226] Pushing image to 192.168.1.8:30082/boutique/frontend:v0.10.6-1139de7b-b5 
+[36mINFO[0m[0292] Pushed 192.168.1.8:30082/boutique/frontend@sha256:6d85a5a7919a87ec195a65ea30815d9b3c421270f6c4a416d276c6f8fd38feb0 
++ cat /home/jenkins/agent/workspace/boutique-app-ci/digest-frontend.txt
++ echo 'frontend -> 192.168.1.8:30082/boutique/frontend:v0.10.6-1139de7b-b5 @ sha256:6d85a5a7919a87ec195a65ea30815d9b3c421270f6c4a416d276c6f8fd38feb0'
+frontend -> 192.168.1.8:30082/boutique/frontend:v0.10.6-1139de7b-b5 @ sha256:6d85a5a7919a87ec195a65ea30815d9b3c421270f6c4a416d276c6f8fd38feb0
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Declarative: Post Actions)
+[Pipeline] archiveArtifacts
+Archiving artifacts
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // timeout
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] }
+[Pipeline] // podTemplate
+[Pipeline] End of Pipeline
+Finished: SUCCESS

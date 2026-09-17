@@ -1,0 +1,8 @@
+
+Verification for 192.168.1.8:30082/boutique/frontend@sha256:6d85a5a7919a87ec195a65ea30815d9b3c421270f6c4a416d276c6f8fd38feb0 --
+The following checks were performed on each of these signatures:
+  - The cosign claims were validated
+  - Existence of the claims in the transparency log was verified offline
+  - The signatures were verified against the specified public key
+
+[{"critical":{"identity":{"docker-reference":"192.168.1.8:30082/boutique/frontend"},"image":{"docker-manifest-digest":"sha256:6d85a5a7919a87ec195a65ea30815d9b3c421270f6c4a416d276c6f8fd38feb0"},"type":"cosign container image signature"},"optional":{"Bundle":{"SignedEntryTimestamp":"MEUCIQDXZoHCIwXRdoj9z3eLIbT5oQhLhk6QADPBc6gpjOhRCQIgDhT52NUAj65EwAFDRqZGXYIB6CFZM9U4AHJB9Shu69A=","Payload":{"body":"eyJhcGlWZXJzaW9uIjoiMC4wLjEiLCJraW5kIjoiaGFzaGVkcmVrb3JkIiwic3BlYyI6eyJkYXRhIjp7Imhhc2giOnsiYWxnb3JpdGhtIjoic2hhMjU2IiwidmFsdWUiOiJjMmZhNjNhZDRlMjBmN2Y0NzMwMTU2YjRhZTI3NjkxNzZkZTVjNjI4ZjM3Zjk3ZjgzMTQ0YjI2MTVjOGY5YzRlIn19LCJzaWduYXR1cmUiOnsiY29udGVudCI6Ik1FVUNJR1V2bnN6clhaNURVVXBtSkVmaDJmbFBtSzJQY1Axc1pzNm1HMVg3YllTcEFpRUE3c2ViNVN1b0F6Ykp0d0JpekJwM2tXVno2K3Uyb3Fxc2hHWFdGWElibWd3PSIsInB1YmxpY0tleSI6eyJjb250ZW50IjoiTFMwdExTMUNSVWRKVGlCUVZVSk1TVU1nUzBWWkxTMHRMUzBLVFVacmQwVjNXVWhMYjFwSmVtb3dRMEZSV1VsTGIxcEplbW93UkVGUlkwUlJaMEZGUkc1d1IzaDVWVFpLYVVGdGVqTkJPR2N3VFZwTWVXWmpOMHgwVndwQ1IySkxkbGR0YmxSSU1WbHRiMkZvTm5OQlFUQmxkVEJRV1hoblNtTlNTakJEVldwQ1lsUk5Sa2hJZFdKdmMxVmtVbTk1WldOYWVETjNQVDBLTFMwdExTMUZUa1FnVUZWQ1RFbERJRXRGV1MwdExTMHRDZz09In19fX0=","integratedTime":1789567251,"logIndex":2862243669,"logID":"c0d23d6ad406973f9559f3ba2d1ca01f84147d8ffc5b8445c224f98b9591801d"}}}}]

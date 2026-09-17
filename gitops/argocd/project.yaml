@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: boutique
+  namespace: argocd
+  labels:
+    app.kubernetes.io/part-of: online-boutique
+spec:
+  description: Online Boutique DevSecOps environments (dev/staging/prod)
+  sourceRepos:
+    - https://github.com/Hephast0s/boutique-devsecops.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: 'boutique-*'
+  clusterResourceWhitelist:
+    - group: ''
+      kind: Namespace
+  namespaceResourceBlacklist: []

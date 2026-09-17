@@ -1,0 +1,65 @@
+# Grafana dashboard for the boutique platform, delivered as a ConfigMap.
+# The Grafana sidecar (LABEL=grafana_dashboard, LABEL_VALUE=1, NAMESPACE=ALL) imports it automatically.
+# Explicit datasource UID (prometheus) so panels render even if the default changes.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: boutique-runtime-dashboard
+  namespace: boutique-security
+  labels:
+    grafana_dashboard: "1"
+    app.kubernetes.io/part-of: online-boutique
+  annotations:
+    k8s-sidecar-target-folder: "Boutique DevSecOps"
+data:
+  boutique-runtime.json: |
+    {
+      "title": "Boutique — Runtime & Health",
+      "uid": "boutique-runtime",
+      "schemaVersion": 39,
+      "editable": true,
+      "refresh": "30s",
+      "time": {"from": "now-6h", "to": "now"},
+      "panels": [
+        {
+          "id": 1, "type": "stat", "title": "Pods not ready (boutique-*)",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"h": 6, "w": 8, "x": 0, "y": 0},
+          "fieldConfig": {"defaults": {"unit": "short", "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "red", "value": 1}]}, "color": {"mode": "thresholds"}}, "overrides": []},
+          "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "colorMode": "value", "graphMode": "area", "textMode": "auto"},
+          "targets": [{"refId": "A", "datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "sum(kube_pod_status_ready{namespace=~\"boutique-.*\",condition=\"true\"} == 0) or vector(0)", "instant": true}]
+        },
+        {
+          "id": 2, "type": "stat", "title": "Deployment replica shortfall",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"h": 6, "w": 8, "x": 8, "y": 0},
+          "fieldConfig": {"defaults": {"unit": "short", "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "red", "value": 1}]}, "color": {"mode": "thresholds"}}, "overrides": []},
+          "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "colorMode": "value", "graphMode": "area", "textMode": "auto"},
+          "targets": [{"refId": "A", "datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "sum(kube_deployment_spec_replicas{namespace=~\"boutique-.*\"} - kube_deployment_status_replicas_available{namespace=~\"boutique-.*\"}) or vector(0)", "instant": true}]
+        },
+        {
+          "id": 3, "type": "stat", "title": "Container restarts (1h)",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"h": 6, "w": 8, "x": 16, "y": 0},
+          "fieldConfig": {"defaults": {"unit": "short", "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "orange", "value": 1}, {"color": "red", "value": 5}]}, "color": {"mode": "thresholds"}}, "overrides": []},
+          "options": {"reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "colorMode": "value", "graphMode": "area", "textMode": "auto"},
+          "targets": [{"refId": "A", "datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "sum(increase(kube_pod_container_status_restarts_total{namespace=~\"boutique-.*\"}[1h])) or vector(0)", "instant": true}]
+        },
+        {
+          "id": 4, "type": "timeseries", "title": "CPU by pod (cores)",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"h": 9, "w": 12, "x": 0, "y": 6},
+          "fieldConfig": {"defaults": {"unit": "cores", "custom": {"drawStyle": "line", "fillOpacity": 10}}, "overrides": []},
+          "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"]}, "tooltip": {"mode": "multi"}},
+          "targets": [{"refId": "A", "datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=~\"boutique-.*\",container!=\"POD\"}[5m])) by (pod)", "legendFormat": "{{namespace}}/{{pod}}"}]
+        },
+        {
+          "id": 5, "type": "timeseries", "title": "Memory working set by pod (bytes)",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "gridPos": {"h": 9, "w": 12, "x": 12, "y": 6},
+          "fieldConfig": {"defaults": {"unit": "bytes", "custom": {"drawStyle": "line", "fillOpacity": 10}}, "overrides": []},
+          "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"]}, "tooltip": {"mode": "multi"}},
+          "targets": [{"refId": "A", "datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "sum(container_memory_working_set_bytes{namespace=~\"boutique-.*\",container!=\"POD\"}) by (pod)", "legendFormat": "{{namespace}}/{{pod}}"}]
+        }
+      ]
+    }

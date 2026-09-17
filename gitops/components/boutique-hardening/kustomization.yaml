@@ -1,0 +1,47 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+# Shared homelab hardening applied to every boutique environment.
+patches:
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+    patch: |-
+      - op: add
+        path: /spec/template/spec/automountServiceAccountToken
+        value: false
+      - op: add
+        path: /spec/template/spec/securityContext/seccompProfile
+        value:
+          type: RuntimeDefault
+      - op: add
+        path: /spec/template/metadata/labels/app.kubernetes.io~1part-of
+        value: online-boutique
+      - op: add
+        path: /spec/template/spec/nodeSelector
+        value:
+          node-type: worker
+      # Homelab probe tolerance: the 1s gRPC probe is too tight on a busy small cluster.
+      - op: add
+        path: /spec/template/spec/containers/0/livenessProbe/timeoutSeconds
+        value: 3
+      - op: add
+        path: /spec/template/spec/containers/0/livenessProbe/failureThreshold
+        value: 6
+      - op: add
+        path: /spec/template/spec/containers/0/readinessProbe/timeoutSeconds
+        value: 3
+      - op: add
+        path: /spec/template/spec/containers/0/readinessProbe/failureThreshold
+        value: 6
+
+  # Replace the LoadBalancer with ClusterIP; ingress is the entry point (avoids node port-80 conflict).
+  - target:
+      version: v1
+      kind: Service
+      name: frontend-external
+    patch: |-
+      - op: replace
+        path: /spec/type
+        value: ClusterIP

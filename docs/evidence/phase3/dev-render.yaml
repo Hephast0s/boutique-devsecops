@@ -1,0 +1,988 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    app.kubernetes.io/part-of: online-boutique
+    environment: dev
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/warn: restricted
+  name: boutique-dev
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: adservice
+  namespace: boutique-dev
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cartservice
+  namespace: boutique-dev
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: checkoutservice
+  namespace: boutique-dev
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: currencyservice
+  namespace: boutique-dev
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: emailservice
+  namespace: boutique-dev
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: frontend
+  namespace: boutique-dev
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: loadgenerator
+  namespace: boutique-dev
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: paymentservice
+  namespace: boutique-dev
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: productcatalogservice
+  namespace: boutique-dev
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: recommendationservice
+  namespace: boutique-dev
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: shippingservice
+  namespace: boutique-dev
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: adservice
+  name: adservice
+  namespace: boutique-dev
+spec:
+  ports:
+  - name: grpc
+    port: 9555
+    targetPort: 9555
+  selector:
+    app: adservice
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: cartservice
+  name: cartservice
+  namespace: boutique-dev
+spec:
+  ports:
+  - name: grpc
+    port: 7070
+    targetPort: 7070
+  selector:
+    app: cartservice
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: checkoutservice
+  name: checkoutservice
+  namespace: boutique-dev
+spec:
+  ports:
+  - name: grpc
+    port: 5050
+    targetPort: 5050
+  selector:
+    app: checkoutservice
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: currencyservice
+  name: currencyservice
+  namespace: boutique-dev
+spec:
+  ports:
+  - name: grpc
+    port: 7000
+    targetPort: 7000
+  selector:
+    app: currencyservice
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: emailservice
+  name: emailservice
+  namespace: boutique-dev
+spec:
+  ports:
+  - name: grpc
+    port: 5000
+    targetPort: 8080
+  selector:
+    app: emailservice
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: frontend
+  name: frontend
+  namespace: boutique-dev
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
+  selector:
+    app: frontend
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: frontend
+  name: frontend-external
+  namespace: boutique-dev
+spec:
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
+  selector:
+    app: frontend
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: paymentservice
+  name: paymentservice
+  namespace: boutique-dev
+spec:
+  ports:
+  - name: grpc
+    port: 50051
+    targetPort: 50051
+  selector:
+    app: paymentservice
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: productcatalogservice
+  name: productcatalogservice
+  namespace: boutique-dev
+spec:
+  ports:
+  - name: grpc
+    port: 3550
+    targetPort: 3550
+  selector:
+    app: productcatalogservice
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: recommendationservice
+  name: recommendationservice
+  namespace: boutique-dev
+spec:
+  ports:
+  - name: grpc
+    port: 8080
+    targetPort: 8080
+  selector:
+    app: recommendationservice
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: redis-cart
+  name: redis-cart
+  namespace: boutique-dev
+spec:
+  ports:
+  - name: tcp-redis
+    port: 6379
+    targetPort: 6379
+  selector:
+    app: redis-cart
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: shippingservice
+  name: shippingservice
+  namespace: boutique-dev
+spec:
+  ports:
+  - name: grpc
+    port: 50051
+    targetPort: 50051
+  selector:
+    app: shippingservice
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: adservice
+  name: adservice
+  namespace: boutique-dev
+spec:
+  selector:
+    matchLabels:
+      app: adservice
+  template:
+    metadata:
+      labels:
+        app: adservice
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: PORT
+          value: "9555"
+        image: 192.168.1.8:30082/boutique/adservice@sha256:f580c4853e896dd2083f0c270c4b7aa5feda6dd56058a93b87d0c88334a4c07d
+        livenessProbe:
+          grpc:
+            port: 9555
+          initialDelaySeconds: 20
+          periodSeconds: 15
+        name: server
+        ports:
+        - containerPort: 9555
+        readinessProbe:
+          grpc:
+            port: 9555
+          initialDelaySeconds: 20
+          periodSeconds: 15
+        resources:
+          limits:
+            cpu: 300m
+            memory: 300Mi
+          requests:
+            cpu: 200m
+            memory: 180Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+      nodeSelector:
+        node-type: worker
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: adservice
+      terminationGracePeriodSeconds: 5
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: cartservice
+  name: cartservice
+  namespace: boutique-dev
+spec:
+  selector:
+    matchLabels:
+      app: cartservice
+  template:
+    metadata:
+      labels:
+        app: cartservice
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: REDIS_ADDR
+          value: redis-cart:6379
+        image: 192.168.1.8:30082/boutique/cartservice@sha256:b5c29ddb3238474ea8d1842f07004fedeeae47f660627ab111a613a681cd0356
+        livenessProbe:
+          grpc:
+            port: 7070
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        name: server
+        ports:
+        - containerPort: 7070
+        readinessProbe:
+          grpc:
+            port: 7070
+          initialDelaySeconds: 15
+        resources:
+          limits:
+            cpu: 300m
+            memory: 128Mi
+          requests:
+            cpu: 200m
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+      nodeSelector:
+        node-type: worker
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: cartservice
+      terminationGracePeriodSeconds: 5
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: checkoutservice
+  name: checkoutservice
+  namespace: boutique-dev
+spec:
+  selector:
+    matchLabels:
+      app: checkoutservice
+  template:
+    metadata:
+      labels:
+        app: checkoutservice
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: PORT
+          value: "5050"
+        - name: PRODUCT_CATALOG_SERVICE_ADDR
+          value: productcatalogservice:3550
+        - name: SHIPPING_SERVICE_ADDR
+          value: shippingservice:50051
+        - name: PAYMENT_SERVICE_ADDR
+          value: paymentservice:50051
+        - name: EMAIL_SERVICE_ADDR
+          value: emailservice:5000
+        - name: CURRENCY_SERVICE_ADDR
+          value: currencyservice:7000
+        - name: CART_SERVICE_ADDR
+          value: cartservice:7070
+        image: 192.168.1.8:30082/boutique/checkoutservice@sha256:ab40699b6d9e45c9a93b5427008f327fbe912465361e2ff7a1a1be7111e36134
+        livenessProbe:
+          grpc:
+            port: 5050
+        name: server
+        ports:
+        - containerPort: 5050
+        readinessProbe:
+          grpc:
+            port: 5050
+        resources:
+          limits:
+            cpu: 200m
+            memory: 128Mi
+          requests:
+            cpu: 100m
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+      nodeSelector:
+        node-type: worker
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: checkoutservice
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: currencyservice
+  name: currencyservice
+  namespace: boutique-dev
+spec:
+  selector:
+    matchLabels:
+      app: currencyservice
+  template:
+    metadata:
+      labels:
+        app: currencyservice
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: PORT
+          value: "7000"
+        - name: DISABLE_PROFILER
+          value: "1"
+        image: 192.168.1.8:30082/boutique/currencyservice@sha256:7b2f3f804555c926861d67cd22c1b7c9e32d46b81cf1a64dd3089ae424d73be9
+        livenessProbe:
+          grpc:
+            port: 7000
+        name: server
+        ports:
+        - containerPort: 7000
+          name: grpc
+        readinessProbe:
+          grpc:
+            port: 7000
+        resources:
+          limits:
+            cpu: 200m
+            memory: 128Mi
+          requests:
+            cpu: 100m
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+      nodeSelector:
+        node-type: worker
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: currencyservice
+      terminationGracePeriodSeconds: 5
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: emailservice
+  name: emailservice
+  namespace: boutique-dev
+spec:
+  selector:
+    matchLabels:
+      app: emailservice
+  template:
+    metadata:
+      labels:
+        app: emailservice
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: PORT
+          value: "8080"
+        - name: DISABLE_PROFILER
+          value: "1"
+        image: 192.168.1.8:30082/boutique/emailservice@sha256:77fd45d411b3550cbd39e30bda83ed6ea23d87fd6e58e69cf9fa2808e003984d
+        livenessProbe:
+          grpc:
+            port: 8080
+          periodSeconds: 5
+        name: server
+        ports:
+        - containerPort: 8080
+        readinessProbe:
+          grpc:
+            port: 8080
+          periodSeconds: 5
+        resources:
+          limits:
+            cpu: 200m
+            memory: 128Mi
+          requests:
+            cpu: 100m
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+      nodeSelector:
+        node-type: worker
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: emailservice
+      terminationGracePeriodSeconds: 5
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: frontend
+  name: frontend
+  namespace: boutique-dev
+spec:
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/rewriteAppHTTPProbers: "true"
+      labels:
+        app: frontend
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: PORT
+          value: "8080"
+        - name: PRODUCT_CATALOG_SERVICE_ADDR
+          value: productcatalogservice:3550
+        - name: CURRENCY_SERVICE_ADDR
+          value: currencyservice:7000
+        - name: CART_SERVICE_ADDR
+          value: cartservice:7070
+        - name: RECOMMENDATION_SERVICE_ADDR
+          value: recommendationservice:8080
+        - name: SHIPPING_SERVICE_ADDR
+          value: shippingservice:50051
+        - name: CHECKOUT_SERVICE_ADDR
+          value: checkoutservice:5050
+        - name: AD_SERVICE_ADDR
+          value: adservice:9555
+        - name: SHOPPING_ASSISTANT_SERVICE_ADDR
+          value: shoppingassistantservice:80
+        - name: ENABLE_PROFILER
+          value: "0"
+        image: 192.168.1.8:30082/boutique/frontend@sha256:c06df08eccd78568a37292cfbe889df42fac48691b7fb05f2deeba0ae8d669ef
+        livenessProbe:
+          httpGet:
+            httpHeaders:
+            - name: Cookie
+              value: shop_session-id=x-liveness-probe
+            path: /_healthz
+            port: 8080
+          initialDelaySeconds: 10
+        name: server
+        ports:
+        - containerPort: 8080
+        readinessProbe:
+          httpGet:
+            httpHeaders:
+            - name: Cookie
+              value: shop_session-id=x-readiness-probe
+            path: /_healthz
+            port: 8080
+          initialDelaySeconds: 10
+        resources:
+          limits:
+            cpu: 200m
+            memory: 128Mi
+          requests:
+            cpu: 100m
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+      nodeSelector:
+        node-type: worker
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: frontend
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: paymentservice
+  name: paymentservice
+  namespace: boutique-dev
+spec:
+  selector:
+    matchLabels:
+      app: paymentservice
+  template:
+    metadata:
+      labels:
+        app: paymentservice
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: PORT
+          value: "50051"
+        - name: DISABLE_PROFILER
+          value: "1"
+        image: 192.168.1.8:30082/boutique/paymentservice@sha256:735b6d3255e2c74b0135a95cfc2337987e492f24e163c0bb9a853635876993c4
+        livenessProbe:
+          grpc:
+            port: 50051
+        name: server
+        ports:
+        - containerPort: 50051
+        readinessProbe:
+          grpc:
+            port: 50051
+        resources:
+          limits:
+            cpu: 200m
+            memory: 128Mi
+          requests:
+            cpu: 100m
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+      nodeSelector:
+        node-type: worker
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: paymentservice
+      terminationGracePeriodSeconds: 5
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: productcatalogservice
+  name: productcatalogservice
+  namespace: boutique-dev
+spec:
+  selector:
+    matchLabels:
+      app: productcatalogservice
+  template:
+    metadata:
+      labels:
+        app: productcatalogservice
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: PORT
+          value: "3550"
+        - name: DISABLE_PROFILER
+          value: "1"
+        image: 192.168.1.8:30082/boutique/productcatalogservice@sha256:fb8568ecfc948717eb07746a6ce360fb8e5f906ae8a874cbad666891f0d21790
+        livenessProbe:
+          grpc:
+            port: 3550
+        name: server
+        ports:
+        - containerPort: 3550
+        readinessProbe:
+          grpc:
+            port: 3550
+        resources:
+          limits:
+            cpu: 200m
+            memory: 128Mi
+          requests:
+            cpu: 100m
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+      nodeSelector:
+        node-type: worker
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: productcatalogservice
+      terminationGracePeriodSeconds: 5
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: recommendationservice
+  name: recommendationservice
+  namespace: boutique-dev
+spec:
+  selector:
+    matchLabels:
+      app: recommendationservice
+  template:
+    metadata:
+      labels:
+        app: recommendationservice
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: PORT
+          value: "8080"
+        - name: PRODUCT_CATALOG_SERVICE_ADDR
+          value: productcatalogservice:3550
+        - name: DISABLE_PROFILER
+          value: "1"
+        image: 192.168.1.8:30082/boutique/recommendationservice@sha256:5d8321f2d24132889f654f75308e541b0626e6ae0cbacf81b170e5eb0921b415
+        livenessProbe:
+          grpc:
+            port: 8080
+          periodSeconds: 5
+        name: server
+        ports:
+        - containerPort: 8080
+        readinessProbe:
+          grpc:
+            port: 8080
+          periodSeconds: 5
+        resources:
+          limits:
+            cpu: 200m
+            memory: 450Mi
+          requests:
+            cpu: 100m
+            memory: 220Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+      nodeSelector:
+        node-type: worker
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: recommendationservice
+      terminationGracePeriodSeconds: 5
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: redis-cart
+  name: redis-cart
+  namespace: boutique-dev
+spec:
+  selector:
+    matchLabels:
+      app: redis-cart
+  template:
+    metadata:
+      labels:
+        app: redis-cart
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - image: 192.168.1.8:30082/boutique/redis@sha256:9c3ecc609a8087c0f11c494fefaf37a8f7bf9a967631d4a0da8967a9810be354
+        livenessProbe:
+          periodSeconds: 5
+          tcpSocket:
+            port: 6379
+        name: redis
+        ports:
+        - containerPort: 6379
+        readinessProbe:
+          periodSeconds: 5
+          tcpSocket:
+            port: 6379
+        resources:
+          limits:
+            cpu: 125m
+            memory: 256Mi
+          requests:
+            cpu: 70m
+            memory: 200Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - mountPath: /data
+          name: redis-data
+      nodeSelector:
+        node-type: worker
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+      - emptyDir: {}
+        name: redis-data
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: shippingservice
+  name: shippingservice
+  namespace: boutique-dev
+spec:
+  selector:
+    matchLabels:
+      app: shippingservice
+  template:
+    metadata:
+      labels:
+        app: shippingservice
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: PORT
+          value: "50051"
+        - name: DISABLE_PROFILER
+          value: "1"
+        image: 192.168.1.8:30082/boutique/shippingservice@sha256:8527bafff8c8776e345f2dca0641f6e8595b053ce67f9a5af66f5a85d9eaca9d
+        livenessProbe:
+          grpc:
+            port: 50051
+        name: server
+        ports:
+        - containerPort: 50051
+        readinessProbe:
+          grpc:
+            port: 50051
+          periodSeconds: 5
+        resources:
+          limits:
+            cpu: 200m
+            memory: 128Mi
+          requests:
+            cpu: 100m
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+      nodeSelector:
+        node-type: worker
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccountName: shippingservice
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+  labels:
+    app.kubernetes.io/part-of: online-boutique
+    environment: dev
+  name: boutique-frontend
+  namespace: boutique-dev
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: boutique-dev.192.168.1.8.nip.io
+    http:
+      paths:
+      - backend:
+          service:
+            name: frontend
+            port:
+              number: 80
+        path: /
+        pathType: Prefix

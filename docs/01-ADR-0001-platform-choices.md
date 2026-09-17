@@ -64,14 +64,16 @@ Two components are **installed but scaled to zero** (Jenkins, Gitea), and two pl
   `*-eso` name convention so kustomize/Helm never co-manage the same object (a lesson the operator hit before).
 - Consequence: no long-lived static Secret is authored in Git; rotation is demonstrated in Phase 6.
 
-## Decision 7 — Source of truth: **GitHub** (Gitea abandoned)
+## Decision 7 — Source of truth: **new GitHub repo under Hephast0s**
 
-- Context: the engagement originally planned three Gitea repos, but Gitea is scaled to 0 and the operator
-  decided (2026-09-16) that **Git work happens on GitHub**.
-- Decision: `github.com/MinaC4/microservices-demo` is the app repo; new GitHub repos are created for
-  `boutique-gitops` and `boutique-jenkins-library`. Gitea is dropped from the design entirely.
-- Consequence: replaces the Gitea-first plan; the engagement still forbids pushing to the **Google
-  upstream** repository. Git identity is `Marshal <Hephast0s@users.noreply.github.com>`.
+- Context: the engagement planned three Gitea repos; Gitea is scaled to 0. The existing repo
+  `MinaC4/microservices-demo` is a **fork** where the authenticated account has no admin, so branch
+  protection cannot be enabled there.
+- Decision: create **`github.com/Hephast0s/boutique-devsecops`** (admin) as the source of truth, with
+  branch-per-work-stream (`main`, `devsecops`, `phase-*`) and a final integrated branch. The fork is kept
+  as remote `fork` for reference/backup.
+- Consequence: replaces the Gitea-first plan and the fork-only plan; branch protection (PR review, linear
+  history, no force-push, signed commits) is now actually enforced. Pushing to the **Google upstream** stays forbidden.
 
 ## Open blocker (not an ADR decision)
 

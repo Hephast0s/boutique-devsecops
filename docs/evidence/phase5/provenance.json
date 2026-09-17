@@ -1,0 +1,6 @@
+{
+  "builder": {"id": "jenkins://boutique-app-ci"},
+  "buildType": "https://jenkins.io/pipeline@v1",
+  "invocation": {"configSource": {"uri": "https://github.com/Hephast0s/boutique-devsecops", "digest": {"sha1": "2ec3067e"}}, "parameters": {"service": "frontend"}},
+  "metadata": {"buildInvocationId": "boutique-app-ci#5", "buildStartedOn": "2026-09-16T13:00:00Z", "buildFinishedOn": "2026-09-16T13:07:00Z", "completeness": {"parameters": true, "environment": false, "materials": false}, "reproducible": false}
+}

@@ -17,10 +17,12 @@
 from concurrent import futures
 import argparse
 import os
+import smtplib
 import sys
 import time
 import grpc
 import traceback
+from email.mime.text import MIMEText
 from jinja2 import Environment, FileSystemLoader, select_autoescape, TemplateError
 from google.api_core.exceptions import GoogleAPICallError
 from google.auth.exceptions import DefaultCredentialsError
@@ -110,6 +112,58 @@ class DummyEmailService(BaseEmailService):
     logger.info('A request to send order confirmation email to {} has been received.'.format(request.email))
     return demo_pb2.Empty()
 
+class SMTPEmailService(BaseEmailService):
+  """Real email delivery over SMTP (non-GCP environments).
+
+  Enabled only when SMTP_HOST is set; otherwise the dummy service is used.
+  This is a non-GCP environment shim: upstream only implements a Google Cloud
+  Mail client, which is unavailable on this cluster.
+  """
+  def SendOrderConfirmation(self, request, context):
+    email = request.email
+    order = request.order
+    try:
+      confirmation = template.render(order=order)
+    except TemplateError as err:
+      context.set_details("An error occurred when preparing the confirmation mail.")
+      context.set_code(grpc.StatusCode.INTERNAL)
+      return demo_pb2.Empty()
+
+    host = os.environ.get('SMTP_HOST')
+    port = int(os.environ.get('SMTP_PORT', '1025'))
+    sender = os.environ.get('SMTP_FROM', 'no-reply@boutique.local')
+    user = os.environ.get('SMTP_USER')
+    password = os.environ.get('SMTP_PASSWORD')
+    use_tls = os.environ.get('SMTP_TLS', '').lower() in ('1', 'true', 'yes')
+    use_ssl = os.environ.get('SMTP_SSL', '').lower() in ('1', 'true', 'yes')
+
+    msg = MIMEText(confirmation, 'html')
+    msg['Subject'] = 'Your Confirmation Email'
+    msg['From'] = sender
+    msg['To'] = email
+
+    try:
+      if use_ssl:
+        smtp = smtplib.SMTP_SSL(host, port, timeout=20)
+      else:
+        smtp = smtplib.SMTP(host, port, timeout=20)
+      with smtp:
+        if use_tls and not use_ssl:
+          smtp.ehlo()
+          smtp.starttls()
+          smtp.ehlo()
+        if user:
+          smtp.login(user, password)
+        smtp.sendmail(sender, [email], msg.as_string())
+    except Exception as err:
+      logger.error('failed to send order confirmation email to {}: {}'.format(email, err))
+      context.set_details("An error occurred when sending the email.")
+      context.set_code(grpc.StatusCode.INTERNAL)
+      return demo_pb2.Empty()
+
+    logger.info('order confirmation email sent to {} via SMTP {}:{}'.format(email, host, port))
+    return demo_pb2.Empty()
+
 class HealthCheck():
   def Check(self, request, context):
     return health_pb2.HealthCheckResponse(
@@ -120,6 +174,8 @@ def start(dummy_mode):
   service = None
   if dummy_mode:
     service = DummyEmailService()
+  elif os.environ.get('SMTP_HOST'):
+    service = SMTPEmailService()
   else:
     raise Exception('non-dummy mode not implemented yet')
 
@@ -197,4 +253,4 @@ if __name__ == '__main__':
   except Exception as e:
       logger.warn(f"Exception on Cloud Trace setup: {traceback.format_exc()}, tracing disabled.") 
   
-  start(dummy_mode = True)
+  start(dummy_mode = 'SMTP_HOST' not in os.environ)

@@ -1,0 +1,515 @@
+Started by user Jenkins Admin
+Obtained Jenkinsfile from git https://github.com/Hephast0s/boutique-devsecops.git
+[Pipeline] Start of Pipeline
+[Pipeline] podTemplate
+[Pipeline] {
+[Pipeline] node
+Created Pod: kubernetes boutique-ci/boutique-app-ci-11-vl8t5-g4s2r-4f18m
+[PodInfo] boutique-ci/boutique-app-ci-11-vl8t5-g4s2r-4f18m
+	Container [gitleaks] waiting [ContainerCreating] No message
+	Container [jnlp] waiting [ContainerCreating] No message
+	Container [kaniko] waiting [ContainerCreating] No message
+	Container [semgrep] waiting [ContainerCreating] No message
+	Container [tools] waiting [ContainerCreating] No message
+	Container [trivy] waiting [ContainerCreating] No message
+	Pod [Pending][ContainersNotReady] containers with unready status: [jnlp tools gitleaks kaniko trivy semgrep]
+[PodInfo] boutique-ci/boutique-app-ci-11-vl8t5-g4s2r-4f18m
+	Container [gitleaks] waiting [ContainerCreating] No message
+	Container [jnlp] waiting [ContainerCreating] No message
+	Container [kaniko] waiting [ContainerCreating] No message
+	Container [semgrep] waiting [ContainerCreating] No message
+	Container [tools] waiting [ContainerCreating] No message
+	Container [trivy] waiting [ContainerCreating] No message
+	Pod [Pending][ContainersNotReady] containers with unready status: [jnlp tools gitleaks kaniko trivy semgrep]
+Agent boutique-app-ci-11-vl8t5-g4s2r-4f18m is provisioned from template boutique-app-ci_11-vl8t5-g4s2r
+---
+apiVersion: "v1"
+kind: "Pod"
+metadata:
+  annotations:
+    kubernetes.jenkins.io/last-refresh: "1789571825854"
+    buildUrl: "http://jenkins.jenkins.svc.cluster.local:8080/job/boutique-app-ci/11/"
+    runUrl: "job/boutique-app-ci/11/"
+  labels:
+    jenkins/jenkins-jenkins-agent: "true"
+    jenkins/label-digest: "bb9deab75c07599b25f831064d8f11adea2c49d0"
+    jenkins/label: "boutique-app-ci_11-vl8t5"
+    kubernetes.jenkins.io/controller: "http___jenkins_jenkins_svc_cluster_local_8080x"
+  name: "boutique-app-ci-11-vl8t5-g4s2r-4f18m"
+  namespace: "boutique-ci"
+spec:
+  automountServiceAccountToken: false
+  containers:
+  - args:
+    - "$(JENKINS_SECRET)"
+    - "$(JENKINS_NAME)"
+    env:
+    - name: "JENKINS_SECRET"
+      value: "********"
+    - name: "JENKINS_TUNNEL"
+      value: "jenkins-agent.jenkins.svc.cluster.local:50000"
+    - name: "JENKINS_AGENT_NAME"
+      value: "boutique-app-ci-11-vl8t5-g4s2r-4f18m"
+    - name: "REMOTING_OPTS"
+      value: "-noReconnectAfter 1d"
+    - name: "JENKINS_NAME"
+      value: "boutique-app-ci-11-vl8t5-g4s2r-4f18m"
+    - name: "JENKINS_AGENT_WORKDIR"
+      value: "/home/jenkins/agent"
+    - name: "JENKINS_URL"
+      value: "http://jenkins.jenkins.svc.cluster.local:8080/"
+    image: "jenkins/inbound-agent:3384.v60d89463d9e0-1"
+    name: "jnlp"
+    resources:
+      limits:
+        cpu: "500m"
+        memory: "512Mi"
+      requests:
+        cpu: "100m"
+        memory: "256Mi"
+    volumeMounts:
+    - mountPath: "/home/jenkins/agent"
+      name: "workspace-volume"
+      readOnly: false
+  - args:
+    - "3600"
+    command:
+    - "sleep"
+    env:
+    - name: "COSIGN_PASSWORD"
+      valueFrom:
+        secretKeyRef:
+          key: "COSIGN_PASSWORD"
+          name: "cosign-key"
+    - name: "DOCKER_CONFIG"
+      value: "/dockercfg"
+    image: "python:3.14-alpine"
+    name: "tools"
+    resources:
+      limits:
+        cpu: "1000m"
+        memory: "1Gi"
+      requests:
+        cpu: "50m"
+        memory: "128Mi"
+    volumeMounts:
+    - mountPath: "/cosign"
+      name: "cosign-key"
+      readOnly: true
+    - mountPath: "/dockercfg"
+      name: "docker-config"
+      readOnly: true
+    - mountPath: "/home/jenkins/agent"
+      name: "workspace-volume"
+      readOnly: false
+  - args:
+    - "3600"
+    command:
+    - "sleep"
+    image: "ghcr.io/gitleaks/gitleaks:v8.30.0"
+    name: "gitleaks"
+    resources:
+      limits:
+        cpu: "500m"
+        memory: "512Mi"
+      requests:
+        cpu: "50m"
+        memory: "128Mi"
+    volumeMounts:
+    - mountPath: "/home/jenkins/agent"
+      name: "workspace-volume"
+      readOnly: false
+  - args:
+    - "3600"
+    command:
+    - "sleep"
+    image: "gcr.io/kaniko-project/executor:v1.23.2-debug"
+    name: "kaniko"
+    resources:
+      limits:
+        cpu: "1500m"
+        memory: "2Gi"
+      requests:
+        cpu: "200m"
+        memory: "512Mi"
+    volumeMounts:
+    - mountPath: "/kaniko/.docker"
+      name: "docker-config"
+    - mountPath: "/home/jenkins/agent"
+      name: "workspace-volume"
+      readOnly: false
+  - args:
+    - "3600"
+    command:
+    - "sleep"
+    image: "aquasec/trivy:latest"
+    name: "trivy"
+    resources:
+      limits:
+        cpu: "500m"
+        memory: "1Gi"
+      requests:
+        cpu: "50m"
+        memory: "128Mi"
+    volumeMounts:
+    - mountPath: "/home/jenkins/agent"
+      name: "workspace-volume"
+      readOnly: false
+  - args:
+    - "3600"
+    command:
+    - "sleep"
+    image: "semgrep/semgrep:latest"
+    name: "semgrep"
+    resources:
+      limits:
+        cpu: "1000m"
+        memory: "1Gi"
+      requests:
+        cpu: "50m"
+        memory: "256Mi"
+    volumeMounts:
+    - mountPath: "/home/jenkins/agent"
+      name: "workspace-volume"
+      readOnly: false
+  nodeSelector:
+    kubernetes.io/os: "linux"
+  restartPolicy: "Never"
+  serviceAccountName: "jenkins-agent"
+  volumes:
+  - name: "cosign-key"
+    secret:
+      items:
+      - key: "cosign.key"
+        path: "cosign.key"
+      secretName: "cosign-key"
+  - name: "docker-config"
+    secret:
+      items:
+      - key: ".dockerconfigjson"
+        path: "config.json"
+      secretName: "harbor-push"
+  - emptyDir:
+      medium: ""
+    name: "workspace-volume"
+
+Running on boutique-app-ci-11-vl8t5-g4s2r-4f18m in /home/jenkins/agent/workspace/boutique-app-ci
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Declarative: Checkout SCM)
+[Pipeline] checkout
+The recommended git tool is: git
+No credentials specified
+Cloning the remote Git repository
+Cloning repository https://github.com/Hephast0s/boutique-devsecops.git
+ > git init /home/jenkins/agent/workspace/boutique-app-ci # timeout=10
+Fetching upstream changes from https://github.com/Hephast0s/boutique-devsecops.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.47.3'
+ > git fetch --tags --force --progress -- https://github.com/Hephast0s/boutique-devsecops.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+Avoid second fetch
+Checking out Revision 55be6a2515b339e4347439c42e8ef6f89deab635 (refs/remotes/origin/phase-5-supply-chain)
+ > git config remote.origin.url https://github.com/Hephast0s/boutique-devsecops.git # timeout=10
+ > git config --add remote.origin.fetch +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git rev-parse refs/remotes/origin/phase-5-supply-chain^{commit} # timeout=10
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f 55be6a2515b339e4347439c42e8ef6f89deab635 # timeout=10
+Commit message: "ci(jenkins): mount docker config into tools so cosign can push to Harbor"
+ > git rev-list --no-walk ad610e07f32e771e59ea4223d87f18794dedea38 # timeout=10
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] container
+[Pipeline] {
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] timeout
+Timeout set to expire in 45 min
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (1. Preflight)
+[Pipeline] container
+[Pipeline] {
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
++ apk add --no-cache git bash syft cosign
++ git config --global --add safe.directory '*'
+[Pipeline] sh
++ git rev-parse --short HEAD
+[Pipeline] echo
+git_sha=55be6a25
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (2. Change Detection)
+[Pipeline] container
+[Pipeline] {
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
++ bash ci/scripts/detect-changes.sh origin/devsecops
+[Pipeline] echo
+changed=adservice,cartservice,checkoutservice,currencyservice,emailservice,frontend,loadgenerator,paymentservice,productcatalogservice,recommendationservice,shippingservice,shoppingassistantservice target=frontend,productcatalogservice
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (3. Secret Scan (gitleaks))
+[Pipeline] container
+[Pipeline] {
+[Pipeline] sh
++ gitleaks dir . --config .gitleaks.toml --redact --no-banner --exit-code 1
+[90m3:19PM[0m [32mINF[0m [1mscanned ~1591643 bytes (1.59 MB) in 2.12s[0m
+[90m3:19PM[0m [32mINF[0m [1mno leaks found[0m
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (4. Build & Push (Kaniko))
+[Pipeline] container
+[Pipeline] {
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
++ set -e
++ mkdir -p /home/jenkins/agent/workspace/boutique-app-ci/digest /home/jenkins/agent/workspace/boutique-app-ci/sbom /home/jenkins/agent/workspace/boutique-app-ci/scan /home/jenkins/agent/workspace/boutique-app-ci/reports
++ TAG=v0.10.6-55be6a25-b11
++ echo frontend,productcatalogservice
++ tr , ' '
++ ctx=src/frontend
++ '[' frontend '=' cartservice ]
++ echo '== building frontend from src/frontend =='
+== building frontend from src/frontend ==
++ /kaniko/executor '--context=dir:///home/jenkins/agent/workspace/boutique-app-ci/src/frontend' '--dockerfile=/home/jenkins/agent/workspace/boutique-app-ci/src/frontend/Dockerfile' '--destination=192.168.1.8:30082/boutique/frontend:v0.10.6-55be6a25-b11' '--digest-file=/home/jenkins/agent/workspace/boutique-app-ci/digest/frontend.txt' '--cache=false' '--verbosity=warn'
++ cat /home/jenkins/agent/workspace/boutique-app-ci/digest/frontend.txt
++ echo 'frontend -> 192.168.1.8:30082/boutique/frontend:v0.10.6-55be6a25-b11 @ sha256:0c19e21f173849abd5207333f27cb005088d961018f3c77714381021275886cb'
+frontend -> 192.168.1.8:30082/boutique/frontend:v0.10.6-55be6a25-b11 @ sha256:0c19e21f173849abd5207333f27cb005088d961018f3c77714381021275886cb
++ ctx=src/productcatalogservice
++ '[' productcatalogservice '=' cartservice ]
++ echo '== building productcatalogservice from src/productcatalogservice =='
+== building productcatalogservice from src/productcatalogservice ==
++ /kaniko/executor '--context=dir:///home/jenkins/agent/workspace/boutique-app-ci/src/productcatalogservice' '--dockerfile=/home/jenkins/agent/workspace/boutique-app-ci/src/productcatalogservice/Dockerfile' '--destination=192.168.1.8:30082/boutique/productcatalogservice:v0.10.6-55be6a25-b11' '--digest-file=/home/jenkins/agent/workspace/boutique-app-ci/digest/productcatalogservice.txt' '--cache=false' '--verbosity=warn'
++ cat /home/jenkins/agent/workspace/boutique-app-ci/digest/productcatalogservice.txt
++ echo 'productcatalogservice -> 192.168.1.8:30082/boutique/productcatalogservice:v0.10.6-55be6a25-b11 @ sha256:ca53dee2a4646cc2028bc2b7cbcdfcd42da578552095a5b3d99da347d13467b0'
+productcatalogservice -> 192.168.1.8:30082/boutique/productcatalogservice:v0.10.6-55be6a25-b11 @ sha256:ca53dee2a4646cc2028bc2b7cbcdfcd42da578552095a5b3d99da347d13467b0
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (5. SBOM (Syft))
+[Pipeline] container
+[Pipeline] {
+[Pipeline] sh
++ set -e
++ '[' -f digest/frontend.txt ]
++ basename digest/frontend.txt .txt
++ svc=frontend
++ cat digest/frontend.txt
++ syft 192.168.1.8:30082/boutique/frontend@sha256:0c19e21f173849abd5207333f27cb005088d961018f3c77714381021275886cb -q -o 'cyclonedx-json=/home/jenkins/agent/workspace/boutique-app-ci/sbom/frontend.cdx.json' -o 'spdx-json=/home/jenkins/agent/workspace/boutique-app-ci/sbom/frontend.spdx.json'
++ grep+  -o '"bom-ref"'wc /home/jenkins/agent/workspace/boutique-app-ci/sbom/frontend.cdx.json
+ -l
++ n=1003
++ echo 'frontend SBOM components~=1003'
+frontend SBOM components~=1003
++ '[' -f digest/productcatalogservice.txt ]
++ basename digest/productcatalogservice.txt .txt
++ svc=productcatalogservice
++ cat digest/productcatalogservice.txt
++ syft 192.168.1.8:30082/boutique/productcatalogservice@sha256:ca53dee2a4646cc2028bc2b7cbcdfcd42da578552095a5b3d99da347d13467b0 -q -o 'cyclonedx-json=/home/jenkins/agent/workspace/boutique-app-ci/sbom/productcatalogservice.cdx.json' -o 'spdx-json=/home/jenkins/agent/workspace/boutique-app-ci/sbom/productcatalogservice.spdx.json'
++ grep -o '"bom-ref"' /home/jenkins/agent/workspace/boutique-app-ci/sbom/productcatalogservice.cdx.json
++ wc -l
++ n=1013
++ echo 'productcatalogservice SBOM components~=1013'
+productcatalogservice SBOM components~=1013
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (6. Image Scan (Trivy, gate))
+[Pipeline] container
+[Pipeline] {
+[Pipeline] sh
++ set -e
++ '[' -f digest/frontend.txt ]
++ basename digest/frontend.txt .txt
++ svc=frontend
++ cat digest/frontend.txt
++ img=192.168.1.8:30082/boutique/frontend@sha256:0c19e21f173849abd5207333f27cb005088d961018f3c77714381021275886cb
++ echo '== trivy scan frontend =='
+== trivy scan frontend ==
++ trivy image --insecure --scanners vuln --format json -o /home/jenkins/agent/workspace/boutique-app-ci/scan/frontend.trivy.json --severity CRITICAL,HIGH --ignore-unfixed --exit-code 1 192.168.1.8:30082/boutique/frontend@sha256:0c19e21f173849abd5207333f27cb005088d961018f3c77714381021275886cb
+2026-09-16T15:27:17Z	INFO	[vulndb] Need to update DB
+2026-09-16T15:27:17Z	INFO	[vulndb] Downloading vulnerability DB...
+2026-09-16T15:27:17Z	INFO	[vulndb] Downloading artifact...	repo="mirror.gcr.io/aquasec/trivy-db:2"
+239.25 KiB / 113.31 MiB [>___________________________________________________________] 0.21% ? p/s ?739.57 KiB / 113.31 MiB [>___________________________________________________________] 0.64% ? p/s ?1.19 MiB / 113.31 MiB [>_____________________________________________________________] 1.05% ? p/s ?1.63 MiB / 113.31 MiB [>________________________________________________] 1.44% 2.32 MiB p/s ETA 48s1.88 MiB / 113.31 MiB [>________________________________________________] 1.66% 2.32 MiB p/s ETA 47s1.88 MiB / 113.31 MiB [>________________________________________________] 1.66% 2.32 MiB p/s ETA 47s3.01 MiB / 113.31 MiB [->_______________________________________________] 2.65% 2.32 MiB p/s ETA 47s3.50 MiB / 113.31 MiB [->_______________________________________________] 3.09% 2.32 MiB p/s ETA 47s4.00 MiB / 113.31 MiB [->_______________________________________________] 3.53% 2.32 MiB p/s ETA 47s4.47 MiB / 113.31 MiB [->_______________________________________________] 3.95% 2.33 MiB p/s ETA 46s4.97 MiB / 113.31 MiB [-->______________________________________________] 4.38% 2.33 MiB p/s ETA 46s5.65 MiB / 113.31 MiB [-->______________________________________________] 4.99% 2.33 MiB p/s ETA 46s6.18 MiB / 113.31 MiB [-->______________________________________________] 5.46% 2.36 MiB p/s ETA 45s6.69 MiB / 113.31 MiB [-->______________________________________________] 5.90% 2.36 MiB p/s ETA 45s7.31 MiB / 113.31 MiB [--->_____________________________________________] 6.45% 2.36 MiB p/s ETA 44s7.75 MiB / 113.31 MiB [--->_____________________________________________] 6.84% 2.38 MiB p/s ETA 44s8.27 MiB / 113.31 MiB [--->_____________________________________________] 7.30% 2.38 MiB p/s ETA 44s8.47 MiB / 113.31 MiB [--->_____________________________________________] 7.48% 2.38 MiB p/s ETA 44s9.25 MiB / 113.31 MiB [--->_____________________________________________] 8.16% 2.39 MiB p/s ETA 43s9.78 MiB / 113.31 MiB [---->____________________________________________] 8.63% 2.39 MiB p/s ETA 43s10.49 MiB / 113.31 MiB [---->___________________________________________] 9.26% 2.39 MiB p/s ETA 43s11.12 MiB / 113.31 MiB [---->___________________________________________] 9.81% 2.43 MiB p/s ETA 42s11.55 MiB / 113.31 MiB [---->__________________________________________] 10.20% 2.43 MiB p/s ETA 41s12.20 MiB / 113.31 MiB [----->_________________________________________] 10.77% 2.43 MiB p/s ETA 41s12.39 MiB / 113.31 MiB [----->_________________________________________] 10.94% 2.41 MiB p/s ETA 41s12.83 MiB / 113.31 MiB [----->_________________________________________] 11.32% 2.41 MiB p/s ETA 41s13.33 MiB / 113.31 MiB [----->_________________________________________] 11.76% 2.41 MiB p/s ETA 41s14.00 MiB / 113.31 MiB [----->_________________________________________] 12.36% 2.43 MiB p/s ETA 40s14.46 MiB / 113.31 MiB [----->_________________________________________] 12.76% 2.43 MiB p/s ETA 40s14.95 MiB / 113.31 MiB [------>________________________________________] 13.19% 2.43 MiB p/s ETA 40s15.51 MiB / 113.31 MiB [------>________________________________________] 13.69% 2.44 MiB p/s ETA 40s16.10 MiB / 113.31 MiB [------>________________________________________] 14.21% 2.44 MiB p/s ETA 39s16.54 MiB / 113.31 MiB [------>________________________________________] 14.60% 2.44 MiB p/s ETA 39s17.14 MiB / 113.31 MiB [------->_______________________________________] 15.13% 2.45 MiB p/s ETA 39s17.57 MiB / 113.31 MiB [------->_______________________________________] 15.50% 2.45 MiB p/s ETA 39s18.11 MiB / 113.31 MiB [------->_______________________________________] 15.98% 2.45 MiB p/s ETA 38s18.77 MiB / 113.31 MiB [------->_______________________________________] 16.57% 2.47 MiB p/s ETA 38s19.36 MiB / 113.31 MiB [-------->______________________________________] 17.08% 2.47 MiB p/s ETA 38s19.83 MiB / 113.31 MiB [-------->______________________________________] 17.50% 2.47 MiB p/s ETA 37s20.23 MiB / 113.31 MiB [-------->______________________________________] 17.86% 2.47 MiB p/s ETA 37s20.88 MiB / 113.31 MiB [-------->______________________________________] 18.43% 2.47 MiB p/s ETA 37s21.29 MiB / 113.31 MiB [-------->______________________________________] 18.79% 2.47 MiB p/s ETA 37s21.94 MiB / 113.31 MiB [--------->_____________________________________] 19.36% 2.49 MiB p/s ETA 36s22.45 MiB / 113.31 MiB [--------->_____________________________________] 19.81% 2.49 MiB p/s ETA 36s23.16 MiB / 113.31 MiB [--------->_____________________________________] 20.44% 2.49 MiB p/s ETA 36s23.61 MiB / 113.31 MiB [--------->_____________________________________] 20.83% 2.51 MiB p/s ETA 35s24.09 MiB / 113.31 MiB [--------->_____________________________________] 21.26% 2.51 MiB p/s ETA 35s24.81 MiB / 113.31 MiB [---------->____________________________________] 21.90% 2.51 MiB p/s ETA 35s25.25 MiB / 113.31 MiB [---------->____________________________________] 22.28% 2.53 MiB p/s ETA 34s25.88 MiB / 113.31 MiB [---------->____________________________________] 22.84% 2.53 MiB p/s ETA 34s26.33 MiB / 113.31 MiB [---------->____________________________________] 23.24% 2.53 MiB p/s ETA 34s26.89 MiB / 113.31 MiB [----------->___________________________________] 23.74% 2.54 MiB p/s ETA 34s27.32 MiB / 113.31 MiB [----------->___________________________________] 24.11% 2.54 MiB p/s ETA 33s27.57 MiB / 113.31 MiB [----------->___________________________________] 24.33% 2.54 MiB p/s ETA 33s27.76 MiB / 113.31 MiB [----------->___________________________________] 24.50% 2.47 MiB p/s ETA 34s27.87 MiB / 113.31 MiB [----------->___________________________________] 24.60% 2.47 MiB p/s ETA 34s28.24 MiB / 113.31 MiB [----------->___________________________________] 24.92% 2.47 MiB p/s ETA 34s28.89 MiB / 113.31 MiB [----------->___________________________________] 25.49% 2.43 MiB p/s ETA 34s29.50 MiB / 113.31 MiB [------------>__________________________________] 26.03% 2.43 MiB p/s ETA 34s30.03 MiB / 113.31 MiB [------------>__________________________________] 26.50% 2.43 MiB p/s ETA 34s30.74 MiB / 113.31 MiB [------------>__________________________________] 27.13% 2.47 MiB p/s ETA 33s31.27 MiB / 113.31 MiB [------------>__________________________________] 27.59% 2.47 MiB p/s ETA 33s31.95 MiB / 113.31 MiB [------------->_________________________________] 28.20% 2.47 MiB p/s ETA 32s32.36 MiB / 113.31 MiB [------------->_________________________________] 28.56% 2.49 MiB p/s ETA 32s32.93 MiB / 113.31 MiB [------------->_________________________________] 29.06% 2.49 MiB p/s ETA 32s33.34 MiB / 113.31 MiB [------------->_________________________________] 29.43% 2.49 MiB p/s ETA 32s34.03 MiB / 113.31 MiB [-------------->________________________________] 30.04% 2.51 MiB p/s ETA 31s34.46 MiB / 113.31 MiB [-------------->________________________________] 30.42% 2.51 MiB p/s ETA 31s35.06 MiB / 113.31 MiB [-------------->________________________________] 30.94% 2.51 MiB p/s ETA 31s35.62 MiB / 113.31 MiB [-------------->________________________________] 31.44% 2.52 MiB p/s ETA 30s36.15 MiB / 113.31 MiB [-------------->________________________________] 31.90% 2.52 MiB p/s ETA 30s36.60 MiB / 113.31 MiB [--------------->_______________________________] 32.30% 2.52 MiB p/s ETA 30s37.34 MiB / 113.31 MiB [--------------->_______________________________] 32.95% 2.54 MiB p/s ETA 29s37.80 MiB / 113.31 MiB [--------------->_______________________________] 33.36% 2.54 MiB p/s ETA 29s38.47 MiB / 113.31 MiB [--------------->_______________________________] 33.95% 2.54 MiB p/s ETA 29s39.09 MiB / 113.31 MiB [---------------->______________________________] 34.50% 2.56 MiB p/s ETA 28s39.57 MiB / 113.31 MiB [---------------->______________________________] 34.92% 2.56 MiB p/s ETA 28s40.23 MiB / 113.31 MiB [---------------->______________________________] 35.51% 2.56 MiB p/s ETA 28s40.75 MiB / 113.31 MiB [---------------->______________________________] 35.97% 2.58 MiB p/s ETA 28s41.21 MiB / 113.31 MiB [----------------->_____________________________] 36.37% 2.58 MiB p/s ETA 27s41.81 MiB / 113.31 MiB [----------------->_____________________________] 36.90% 2.58 MiB p/s ETA 27s42.12 MiB / 113.31 MiB [----------------->_____________________________] 37.18% 2.56 MiB p/s ETA 27s42.24 MiB / 113.31 MiB [----------------->_____________________________] 37.28% 2.56 MiB p/s ETA 27s42.49 MiB / 113.31 MiB [----------------->_____________________________] 37.50% 2.56 MiB p/s ETA 27s42.86 MiB / 113.31 MiB [----------------->_____________________________] 37.83% 2.47 MiB p/s ETA 28s43.02 MiB / 113.31 MiB [----------------->_____________________________] 37.97% 2.47 MiB p/s ETA 28s43.27 MiB / 113.31 MiB [----------------->_____________________________] 38.19% 2.47 MiB p/s ETA 28s44.22 MiB / 113.31 MiB [------------------>____________________________] 39.03% 2.46 MiB p/s ETA 28s44.38 MiB / 113.31 MiB [------------------>____________________________] 39.16% 2.46 MiB p/s ETA 28s44.50 MiB / 113.31 MiB [------------------>____________________________] 39.27% 2.46 MiB p/s ETA 27s44.74 MiB / 113.31 MiB [------------------>____________________________] 39.48% 2.36 MiB p/s ETA 29s45.02 MiB / 113.31 MiB [------------------>____________________________] 39.73% 2.36 MiB p/s ETA 28s45.34 MiB / 113.31 MiB [------------------>____________________________] 40.01% 2.36 MiB p/s ETA 28s45.77 MiB / 113.31 MiB [------------------>____________________________] 40.39% 2.31 MiB p/s ETA 29s46.25 MiB / 113.31 MiB [------------------->___________________________] 40.82% 2.31 MiB p/s ETA 28s46.68 MiB / 113.31 MiB [------------------->___________________________] 41.19% 2.31 MiB p/s ETA 28s47.07 MiB / 113.31 MiB [------------------->___________________________] 41.54% 2.31 MiB p/s ETA 28s47.51 MiB / 113.31 MiB [------------------->___________________________] 41.93% 2.31 MiB p/s ETA 28s47.98 MiB / 113.31 MiB [------------------->___________________________] 42.35% 2.31 MiB p/s ETA 28s48.38 MiB / 113.31 MiB [-------------------->__________________________] 42.69% 2.30 MiB p/s ETA 28s48.91 MiB / 113.31 MiB [-------------------->__________________________] 43.17% 2.30 MiB p/s ETA 28s49.32 MiB / 113.31 MiB [-------------------->__________________________] 43.52% 2.30 MiB p/s ETA 27s49.87 MiB / 113.31 MiB [-------------------->__________________________] 44.01% 2.31 MiB p/s ETA 27s50.22 MiB / 113.31 MiB [-------------------->__________________________] 44.32% 2.31 MiB p/s ETA 27s50.58 MiB / 113.31 MiB [-------------------->__________________________] 44.64% 2.31 MiB p/s ETA 27s51.02 MiB / 113.31 MiB [--------------------->_________________________] 45.03% 2.28 MiB p/s ETA 27s51.43 MiB / 113.31 MiB [--------------------->_________________________] 45.39% 2.28 MiB p/s ETA 27s51.99 MiB / 113.31 MiB [--------------------->_________________________] 45.88% 2.28 MiB p/s ETA 26s52.30 MiB / 113.31 MiB [--------------------->_________________________] 46.15% 2.27 MiB p/s ETA 26s52.52 MiB / 113.31 MiB [--------------------->_________________________] 46.35% 2.27 MiB p/s ETA 26s52.95 MiB / 113.31 MiB [--------------------->_________________________] 46.73% 2.27 MiB p/s ETA 26s53.43 MiB / 113.31 MiB [---------------------->________________________] 47.15% 2.25 MiB p/s ETA 26s53.97 MiB / 113.31 MiB [---------------------->________________________] 47.63% 2.25 MiB p/s ETA 26s54.47 MiB / 113.31 MiB [---------------------->________________________] 48.07% 2.25 MiB p/s ETA 26s55.01 MiB / 113.31 MiB [---------------------->________________________] 48.55% 2.27 MiB p/s ETA 25s55.62 MiB / 113.31 MiB [----------------------->_______________________] 49.09% 2.27 MiB p/s ETA 25s56.08 MiB / 113.31 MiB [----------------------->_______________________] 49.49% 2.27 MiB p/s ETA 25s56.71 MiB / 113.31 MiB [----------------------->_______________________] 50.05% 2.31 MiB p/s ETA 24s57.24 MiB / 113.31 MiB [----------------------->_______________________] 50.52% 2.31 MiB p/s ETA 24s57.75 MiB / 113.31 MiB [----------------------->_______________________] 50.96% 2.31 MiB p/s ETA 24s58.34 MiB / 113.31 MiB [------------------------>______________________] 51.49% 2.34 MiB p/s ETA 23s58.83 MiB / 113.31 MiB [------------------------>______________________] 51.92% 2.34 MiB p/s ETA 23s59.40 MiB / 113.31 MiB [------------------------>______________________] 52.42% 2.34 MiB p/s ETA 23s59.93 MiB / 113.31 MiB [------------------------>______________________] 52.89% 2.36 MiB p/s ETA 22s60.40 MiB / 113.31 MiB [------------------------->_____________________] 53.31% 2.36 MiB p/s ETA 22s60.78 MiB / 113.31 MiB [------------------------->_____________________] 53.64% 2.36 MiB p/s ETA 22s61.35 MiB / 113.31 MiB [------------------------->_____________________] 54.14% 2.36 MiB p/s ETA 22s61.82 MiB / 113.31 MiB [------------------------->_____________________] 54.56% 2.36 MiB p/s ETA 21s62.27 MiB / 113.31 MiB [------------------------->_____________________] 54.95% 2.36 MiB p/s ETA 21s62.89 MiB / 113.31 MiB [-------------------------->____________________] 55.51% 2.37 MiB p/s ETA 21s63.35 MiB / 113.31 MiB [-------------------------->____________________] 55.91% 2.37 MiB p/s ETA 21s63.84 MiB / 113.31 MiB [-------------------------->____________________] 56.35% 2.37 MiB p/s ETA 20s64.44 MiB / 113.31 MiB [-------------------------->____________________] 56.87% 2.38 MiB p/s ETA 20s64.94 MiB / 113.31 MiB [-------------------------->____________________] 57.31% 2.38 MiB p/s ETA 20s65.53 MiB / 113.31 MiB [--------------------------->___________________] 57.83% 2.38 MiB p/s ETA 20s66.03 MiB / 113.31 MiB [--------------------------->___________________] 58.28% 2.40 MiB p/s ETA 19s66.46 MiB / 113.31 MiB [--------------------------->___________________] 58.65% 2.40 MiB p/s ETA 19s66.85 MiB / 113.31 MiB [--------------------------->___________________] 59.00% 2.40 MiB p/s ETA 19s67.47 MiB / 113.31 MiB [--------------------------->___________________] 59.55% 2.40 MiB p/s ETA 19s67.91 MiB / 113.31 MiB [---------------------------->__________________] 59.94% 2.40 MiB p/s ETA 18s68.55 MiB / 113.31 MiB [---------------------------->__________________] 60.50% 2.40 MiB p/s ETA 18s69.04 MiB / 113.31 MiB [---------------------------->__________________] 60.93% 2.41 MiB p/s ETA 18s69.59 MiB / 113.31 MiB [---------------------------->__________________] 61.41% 2.41 MiB p/s ETA 18s69.90 MiB / 113.31 MiB [---------------------------->__________________] 61.69% 2.41 MiB p/s ETA 17s70.41 MiB / 113.31 MiB [----------------------------->_________________] 62.14% 2.41 MiB p/s ETA 17s70.87 MiB / 113.31 MiB [----------------------------->_________________] 62.54% 2.41 MiB p/s ETA 17s71.25 MiB / 113.31 MiB [----------------------------->_________________] 62.88% 2.41 MiB p/s ETA 17s71.50 MiB / 113.31 MiB [----------------------------->_________________] 63.10% 2.37 MiB p/s ETA 17s71.84 MiB / 113.31 MiB [----------------------------->_________________] 63.40% 2.37 MiB p/s ETA 17s72.32 MiB / 113.31 MiB [----------------------------->_________________] 63.82% 2.37 MiB p/s ETA 17s72.79 MiB / 113.31 MiB [------------------------------>________________] 64.24% 2.35 MiB p/s ETA 17s73.07 MiB / 113.31 MiB [------------------------------>________________] 64.48% 2.35 MiB p/s ETA 17s73.51 MiB / 113.31 MiB [------------------------------>________________] 64.87% 2.35 MiB p/s ETA 16s73.82 MiB / 113.31 MiB [------------------------------>________________] 65.15% 2.31 MiB p/s ETA 17s74.24 MiB / 113.31 MiB [------------------------------>________________] 65.52% 2.31 MiB p/s ETA 16s74.74 MiB / 113.31 MiB [------------------------------->_______________] 65.96% 2.31 MiB p/s ETA 16s75.14 MiB / 113.31 MiB [------------------------------->_______________] 66.31% 2.31 MiB p/s ETA 16s75.56 MiB / 113.31 MiB [------------------------------->_______________] 66.68% 2.31 MiB p/s ETA 16s76.00 MiB / 113.31 MiB [------------------------------->_______________] 67.07% 2.31 MiB p/s ETA 16s76.46 MiB / 113.31 MiB [------------------------------->_______________] 67.48% 2.30 MiB p/s ETA 16s76.97 MiB / 113.31 MiB [------------------------------->_______________] 67.93% 2.30 MiB p/s ETA 15s77.44 MiB / 113.31 MiB [-------------------------------->______________] 68.35% 2.30 MiB p/s ETA 15s77.85 MiB / 113.31 MiB [-------------------------------->______________] 68.70% 2.30 MiB p/s ETA 15s78.25 MiB / 113.31 MiB [-------------------------------->______________] 69.06% 2.30 MiB p/s ETA 15s78.71 MiB / 113.31 MiB [-------------------------------->______________] 69.46% 2.30 MiB p/s ETA 15s79.20 MiB / 113.31 MiB [-------------------------------->______________] 69.89% 2.30 MiB p/s ETA 14s79.70 MiB / 113.31 MiB [--------------------------------->_____________] 70.34% 2.30 MiB p/s ETA 14s80.31 MiB / 113.31 MiB [--------------------------------->_____________] 70.88% 2.30 MiB p/s ETA 14s80.61 MiB / 113.31 MiB [--------------------------------->_____________] 71.14% 2.30 MiB p/s ETA 14s80.94 MiB / 113.31 MiB [--------------------------------->_____________] 71.43% 2.30 MiB p/s ETA 14s81.38 MiB / 113.31 MiB [--------------------------------->_____________] 71.82% 2.30 MiB p/s ETA 13s81.82 MiB / 113.31 MiB [--------------------------------->_____________] 72.21% 2.28 MiB p/s ETA 13s82.44 MiB / 113.31 MiB [---------------------------------->____________] 72.75% 2.28 MiB p/s ETA 13s82.78 MiB / 113.31 MiB [---------------------------------->____________] 73.06% 2.28 MiB p/s ETA 13s82.94 MiB / 113.31 MiB [---------------------------------->____________] 73.20% 2.26 MiB p/s ETA 13s83.28 MiB / 113.31 MiB [---------------------------------->____________] 73.50% 2.26 MiB p/s ETA 13s83.85 MiB / 113.31 MiB [---------------------------------->____________] 74.00% 2.26 MiB p/s ETA 13s84.29 MiB / 113.31 MiB [---------------------------------->____________] 74.39% 2.26 MiB p/s ETA 12s84.76 MiB / 113.31 MiB [----------------------------------->___________] 74.81% 2.26 MiB p/s ETA 12s85.18 MiB / 113.31 MiB [----------------------------------->___________] 75.18% 2.26 MiB p/s ETA 12s85.63 MiB / 113.31 MiB [----------------------------------->___________] 75.57% 2.25 MiB p/s ETA 12s86.03 MiB / 113.31 MiB [----------------------------------->___________] 75.93% 2.25 MiB p/s ETA 12s86.41 MiB / 113.31 MiB [----------------------------------->___________] 76.26% 2.25 MiB p/s ETA 11s86.92 MiB / 113.31 MiB [------------------------------------>__________] 76.71% 2.25 MiB p/s ETA 11s87.26 MiB / 113.31 MiB [------------------------------------>__________] 77.01% 2.25 MiB p/s ETA 11s87.73 MiB / 113.31 MiB [------------------------------------>__________] 77.43% 2.25 MiB p/s ETA 11s88.03 MiB / 113.31 MiB [------------------------------------>__________] 77.69% 2.22 MiB p/s ETA 11s88.38 MiB / 113.31 MiB [------------------------------------>__________] 78.00% 2.22 MiB p/s ETA 11s88.79 MiB / 113.31 MiB [------------------------------------>__________] 78.36% 2.22 MiB p/s ETA 11s89.23 MiB / 113.31 MiB [------------------------------------->_________] 78.75% 2.21 MiB p/s ETA 10s89.60 MiB / 113.31 MiB [------------------------------------->_________] 79.08% 2.21 MiB p/s ETA 10s90.03 MiB / 113.31 MiB [------------------------------------->_________] 79.46% 2.21 MiB p/s ETA 10s90.09 MiB / 113.31 MiB [------------------------------------->_________] 79.51% 2.16 MiB p/s ETA 10s90.72 MiB / 113.31 MiB [------------------------------------->_________] 80.07% 2.16 MiB p/s ETA 10s90.72 MiB / 113.31 MiB [------------------------------------->_________] 80.07% 2.16 MiB p/s ETA 10s91.72 MiB / 113.31 MiB [-------------------------------------->_________] 80.94% 2.19 MiB p/s ETA 9s92.02 MiB / 113.31 MiB [-------------------------------------->_________] 81.21% 2.19 MiB p/s ETA 9s92.45 MiB / 113.31 MiB [--------------------------------------->________] 81.59% 2.19 MiB p/s ETA 9s92.89 MiB / 113.31 MiB [--------------------------------------->________] 81.98% 2.18 MiB p/s ETA 9s93.30 MiB / 113.31 MiB [--------------------------------------->________] 82.34% 2.18 MiB p/s ETA 9s93.64 MiB / 113.31 MiB [--------------------------------------->________] 82.64% 2.18 MiB p/s ETA 9s93.86 MiB / 113.31 MiB [--------------------------------------->________] 82.84% 2.14 MiB p/s ETA 9s94.28 MiB / 113.31 MiB [--------------------------------------->________] 83.21% 2.14 MiB p/s ETA 8s94.77 MiB / 113.31 MiB [---------------------------------------->_______] 83.64% 2.14 MiB p/s ETA 8s95.21 MiB / 113.31 MiB [---------------------------------------->_______] 84.02% 2.15 MiB p/s ETA 8s95.61 MiB / 113.31 MiB [---------------------------------------->_______] 84.38% 2.15 MiB p/s ETA 8s96.07 MiB / 113.31 MiB [---------------------------------------->_______] 84.79% 2.15 MiB p/s ETA 8s96.50 MiB / 113.31 MiB [---------------------------------------->_______] 85.16% 2.15 MiB p/s ETA 7s96.84 MiB / 113.31 MiB [----------------------------------------->______] 85.47% 2.15 MiB p/s ETA 7s97.35 MiB / 113.31 MiB [----------------------------------------->______] 85.91% 2.15 MiB p/s ETA 7s97.75 MiB / 113.31 MiB [----------------------------------------->______] 86.27% 2.14 MiB p/s ETA 7s98.22 MiB / 113.31 MiB [----------------------------------------->______] 86.68% 2.14 MiB p/s ETA 7s98.66 MiB / 113.31 MiB [----------------------------------------->______] 87.07% 2.14 MiB p/s ETA 6s99.12 MiB / 113.31 MiB [----------------------------------------->______] 87.48% 2.15 MiB p/s ETA 6s99.59 MiB / 113.31 MiB [------------------------------------------>_____] 87.89% 2.15 MiB p/s ETA 6s100.06 MiB / 113.31 MiB [----------------------------------------->_____] 88.31% 2.15 MiB p/s ETA 6s100.47 MiB / 113.31 MiB [----------------------------------------->_____] 88.67% 2.16 MiB p/s ETA 5s100.97 MiB / 113.31 MiB [----------------------------------------->_____] 89.11% 2.16 MiB p/s ETA 5s101.38 MiB / 113.31 MiB [------------------------------------------>____] 89.47% 2.16 MiB p/s ETA 5s101.72 MiB / 113.31 MiB [------------------------------------------>____] 89.77% 2.15 MiB p/s ETA 5s102.23 MiB / 113.31 MiB [------------------------------------------>____] 90.23% 2.15 MiB p/s ETA 5s102.66 MiB / 113.31 MiB [------------------------------------------>____] 90.60% 2.15 MiB p/s ETA 4s103.23 MiB / 113.31 MiB [------------------------------------------>____] 91.10% 2.18 MiB p/s ETA 4s103.75 MiB / 113.31 MiB [------------------------------------------->___] 91.56% 2.18 MiB p/s ETA 4s104.19 MiB / 113.31 MiB [------------------------------------------->___] 91.95% 2.18 MiB p/s ETA 4s104.68 MiB / 113.31 MiB [------------------------------------------->___] 92.38% 2.19 MiB p/s ETA 3s105.06 MiB / 113.31 MiB [------------------------------------------->___] 92.72% 2.19 MiB p/s ETA 3s105.26 MiB / 113.31 MiB [------------------------------------------->___] 92.90% 2.19 MiB p/s ETA 3s105.64 MiB / 113.31 MiB [------------------------------------------->___] 93.23% 2.15 MiB p/s ETA 3s106.08 MiB / 113.31 MiB [-------------------------------------------->__] 93.62% 2.15 MiB p/s ETA 3s106.52 MiB / 113.31 MiB [-------------------------------------------->__] 94.01% 2.15 MiB p/s ETA 3s107.12 MiB / 113.31 MiB [-------------------------------------------->__] 94.54% 2.18 MiB p/s ETA 2s107.53 MiB / 113.31 MiB [-------------------------------------------->__] 94.90% 2.18 MiB p/s ETA 2s107.99 MiB / 113.31 MiB [-------------------------------------------->__] 95.30% 2.18 MiB p/s ETA 2s108.54 MiB / 113.31 MiB [--------------------------------------------->_] 95.79% 2.19 MiB p/s ETA 2s108.54 MiB / 113.31 MiB [--------------------------------------------->_] 95.79% 2.19 MiB p/s ETA 2s109.38 MiB / 113.31 MiB [--------------------------------------------->_] 96.54% 2.19 MiB p/s ETA 1s109.81 MiB / 113.31 MiB [--------------------------------------------->_] 96.91% 2.18 MiB p/s ETA 1s110.28 MiB / 113.31 MiB [--------------------------------------------->_] 97.33% 2.18 MiB p/s ETA 1s110.81 MiB / 113.31 MiB [--------------------------------------------->_] 97.80% 2.18 MiB p/s ETA 1s111.26 MiB / 113.31 MiB [---------------------------------------------->] 98.19% 2.20 MiB p/s ETA 0s111.76 MiB / 113.31 MiB [---------------------------------------------->] 98.63% 2.20 MiB p/s ETA 0s112.25 MiB / 113.31 MiB [---------------------------------------------->] 99.06% 2.20 MiB p/s ETA 0s112.74 MiB / 113.31 MiB [---------------------------------------------->] 99.50% 2.22 MiB p/s ETA 0s113.16 MiB / 113.31 MiB [---------------------------------------------->] 99.87% 2.22 MiB p/s ETA 0s113.31 MiB / 113.31 MiB [--------------------------------------------->] 100.00% 2.22 MiB p/s ETA 0s113.31 MiB / 113.31 MiB [--------------------------------------------->] 100.00% 2.13 MiB p/s ETA 0s113.31 MiB / 113.31 MiB [--------------------------------------------->] 100.00% 2.13 MiB p/s ETA 0s113.31 MiB / 113.31 MiB [--------------------------------------------->] 100.00% 2.13 MiB p/s ETA 0s113.31 MiB / 113.31 MiB [--------------------------------------------->] 100.00% 2.00 MiB p/s ETA 0s113.31 MiB / 113.31 MiB [--------------------------------------------->] 100.00% 2.00 MiB p/s ETA 0s113.31 MiB / 113.31 MiB [--------------------------------------------->] 100.00% 2.00 MiB p/s ETA 0s113.31 MiB / 113.31 MiB [--------------------------------------------->] 100.00% 1.87 MiB p/s ETA 0s113.31 MiB / 113.31 MiB [--------------------------------------------->] 100.00% 1.87 MiB p/s ETA 0s113.31 MiB / 113.31 MiB [--------------------------------------------->] 100.00% 1.87 MiB p/s ETA 0s113.31 MiB / 113.31 MiB [--------------------------------------------->] 100.00% 1.75 MiB p/s ETA 0s113.31 MiB / 113.31 MiB [--------------------------------------------->] 100.00% 1.75 MiB p/s ETA 0s113.31 MiB / 113.31 MiB [--------------------------------------------->] 100.00% 1.75 MiB p/s ETA 0s113.31 MiB / 113.31 MiB [--------------------------------------------->] 100.00% 1.63 MiB p/s ETA 0s113.31 MiB / 113.31 MiB [--------------------------------------------->] 100.00% 1.63 MiB p/s ETA 0s113.31 MiB / 113.31 MiB [--------------------------------------------->] 100.00% 1.63 MiB p/s ETA 0s113.31 MiB / 113.31 MiB [--------------------------------------------->] 100.00% 1.53 MiB p/s ETA 0s113.31 MiB / 113.31 MiB [--------------------------------------------->] 100.00% 1.53 MiB p/s ETA 0s113.31 MiB / 113.31 MiB [--------------------------------------------->] 100.00% 1.53 MiB p/s ETA 0s113.31 MiB / 113.31 MiB [--------------------------------------------->] 100.00% 1.43 MiB p/s ETA 0s113.31 MiB / 113.31 MiB [--------------------------------------------->] 100.00% 1.43 MiB p/s ETA 0s113.31 MiB / 113.31 MiB [--------------------------------------------->] 100.00% 1.43 MiB p/s ETA 0s113.31 MiB / 113.31 MiB [--------------------------------------------->] 100.00% 1.34 MiB p/s ETA 0s113.31 MiB / 113.31 MiB [--------------------------------------------->] 100.00% 1.34 MiB p/s ETA 0s113.31 MiB / 113.31 MiB [--------------------------------------------->] 100.00% 1.34 MiB p/s ETA 0s113.31 MiB / 113.31 MiB [--------------------------------------------->] 100.00% 1.25 MiB p/s ETA 0s113.31 MiB / 113.31 MiB [--------------------------------------------->] 100.00% 1.25 MiB p/s ETA 0s113.31 MiB / 113.31 MiB [--------------------------------------------->] 100.00% 1.25 MiB p/s ETA 0s113.31 MiB / 113.31 MiB [--------------------------------------------->] 100.00% 1.17 MiB p/s ETA 0s113.31 MiB / 113.31 MiB [--------------------------------------------->] 100.00% 1.17 MiB p/s ETA 0s113.31 MiB / 113.31 MiB [--------------------------------------------->] 100.00% 1.17 MiB p/s ETA 0s113.31 MiB / 113.31 MiB [--------------------------------------------->] 100.00% 1.10 MiB p/s ETA 0s113.31 MiB / 113.31 MiB [--------------------------------------------->] 100.00% 1.10 MiB p/s ETA 0s113.31 MiB / 113.31 MiB [--------------------------------------------->] 100.00% 1.10 MiB p/s ETA 0s113.31 MiB / 113.31 MiB [--------------------------------------------->] 100.00% 1.02 MiB p/s ETA 0s113.31 MiB / 113.31 MiB [--------------------------------------------->] 100.00% 1.02 MiB p/s ETA 0s113.31 MiB / 113.31 MiB [-------------------------------------------------] 100.00% 2.02 MiB p/s 56s2026-09-16T15:28:14Z	INFO	[vulndb] Artifact successfully downloaded	repo="mirror.gcr.io/aquasec/trivy-db:2"
+2026-09-16T15:28:14Z	INFO	[vuln] Vulnerability scanning is enabled
+2026-09-16T15:28:30Z	INFO	Detected OS	family="debian" version="13.7"
+2026-09-16T15:28:30Z	INFO	[debian] Detecting vulnerabilities...	os_version="13" pkg_num=6
+2026-09-16T15:28:30Z	INFO	Number of language-specific files	num=1
+2026-09-16T15:28:30Z	INFO	[gobinary] Detecting vulnerabilities...
+2026-09-16T15:28:30Z	WARN	Using severities from other vendors for some vulnerabilities. Read https://trivy.dev/docs/v0.74/guide/scanner/vulnerability#severity-selection for details.
++ '[' -f digest/productcatalogservice.txt ]
++ basename digest/productcatalogservice.txt .txt
++ svc=productcatalogservice
++ cat digest/productcatalogservice.txt
++ img=192.168.1.8:30082/boutique/productcatalogservice@sha256:ca53dee2a4646cc2028bc2b7cbcdfcd42da578552095a5b3d99da347d13467b0
++ echo '== trivy scan productcatalogservice =='
+== trivy scan productcatalogservice ==
++ trivy image --insecure --scanners vuln --format json -o /home/jenkins/agent/workspace/boutique-app-ci/scan/productcatalogservice.trivy.json --severity CRITICAL,HIGH --ignore-unfixed --exit-code 1 192.168.1.8:30082/boutique/productcatalogservice@sha256:ca53dee2a4646cc2028bc2b7cbcdfcd42da578552095a5b3d99da347d13467b0
+2026-09-16T15:28:30Z	INFO	[vuln] Vulnerability scanning is enabled
+2026-09-16T15:28:35Z	INFO	Detected OS	family="debian" version="13.7"
+2026-09-16T15:28:35Z	INFO	[debian] Detecting vulnerabilities...	os_version="13" pkg_num=6
+2026-09-16T15:28:35Z	INFO	Number of language-specific files	num=1
+2026-09-16T15:28:35Z	INFO	[gobinary] Detecting vulnerabilities...
+2026-09-16T15:28:35Z	WARN	Using severities from other vendors for some vulnerabilities. Read https://trivy.dev/docs/v0.74/guide/scanner/vulnerability#severity-selection for details.
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (7. SAST (Semgrep))
+[Pipeline] container
+[Pipeline] {
+[Pipeline] sh
++ tr , ' '
++ echo frontend,productcatalogservice
++ semgrep --config p/default --json -o reports/semgrep-frontend.json src/frontend
++ semgrep --config p/default --json -o reports/semgrep-productcatalogservice.json src/productcatalogservice
++ wc -l
++ ls reports/semgrep-frontend.json reports/semgrep-productcatalogservice.json
++ echo 'semgrep reports: 2'
+semgrep reports: 2
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (8. Sign & Attest (cosign))
+[Pipeline] container
+[Pipeline] {
+[Pipeline] sh
++ set -e
++ SHA=55be6a25
++ '[' -f digest/frontend.txt ]
++ basename digest/frontend.txt .txt
++ svc=frontend
++ cat digest/frontend.txt
++ img=192.168.1.8:30082/boutique/frontend@sha256:0c19e21f173849abd5207333f27cb005088d961018f3c77714381021275886cb
++ cat
++ cosign sign --key /cosign/cosign.key --yes --allow-insecure-registry 192.168.1.8:30082/boutique/frontend@sha256:0c19e21f173849abd5207333f27cb005088d961018f3c77714381021275886cb
+Signing artifact...
++ cosign attest --key /cosign/cosign.key --yes --allow-insecure-registry --predicate /home/jenkins/agent/workspace/boutique-app-ci/sbom/frontend.cdx.json --type cyclonedx 192.168.1.8:30082/boutique/frontend@sha256:0c19e21f173849abd5207333f27cb005088d961018f3c77714381021275886cb
+Using payload from: /home/jenkins/agent/workspace/boutique-app-ci/sbom/frontend.cdx.json
+Signing artifact...
++ cosign attest --key /cosign/cosign.key --yes --allow-insecure-registry --predicate /home/jenkins/agent/workspace/boutique-app-ci/provenance-frontend.json --type slsaprovenance 192.168.1.8:30082/boutique/frontend@sha256:0c19e21f173849abd5207333f27cb005088d961018f3c77714381021275886cb
+Using payload from: /home/jenkins/agent/workspace/boutique-app-ci/provenance-frontend.json
+Signing artifact...
++ echo 'signed+attested frontend'
+signed+attested frontend
++ '[' -f digest/productcatalogservice.txt ]
++ basename digest/productcatalogservice.txt .txt
++ svc=productcatalogservice
++ cat digest/productcatalogservice.txt
++ img=192.168.1.8:30082/boutique/productcatalogservice@sha256:ca53dee2a4646cc2028bc2b7cbcdfcd42da578552095a5b3d99da347d13467b0
++ cat
++ cosign sign --key /cosign/cosign.key --yes --allow-insecure-registry 192.168.1.8:30082/boutique/productcatalogservice@sha256:ca53dee2a4646cc2028bc2b7cbcdfcd42da578552095a5b3d99da347d13467b0
+Signing artifact...
++ cosign attest --key /cosign/cosign.key --yes --allow-insecure-registry --predicate /home/jenkins/agent/workspace/boutique-app-ci/sbom/productcatalogservice.cdx.json --type cyclonedx 192.168.1.8:30082/boutique/productcatalogservice@sha256:ca53dee2a4646cc2028bc2b7cbcdfcd42da578552095a5b3d99da347d13467b0
+Using payload from: /home/jenkins/agent/workspace/boutique-app-ci/sbom/productcatalogservice.cdx.json
+Signing artifact...
++ cosign attest --key /cosign/cosign.key --yes --allow-insecure-registry --predicate /home/jenkins/agent/workspace/boutique-app-ci/provenance-productcatalogservice.json --type slsaprovenance 192.168.1.8:30082/boutique/productcatalogservice@sha256:ca53dee2a4646cc2028bc2b7cbcdfcd42da578552095a5b3d99da347d13467b0
+Using payload from: /home/jenkins/agent/workspace/boutique-app-ci/provenance-productcatalogservice.json
+Signing artifact...
++ echo 'signed+attested productcatalogservice'
+signed+attested productcatalogservice
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (9. Verify (cosign))
+[Pipeline] fileExists
+[Pipeline] container
+[Pipeline] {
+[Pipeline] sh
++ set -e
++ '[' -f digest/frontend.txt ]
++ basename digest/frontend.txt .txt
++ svc=frontend
++ cat digest/frontend.txt
++ img=192.168.1.8:30082/boutique/frontend@sha256:0c19e21f173849abd5207333f27cb005088d961018f3c77714381021275886cb
++ cosign verify --key /home/jenkins/agent/workspace/boutique-app-ci/security/cosign.pub --allow-insecure-registry 192.168.1.8:30082/boutique/frontend@sha256:0c19e21f173849abd5207333f27cb005088d961018f3c77714381021275886cb
+
+Verification for 192.168.1.8:30082/boutique/frontend@sha256:0c19e21f173849abd5207333f27cb005088d961018f3c77714381021275886cb --
+The following checks were performed on each of these signatures:
+  - The cosign claims were validated
+  - Existence of the claims in the transparency log was verified offline
+  - The signatures were verified against the specified public key
++ cosign verify-attestation --key /home/jenkins/agent/workspace/boutique-app-ci/security/cosign.pub --type cyclonedx --allow-insecure-registry 192.168.1.8:30082/boutique/frontend@sha256:0c19e21f173849abd5207333f27cb005088d961018f3c77714381021275886cb
+
+Verification for 192.168.1.8:30082/boutique/frontend@sha256:0c19e21f173849abd5207333f27cb005088d961018f3c77714381021275886cb --
+The following checks were performed on each of these signatures:
+  - The cosign claims were validated
+  - Existence of the claims in the transparency log was verified offline
+  - The signatures were verified against the specified public key
++ echo 'verified frontend (signature + cyclonedx attestation)'
+verified frontend (signature + cyclonedx attestation)
++ '[' -f digest/productcatalogservice.txt ]
++ basename digest/productcatalogservice.txt .txt
++ svc=productcatalogservice
++ cat digest/productcatalogservice.txt
++ img=192.168.1.8:30082/boutique/productcatalogservice@sha256:ca53dee2a4646cc2028bc2b7cbcdfcd42da578552095a5b3d99da347d13467b0
++ cosign verify --key /home/jenkins/agent/workspace/boutique-app-ci/security/cosign.pub --allow-insecure-registry 192.168.1.8:30082/boutique/productcatalogservice@sha256:ca53dee2a4646cc2028bc2b7cbcdfcd42da578552095a5b3d99da347d13467b0
+
+Verification for 192.168.1.8:30082/boutique/productcatalogservice@sha256:ca53dee2a4646cc2028bc2b7cbcdfcd42da578552095a5b3d99da347d13467b0 --
+The following checks were performed on each of these signatures:
+  - The cosign claims were validated
+  - Existence of the claims in the transparency log was verified offline
+  - The signatures were verified against the specified public key
++ cosign verify-attestation --key /home/jenkins/agent/workspace/boutique-app-ci/security/cosign.pub --type cyclonedx --allow-insecure-registry 192.168.1.8:30082/boutique/productcatalogservice@sha256:ca53dee2a4646cc2028bc2b7cbcdfcd42da578552095a5b3d99da347d13467b0
+
+Verification for 192.168.1.8:30082/boutique/productcatalogservice@sha256:ca53dee2a4646cc2028bc2b7cbcdfcd42da578552095a5b3d99da347d13467b0 --
+The following checks were performed on each of these signatures:
+  - The cosign claims were validated
+  - Existence of the claims in the transparency log was verified offline
+  - The signatures were verified against the specified public key
++ echo 'verified productcatalogservice (signature + cyclonedx attestation)'
+verified productcatalogservice (signature + cyclonedx attestation)
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Declarative: Post Actions)
+[Pipeline] archiveArtifacts
+Archiving artifacts
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // timeout
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] }
+[Pipeline] // podTemplate
+[Pipeline] End of Pipeline
+Finished: SUCCESS

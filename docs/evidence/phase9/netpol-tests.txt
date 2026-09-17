@@ -1,0 +1,8 @@
+NetworkPolicy enforcement test — boutique-dev, 2026-09-16
+(1) App still works: cart=302, checkout=200 (full checkout succeeds with default-deny active)
+(2) ALLOWED   emailservice -> mailpit:1025            -> connected
+(3) BLOCKED   emailservice -> redis-cart:6379         -> ConnectionRefusedError
+(4) BLOCKED   emailservice -> productcatalogservice:3550 -> ConnectionRefusedError
+(5) BLOCKED   emailservice -> 1.1.1.1:443 (internet)  -> ConnectionRefusedError
+(6) ALLOWED   emailservice -> smtp.gmail.com:587      -> email delivered (log: via SMTP smtp.gmail.com:587)
+Conclusion: k3s enforces NetworkPolicy; allowed flows pass, disallowed flows are blocked.

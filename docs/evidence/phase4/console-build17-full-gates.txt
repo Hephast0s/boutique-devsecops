@@ -1,0 +1,831 @@
+Started by user Jenkins Admin
+Obtained Jenkinsfile from git https://github.com/Hephast0s/boutique-devsecops.git
+[Pipeline] Start of Pipeline
+[Pipeline] podTemplate
+[Pipeline] {
+[Pipeline] node
+Created Pod: kubernetes boutique-ci/boutique-app-ci-17-mwp84-lm5qh-hk1j3
+[PodInfo] boutique-ci/boutique-app-ci-17-mwp84-lm5qh-hk1j3
+	Container [dotnet] waiting [ContainerCreating] No message
+	Container [gitleaks] waiting [ContainerCreating] No message
+	Container [golang] waiting [ContainerCreating] No message
+	Container [hadolint] waiting [ContainerCreating] No message
+	Container [jnlp] waiting [ContainerCreating] No message
+	Container [kaniko] waiting [ContainerCreating] No message
+	Container [semgrep] waiting [ContainerCreating] No message
+	Container [tools] waiting [ContainerCreating] No message
+	Container [trivy] waiting [ContainerCreating] No message
+	Pod [Pending][ContainersNotReady] containers with unready status: [jnlp tools gitleaks kaniko trivy semgrep hadolint golang dotnet]
+[PodInfo] boutique-ci/boutique-app-ci-17-mwp84-lm5qh-hk1j3
+	Container [dotnet] waiting [ContainerCreating] No message
+	Container [gitleaks] waiting [ContainerCreating] No message
+	Container [golang] waiting [ContainerCreating] No message
+	Container [hadolint] waiting [ContainerCreating] No message
+	Container [jnlp] waiting [ContainerCreating] No message
+	Container [kaniko] waiting [ContainerCreating] No message
+	Container [semgrep] waiting [ContainerCreating] No message
+	Container [tools] waiting [ContainerCreating] No message
+	Container [trivy] waiting [ContainerCreating] No message
+	Pod [Pending][ContainersNotReady] containers with unready status: [jnlp tools gitleaks kaniko trivy semgrep hadolint golang dotnet]
+Agent boutique-app-ci-17-mwp84-lm5qh-hk1j3 is provisioned from template boutique-app-ci_17-mwp84-lm5qh
+---
+apiVersion: "v1"
+kind: "Pod"
+metadata:
+  annotations:
+    kubernetes.jenkins.io/last-refresh: "1789661823344"
+    buildUrl: "http://jenkins.jenkins.svc.cluster.local:8080/job/boutique-app-ci/17/"
+    runUrl: "job/boutique-app-ci/17/"
+  labels:
+    jenkins/jenkins-jenkins-agent: "true"
+    jenkins/label-digest: "f72b9cb3cb9049b97c003f86ad6baeb78a888e83"
+    jenkins/label: "boutique-app-ci_17-mwp84"
+    kubernetes.jenkins.io/controller: "http___jenkins_jenkins_svc_cluster_local_8080x"
+  name: "boutique-app-ci-17-mwp84-lm5qh-hk1j3"
+  namespace: "boutique-ci"
+spec:
+  automountServiceAccountToken: false
+  containers:
+  - args:
+    - "$(JENKINS_SECRET)"
+    - "$(JENKINS_NAME)"
+    env:
+    - name: "JENKINS_SECRET"
+      value: "********"
+    - name: "JENKINS_TUNNEL"
+      value: "jenkins-agent.jenkins.svc.cluster.local:50000"
+    - name: "JENKINS_AGENT_NAME"
+      value: "boutique-app-ci-17-mwp84-lm5qh-hk1j3"
+    - name: "REMOTING_OPTS"
+      value: "-noReconnectAfter 1d"
+    - name: "JENKINS_NAME"
+      value: "boutique-app-ci-17-mwp84-lm5qh-hk1j3"
+    - name: "JENKINS_AGENT_WORKDIR"
+      value: "/home/jenkins/agent"
+    - name: "JENKINS_URL"
+      value: "http://jenkins.jenkins.svc.cluster.local:8080/"
+    image: "jenkins/inbound-agent:3384.v60d89463d9e0-1"
+    name: "jnlp"
+    resources:
+      limits:
+        cpu: "500m"
+        memory: "512Mi"
+      requests:
+        cpu: "100m"
+        memory: "256Mi"
+    volumeMounts:
+    - mountPath: "/home/jenkins/agent"
+      name: "workspace-volume"
+      readOnly: false
+  - args:
+    - "3600"
+    command:
+    - "sleep"
+    env:
+    - name: "COSIGN_PASSWORD"
+      valueFrom:
+        secretKeyRef:
+          key: "COSIGN_PASSWORD"
+          name: "cosign-key"
+    - name: "DOCKER_CONFIG"
+      value: "/dockercfg"
+    image: "python:3.14-alpine"
+    name: "tools"
+    resources:
+      limits:
+        cpu: "1000m"
+        memory: "1Gi"
+      requests:
+        cpu: "50m"
+        memory: "128Mi"
+    volumeMounts:
+    - mountPath: "/cosign"
+      name: "cosign-key"
+      readOnly: true
+    - mountPath: "/dockercfg"
+      name: "docker-config"
+      readOnly: true
+    - mountPath: "/home/jenkins/agent"
+      name: "workspace-volume"
+      readOnly: false
+  - args:
+    - "3600"
+    command:
+    - "sleep"
+    image: "ghcr.io/gitleaks/gitleaks:v8.30.0"
+    name: "gitleaks"
+    resources:
+      limits:
+        cpu: "500m"
+        memory: "512Mi"
+      requests:
+        cpu: "50m"
+        memory: "128Mi"
+    volumeMounts:
+    - mountPath: "/home/jenkins/agent"
+      name: "workspace-volume"
+      readOnly: false
+  - args:
+    - "3600"
+    command:
+    - "sleep"
+    image: "gcr.io/kaniko-project/executor:v1.23.2-debug"
+    name: "kaniko"
+    resources:
+      limits:
+        cpu: "1500m"
+        memory: "2Gi"
+      requests:
+        cpu: "200m"
+        memory: "512Mi"
+    volumeMounts:
+    - mountPath: "/kaniko/.docker"
+      name: "docker-config"
+    - mountPath: "/home/jenkins/agent"
+      name: "workspace-volume"
+      readOnly: false
+  - args:
+    - "3600"
+    command:
+    - "sleep"
+    image: "aquasec/trivy:latest"
+    name: "trivy"
+    resources:
+      limits:
+        cpu: "500m"
+        memory: "1Gi"
+      requests:
+        cpu: "50m"
+        memory: "128Mi"
+    volumeMounts:
+    - mountPath: "/home/jenkins/agent"
+      name: "workspace-volume"
+      readOnly: false
+  - args:
+    - "3600"
+    command:
+    - "sleep"
+    image: "semgrep/semgrep:latest"
+    name: "semgrep"
+    resources:
+      limits:
+        cpu: "1000m"
+        memory: "1Gi"
+      requests:
+        cpu: "50m"
+        memory: "256Mi"
+    volumeMounts:
+    - mountPath: "/home/jenkins/agent"
+      name: "workspace-volume"
+      readOnly: false
+  - args:
+    - "3600"
+    command:
+    - "sleep"
+    image: "hadolint/hadolint:latest-debian"
+    name: "hadolint"
+    resources:
+      limits:
+        cpu: "200m"
+        memory: "256Mi"
+      requests:
+        cpu: "20m"
+        memory: "64Mi"
+    volumeMounts:
+    - mountPath: "/home/jenkins/agent"
+      name: "workspace-volume"
+      readOnly: false
+  - args:
+    - "3600"
+    command:
+    - "sleep"
+    image: "golang:1.27.0-alpine"
+    name: "golang"
+    resources:
+      limits:
+        cpu: "1000m"
+        memory: "1Gi"
+      requests:
+        cpu: "50m"
+        memory: "256Mi"
+    volumeMounts:
+    - mountPath: "/home/jenkins/agent"
+      name: "workspace-volume"
+      readOnly: false
+  - args:
+    - "3600"
+    command:
+    - "sleep"
+    image: "mcr.microsoft.com/dotnet/sdk:10.0.100-noble"
+    name: "dotnet"
+    resources:
+      limits:
+        cpu: "1000m"
+        memory: "1Gi"
+      requests:
+        cpu: "50m"
+        memory: "256Mi"
+    volumeMounts:
+    - mountPath: "/home/jenkins/agent"
+      name: "workspace-volume"
+      readOnly: false
+  nodeSelector:
+    kubernetes.io/os: "linux"
+  restartPolicy: "Never"
+  serviceAccountName: "jenkins-agent"
+  volumes:
+  - name: "cosign-key"
+    secret:
+      items:
+      - key: "cosign.key"
+        path: "cosign.key"
+      secretName: "cosign-key"
+  - name: "docker-config"
+    secret:
+      items:
+      - key: ".dockerconfigjson"
+        path: "config.json"
+      secretName: "harbor-push"
+  - emptyDir:
+      medium: ""
+    name: "workspace-volume"
+
+Running on boutique-app-ci-17-mwp84-lm5qh-hk1j3 in /home/jenkins/agent/workspace/boutique-app-ci
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Declarative: Checkout SCM)
+[Pipeline] checkout
+The recommended git tool is: git
+No credentials specified
+Cloning the remote Git repository
+Cloning repository https://github.com/Hephast0s/boutique-devsecops.git
+ > git init /home/jenkins/agent/workspace/boutique-app-ci # timeout=10
+Fetching upstream changes from https://github.com/Hephast0s/boutique-devsecops.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.47.3'
+ > git fetch --tags --force --progress -- https://github.com/Hephast0s/boutique-devsecops.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git config remote.origin.url https://github.com/Hephast0s/boutique-devsecops.git # timeout=10
+ > git config --add remote.origin.fetch +refs/heads/*:refs/remotes/origin/* # timeout=10
+Avoid second fetch
+Checking out Revision ed9f55dd02fd9581d4970325922c502f7d180a70 (refs/remotes/origin/devsecops)
+Commit message: "fix(checkoutservice): non-constant format string in status.Errorf (go vet) (#36)"
+ > git rev-parse refs/remotes/origin/devsecops^{commit} # timeout=10
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f ed9f55dd02fd9581d4970325922c502f7d180a70 # timeout=10
+ > git rev-list --no-walk 8c56c11ed946a809cb7d1c9db1a29570b2f78c48 # timeout=10
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] container
+[Pipeline] {
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] timeout
+Timeout set to expire in 45 min
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (1. Preflight)
+[Pipeline] container
+[Pipeline] {
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
++ apk add --no-cache git bash syft cosign
++ git config --global --add safe.directory '*'
+[Pipeline] sh
++ git rev-parse --short HEAD
+[Pipeline] echo
+git_sha=ed9f55dd
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (2. Change Detection)
+[Pipeline] container
+[Pipeline] {
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
++ bash ci/scripts/detect-changes.sh origin/devsecops
+[Pipeline] echo
+changed=(none) target=checkoutservice
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (3. Secret Scan (gitleaks))
+[Pipeline] container
+[Pipeline] {
+[Pipeline] sh
++ gitleaks dir . --config .gitleaks.toml --redact --no-banner --exit-code 1
+[90m4:18PM[0m [32mINF[0m [1mscanned ~1748703 bytes (1.75 MB) in 4.48s[0m
+[90m4:18PM[0m [32mINF[0m [1mno leaks found[0m
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (3b. Dockerfile Lint (hadolint))
+[Pipeline] container
+[Pipeline] {
+[Pipeline] sh
++ set -e
++ echo checkoutservice
++ tr ,  
++ ctx=src/checkoutservice
++ [ checkoutservice = cartservice ]
++ echo == hadolint checkoutservice ==
+== hadolint checkoutservice ==
++ hadolint --failure-threshold error /home/jenkins/agent/workspace/boutique-app-ci/src/checkoutservice/Dockerfile
+/home/jenkins/agent/workspace/boutique-app-ci/src/checkoutservice/Dockerfile:33 DL3006 [1m[93mwarning[0m: Always tag the version of an image explicitly
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (4. Build & Push (Kaniko))
+[Pipeline] container
+[Pipeline] {
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
++ set -e
++ mkdir -p /home/jenkins/agent/workspace/boutique-app-ci/digest /home/jenkins/agent/workspace/boutique-app-ci/sbom /home/jenkins/agent/workspace/boutique-app-ci/scan /home/jenkins/agent/workspace/boutique-app-ci/reports
++ TAG=v0.10.6-ed9f55dd-b17
++ tr , ' '
++ echo checkoutservice
++ ctx=src/checkoutservice
++ '[' checkoutservice '=' cartservice ]
++ echo '== building checkoutservice from src/checkoutservice =='
+== building checkoutservice from src/checkoutservice ==
++ /kaniko/executor '--context=dir:///home/jenkins/agent/workspace/boutique-app-ci/src/checkoutservice' '--dockerfile=/home/jenkins/agent/workspace/boutique-app-ci/src/checkoutservice/Dockerfile' '--destination=192.168.1.8:30082/boutique/checkoutservice:v0.10.6-ed9f55dd-b17' '--digest-file=/home/jenkins/agent/workspace/boutique-app-ci/digest/checkoutservice.txt' '--cache=false' '--verbosity=warn'
++ cat /home/jenkins/agent/workspace/boutique-app-ci/digest/checkoutservice.txt
++ echo 'checkoutservice -> 192.168.1.8:30082/boutique/checkoutservice:v0.10.6-ed9f55dd-b17 @ sha256:4472372db6237ae75e25ee0da62f2c0641900ccbabdaa717858b112e573a3712'
+checkoutservice -> 192.168.1.8:30082/boutique/checkoutservice:v0.10.6-ed9f55dd-b17 @ sha256:4472372db6237ae75e25ee0da62f2c0641900ccbabdaa717858b112e573a3712
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (5. SBOM (Syft))
+[Pipeline] container
+[Pipeline] {
+[Pipeline] sh
++ set -e
++ '[' -f digest/checkoutservice.txt ]
++ basename digest/checkoutservice.txt .txt
++ svc=checkoutservice
++ cat digest/checkoutservice.txt
++ syft 192.168.1.8:30082/boutique/checkoutservice@sha256:4472372db6237ae75e25ee0da62f2c0641900ccbabdaa717858b112e573a3712 -q -o 'cyclonedx-json=/home/jenkins/agent/workspace/boutique-app-ci/sbom/checkoutservice.cdx.json' -o 'spdx-json=/home/jenkins/agent/workspace/boutique-app-ci/sbom/checkoutservice.spdx.json'
++ grep -o '"bom-ref"' /home/jenkins/agent/workspace/boutique-app-ci/sbom/checkoutservice.cdx.json
++ wc -l
++ n=997
++ echo 'checkoutservice SBOM components~=997'
+checkoutservice SBOM components~=997
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (5b. Unit Tests (Go + .NET))
+[Pipeline] container
+[Pipeline] {
+[Pipeline] sh
++ set -e
++ echo '== go test src/frontend =='
+== go test src/frontend ==
++ cd /home/jenkins/agent/workspace/boutique-app-ci/src/frontend
++ go test ./...
+go: downloading google.golang.org/grpc v1.83.2
+go: downloading google.golang.org/protobuf v1.36.12
+go: downloading github.com/go-playground/validator/v10 v10.30.3
+go: downloading cloud.google.com/go/compute/metadata v0.9.0
+go: downloading cloud.google.com/go v0.123.0
+go: downloading cloud.google.com/go/profiler v0.6.0
+go: downloading github.com/google/uuid v1.6.0
+go: downloading github.com/gorilla/mux v1.8.1
+go: downloading github.com/pkg/errors v0.9.1
+go: downloading github.com/sirupsen/logrus v1.10.2
+go: downloading go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.71.0
+go: downloading go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.71.0
+go: downloading go.opentelemetry.io/otel v1.46.0
+go: downloading go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.46.0
+go: downloading go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.46.0
+go: downloading go.opentelemetry.io/otel/sdk v1.46.0
+go: downloading golang.org/x/net v0.58.0
+go: downloading google.golang.org/genproto/googleapis/rpc v0.0.0-20260825221802-da73d73af1c5
+go: downloading google.golang.org/genproto v0.0.0-20260319201613-d00831a3d3e7
+go: downloading github.com/gabriel-vasile/mimetype v1.4.13
+go: downloading github.com/go-playground/universal-translator v0.18.1
+go: downloading github.com/leodido/go-urn v1.4.0
+go: downloading golang.org/x/crypto v0.55.0
+go: downloading golang.org/x/text v0.41.0
+go: downloading github.com/google/pprof v0.0.0-20260402051712-545e8a4df936
+go: downloading github.com/googleapis/gax-go/v2 v2.21.0
+go: downloading google.golang.org/api v0.274.0
+go: downloading golang.org/x/sys v0.47.0
+go: downloading go.opentelemetry.io/otel/metric v1.46.0
+go: downloading go.opentelemetry.io/otel/trace v1.46.0
+go: downloading github.com/felixge/httpsnoop v1.1.0
+go: downloading github.com/go-logr/logr v1.4.4
+go: downloading go.opentelemetry.io/proto/otlp v1.11.0
+go: downloading github.com/go-playground/locales v0.14.1
+go: downloading cloud.google.com/go/auth v0.19.0
+go: downloading golang.org/x/oauth2 v0.36.0
+go: downloading cloud.google.com/go/auth/oauth2adapt v0.2.8
+go: downloading golang.org/x/time v0.15.0
+go: downloading google.golang.org/genproto/googleapis/api v0.0.0-20260819154853-08b0e4226688
+go: downloading github.com/go-logr/stdr v1.2.2
+go: downloading go.opentelemetry.io/auto/sdk v1.2.1
+go: downloading github.com/cenkalti/backoff/v5 v5.0.3
+go: downloading github.com/grpc-ecosystem/grpc-gateway/v2 v2.30.0
+go: downloading github.com/google/s2a-go v0.1.9
+go: downloading github.com/cespare/xxhash/v2 v2.3.0
+go: downloading github.com/googleapis/enterprise-certificate-proxy v0.3.14
+go: downloading golang.org/x/sync v0.22.0
+?   	github.com/GoogleCloudPlatform/microservices-demo/src/frontend	[no test files]
+?   	github.com/GoogleCloudPlatform/microservices-demo/src/frontend/genproto	[no test files]
+ok  	github.com/GoogleCloudPlatform/microservices-demo/src/frontend/money	0.004s
+ok  	github.com/GoogleCloudPlatform/microservices-demo/src/frontend/validator	0.003s
++ echo '== go test src/productcatalogservice =='
+== go test src/productcatalogservice ==
++ cd /home/jenkins/agent/workspace/boutique-app-ci/src/productcatalogservice
++ go test ./...
+go: downloading cloud.google.com/go/alloydbconn v1.18.6
+go: downloading cloud.google.com/go/secretmanager v1.21.0
+go: downloading github.com/golang/protobuf v1.5.4
+go: downloading github.com/jackc/pgx/v5 v5.10.0
+go: downloading github.com/googleapis/gax-go/v2 v2.23.0
+go: downloading google.golang.org/api v0.287.1
+go: downloading cloud.google.com/go/iam v1.11.0
+go: downloading cloud.google.com/go/alloydb v1.26.0
+go: downloading cloud.google.com/go/auth v0.20.0
+go: downloading cloud.google.com/go/monitoring v1.29.0
+go: downloading github.com/jackc/puddle/v2 v2.2.2
+go: downloading go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.70.0
+go: downloading cloud.google.com/go/longrunning v0.9.0
+go: downloading go.opencensus.io v0.24.0
+go: downloading github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.56.0
+go: downloading go.opentelemetry.io/otel/sdk/metric v1.46.0
+go: downloading github.com/jackc/pgpassfile v1.0.0
+go: downloading github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761
+go: downloading github.com/googleapis/enterprise-certificate-proxy v0.3.17
+go: downloading github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8
+go: downloading github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.56.0
+ok  	github.com/GoogleCloudPlatform/microservices-demo/src/productcatalogservice	0.029s
+?   	github.com/GoogleCloudPlatform/microservices-demo/src/productcatalogservice/genproto	[no test files]
++ echo '== go test src/shippingservice =='
+== go test src/shippingservice ==
++ cd /home/jenkins/agent/workspace/boutique-app-ci/src/shippingservice
++ go test ./...
+go: downloading google.golang.org/grpc v1.83.1
+go: downloading google.golang.org/genproto/googleapis/rpc v0.0.0-20260526163538-3dc84a4a5aaa
+go: downloading go.opentelemetry.io/otel v1.44.0
+go: downloading go.opentelemetry.io/otel/metric v1.44.0
+go: downloading go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.63.0
+go: downloading google.golang.org/genproto/googleapis/api v0.0.0-20260526163538-3dc84a4a5aaa
+go: downloading github.com/go-logr/logr v1.4.3
+go: downloading go.opentelemetry.io/otel/trace v1.44.0
+go: downloading go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.61.0
+go: downloading github.com/felixge/httpsnoop v1.0.4
+ok  	github.com/GoogleCloudPlatform/microservices-demo/src/shippingservice	0.017s
+?   	github.com/GoogleCloudPlatform/microservices-demo/src/shippingservice/genproto	[no test files]
++ echo '== go test src/checkoutservice =='
+== go test src/checkoutservice ==
++ cd /home/jenkins/agent/workspace/boutique-app-ci/src/checkoutservice
++ go test ./...
+?   	github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice	[no test files]
+?   	github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice/genproto	[no test files]
+ok  	github.com/GoogleCloudPlatform/microservices-demo/src/checkoutservice/money	0.006s
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] container
+[Pipeline] {
+[Pipeline] sh
++ echo == dotnet test src/cartservice ==
+== dotnet test src/cartservice ==
++ dotnet test /home/jenkins/agent/workspace/boutique-app-ci/src/cartservice/ --nologo
+  Determining projects to restore...
+  Restored /home/jenkins/agent/workspace/boutique-app-ci/src/cartservice/tests/cartservice.tests.csproj (in 59.28 sec).
+  Restored /home/jenkins/agent/workspace/boutique-app-ci/src/cartservice/src/cartservice.csproj (in 612 ms).
+  cartservice -> /home/jenkins/agent/workspace/boutique-app-ci/src/cartservice/src/bin/Debug/net10.0/cartservice.dll
+  cartservice.tests -> /home/jenkins/agent/workspace/boutique-app-ci/src/cartservice/tests/bin/Debug/net10.0/cartservice.tests.dll
+Test run for /home/jenkins/agent/workspace/boutique-app-ci/src/cartservice/tests/bin/Debug/net10.0/cartservice.tests.dll (.NETCoreApp,Version=v10.0)
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:     3, Skipped:     0, Total:     3, Duration: 1 s - cartservice.tests.dll (net10.0)
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (6. Image Scan (Trivy, gate))
+[Pipeline] container
+[Pipeline] {
+[Pipeline] sh
++ set -e
++ '[' -f digest/checkoutservice.txt ]
++ basename digest/checkoutservice.txt .txt
++ svc=checkoutservice
++ cat digest/checkoutservice.txt
++ img=192.168.1.8:30082/boutique/checkoutservice@sha256:4472372db6237ae75e25ee0da62f2c0641900ccbabdaa717858b112e573a3712
++ echo '== trivy scan checkoutservice =='
+== trivy scan checkoutservice ==
++ trivy image --insecure --scanners vuln --format json -o /home/jenkins/agent/workspace/boutique-app-ci/scan/checkoutservice.trivy.json --severity CRITICAL,HIGH --ignore-unfixed --exit-code 1 192.168.1.8:30082/boutique/checkoutservice@sha256:4472372db6237ae75e25ee0da62f2c0641900ccbabdaa717858b112e573a3712
+2026-09-17T16:28:56Z	INFO	[vulndb] Need to update DB
+2026-09-17T16:28:56Z	INFO	[vulndb] Downloading vulnerability DB...
+2026-09-17T16:28:56Z	INFO	[vulndb] Downloading artifact...	repo="mirror.gcr.io/aquasec/trivy-db:2"
+287.25 KiB / 113.84 MiB [>___________________________________________________________] 0.25% ? p/s ?840.55 KiB / 113.84 MiB [>___________________________________________________________] 0.72% ? p/s ?1.46 MiB / 113.84 MiB [>_____________________________________________________________] 1.29% ? p/s ?2.20 MiB / 113.84 MiB [>________________________________________________] 1.93% 3.19 MiB p/s ETA 34s2.87 MiB / 113.84 MiB [->_______________________________________________] 2.52% 3.19 MiB p/s ETA 34s3.40 MiB / 113.84 MiB [->_______________________________________________] 2.99% 3.19 MiB p/s ETA 34s4.12 MiB / 113.84 MiB [->_______________________________________________] 3.62% 3.19 MiB p/s ETA 34s4.82 MiB / 113.84 MiB [-->______________________________________________] 4.24% 3.19 MiB p/s ETA 34s5.53 MiB / 113.84 MiB [-->______________________________________________] 4.86% 3.19 MiB p/s ETA 33s6.14 MiB / 113.84 MiB [-->______________________________________________] 5.39% 3.20 MiB p/s ETA 33s6.60 MiB / 113.84 MiB [-->______________________________________________] 5.80% 3.20 MiB p/s ETA 33s7.09 MiB / 113.84 MiB [--->_____________________________________________] 6.23% 3.20 MiB p/s ETA 33s7.53 MiB / 113.84 MiB [--->_____________________________________________] 6.61% 3.15 MiB p/s ETA 33s8.11 MiB / 113.84 MiB [--->_____________________________________________] 7.12% 3.15 MiB p/s ETA 33s8.71 MiB / 113.84 MiB [--->_____________________________________________] 7.65% 3.15 MiB p/s ETA 33s9.38 MiB / 113.84 MiB [---->____________________________________________] 8.24% 3.14 MiB p/s ETA 33s9.86 MiB / 113.84 MiB [---->____________________________________________] 8.66% 3.14 MiB p/s ETA 33s10.58 MiB / 113.84 MiB [---->___________________________________________] 9.29% 3.14 MiB p/s ETA 32s11.05 MiB / 113.84 MiB [---->___________________________________________] 9.71% 3.12 MiB p/s ETA 32s11.58 MiB / 113.84 MiB [---->__________________________________________] 10.17% 3.12 MiB p/s ETA 32s12.23 MiB / 113.84 MiB [----->_________________________________________] 10.75% 3.12 MiB p/s ETA 32s12.72 MiB / 113.84 MiB [----->_________________________________________] 11.17% 3.10 MiB p/s ETA 32s13.40 MiB / 113.84 MiB [----->_________________________________________] 11.78% 3.10 MiB p/s ETA 32s13.91 MiB / 113.84 MiB [----->_________________________________________] 12.22% 3.10 MiB p/s ETA 32s14.36 MiB / 113.84 MiB [----->_________________________________________] 12.62% 3.07 MiB p/s ETA 32s14.64 MiB / 113.84 MiB [------>________________________________________] 12.86% 3.07 MiB p/s ETA 32s15.16 MiB / 113.84 MiB [------>________________________________________] 13.32% 3.07 MiB p/s ETA 32s15.77 MiB / 113.84 MiB [------>________________________________________] 13.85% 3.03 MiB p/s ETA 32s15.77 MiB / 113.84 MiB [------>________________________________________] 13.85% 3.03 MiB p/s ETA 32s16.85 MiB / 113.84 MiB [------>________________________________________] 14.80% 3.03 MiB p/s ETA 32s17.31 MiB / 113.84 MiB [------->_______________________________________] 15.20% 3.00 MiB p/s ETA 32s17.95 MiB / 113.84 MiB [------->_______________________________________] 15.76% 3.00 MiB p/s ETA 31s18.38 MiB / 113.84 MiB [------->_______________________________________] 16.15% 3.00 MiB p/s ETA 31s18.89 MiB / 113.84 MiB [------->_______________________________________] 16.60% 2.97 MiB p/s ETA 31s19.34 MiB / 113.84 MiB [------->_______________________________________] 16.99% 2.97 MiB p/s ETA 31s19.87 MiB / 113.84 MiB [-------->______________________________________] 17.46% 2.97 MiB p/s ETA 31s20.35 MiB / 113.84 MiB [-------->______________________________________] 17.88% 2.94 MiB p/s ETA 31s21.05 MiB / 113.84 MiB [-------->______________________________________] 18.50% 2.94 MiB p/s ETA 31s21.74 MiB / 113.84 MiB [-------->______________________________________] 19.10% 2.94 MiB p/s ETA 31s22.22 MiB / 113.84 MiB [--------->_____________________________________] 19.52% 2.95 MiB p/s ETA 31s22.83 MiB / 113.84 MiB [--------->_____________________________________] 20.05% 2.95 MiB p/s ETA 30s22.83 MiB / 113.84 MiB [--------->_____________________________________] 20.05% 2.95 MiB p/s ETA 30s22.83 MiB / 113.84 MiB [--------->_____________________________________] 20.05% 2.83 MiB p/s ETA 32s24.37 MiB / 113.84 MiB [---------->____________________________________] 21.41% 2.83 MiB p/s ETA 31s25.00 MiB / 113.84 MiB [---------->____________________________________] 21.96% 2.83 MiB p/s ETA 31s25.39 MiB / 113.84 MiB [---------->____________________________________] 22.30% 2.92 MiB p/s ETA 30s26.03 MiB / 113.84 MiB [---------->____________________________________] 22.87% 2.92 MiB p/s ETA 30s26.38 MiB / 113.84 MiB [---------->____________________________________] 23.18% 2.92 MiB p/s ETA 29s27.05 MiB / 113.84 MiB [----------->___________________________________] 23.76% 2.91 MiB p/s ETA 29s27.26 MiB / 113.84 MiB [----------->___________________________________] 23.95% 2.91 MiB p/s ETA 29s27.26 MiB / 113.84 MiB [----------->___________________________________] 23.95% 2.91 MiB p/s ETA 29s28.27 MiB / 113.84 MiB [----------->___________________________________] 24.84% 2.85 MiB p/s ETA 29s28.55 MiB / 113.84 MiB [----------->___________________________________] 25.08% 2.85 MiB p/s ETA 29s29.13 MiB / 113.84 MiB [------------>__________________________________] 25.59% 2.85 MiB p/s ETA 29s29.67 MiB / 113.84 MiB [------------>__________________________________] 26.07% 2.82 MiB p/s ETA 29s29.84 MiB / 113.84 MiB [------------>__________________________________] 26.21% 2.82 MiB p/s ETA 29s29.84 MiB / 113.84 MiB [------------>__________________________________] 26.21% 2.82 MiB p/s ETA 29s31.11 MiB / 113.84 MiB [------------>__________________________________] 27.33% 2.79 MiB p/s ETA 29s31.37 MiB / 113.84 MiB [------------>__________________________________] 27.55% 2.79 MiB p/s ETA 29s31.92 MiB / 113.84 MiB [------------->_________________________________] 28.04% 2.79 MiB p/s ETA 29s32.38 MiB / 113.84 MiB [------------->_________________________________] 28.45% 2.75 MiB p/s ETA 29s32.86 MiB / 113.84 MiB [------------->_________________________________] 28.87% 2.75 MiB p/s ETA 29s33.25 MiB / 113.84 MiB [------------->_________________________________] 29.21% 2.75 MiB p/s ETA 29s33.83 MiB / 113.84 MiB [------------->_________________________________] 29.72% 2.73 MiB p/s ETA 29s34.32 MiB / 113.84 MiB [-------------->________________________________] 30.15% 2.73 MiB p/s ETA 29s34.77 MiB / 113.84 MiB [-------------->________________________________] 30.54% 2.73 MiB p/s ETA 28s35.38 MiB / 113.84 MiB [-------------->________________________________] 31.08% 2.72 MiB p/s ETA 28s36.04 MiB / 113.84 MiB [-------------->________________________________] 31.66% 2.72 MiB p/s ETA 28s36.51 MiB / 113.84 MiB [--------------->_______________________________] 32.08% 2.72 MiB p/s ETA 28s37.07 MiB / 113.84 MiB [--------------->_______________________________] 32.56% 2.72 MiB p/s ETA 28s37.64 MiB / 113.84 MiB [--------------->_______________________________] 33.06% 2.72 MiB p/s ETA 27s38.09 MiB / 113.84 MiB [--------------->_______________________________] 33.46% 2.72 MiB p/s ETA 27s38.55 MiB / 113.84 MiB [--------------->_______________________________] 33.87% 2.71 MiB p/s ETA 27s38.87 MiB / 113.84 MiB [---------------->______________________________] 34.15% 2.71 MiB p/s ETA 27s39.49 MiB / 113.84 MiB [---------------->______________________________] 34.69% 2.71 MiB p/s ETA 27s40.02 MiB / 113.84 MiB [---------------->______________________________] 35.15% 2.69 MiB p/s ETA 27s40.72 MiB / 113.84 MiB [---------------->______________________________] 35.77% 2.69 MiB p/s ETA 27s41.18 MiB / 113.84 MiB [----------------->_____________________________] 36.18% 2.69 MiB p/s ETA 27s41.49 MiB / 113.84 MiB [----------------->_____________________________] 36.45% 2.68 MiB p/s ETA 27s41.92 MiB / 113.84 MiB [----------------->_____________________________] 36.83% 2.68 MiB p/s ETA 26s42.56 MiB / 113.84 MiB [----------------->_____________________________] 37.38% 2.68 MiB p/s ETA 26s43.09 MiB / 113.84 MiB [----------------->_____________________________] 37.85% 2.67 MiB p/s ETA 26s43.65 MiB / 113.84 MiB [------------------>____________________________] 38.34% 2.67 MiB p/s ETA 26s44.05 MiB / 113.84 MiB [------------------>____________________________] 38.69% 2.67 MiB p/s ETA 26s44.68 MiB / 113.84 MiB [------------------>____________________________] 39.25% 2.67 MiB p/s ETA 25s45.21 MiB / 113.84 MiB [------------------>____________________________] 39.71% 2.67 MiB p/s ETA 25s45.68 MiB / 113.84 MiB [------------------>____________________________] 40.13% 2.67 MiB p/s ETA 25s46.36 MiB / 113.84 MiB [------------------->___________________________] 40.72% 2.68 MiB p/s ETA 25s46.85 MiB / 113.84 MiB [------------------->___________________________] 41.15% 2.68 MiB p/s ETA 24s47.40 MiB / 113.84 MiB [------------------->___________________________] 41.63% 2.68 MiB p/s ETA 24s47.55 MiB / 113.84 MiB [------------------->___________________________] 41.77% 2.64 MiB p/s ETA 25s47.55 MiB / 113.84 MiB [------------------->___________________________] 41.77% 2.64 MiB p/s ETA 25s48.23 MiB / 113.84 MiB [------------------->___________________________] 42.37% 2.64 MiB p/s ETA 24s48.23 MiB / 113.84 MiB [------------------->___________________________] 42.37% 2.54 MiB p/s ETA 25s49.14 MiB / 113.84 MiB [-------------------->__________________________] 43.16% 2.54 MiB p/s ETA 25s49.52 MiB / 113.84 MiB [-------------------->__________________________] 43.50% 2.54 MiB p/s ETA 25s49.97 MiB / 113.84 MiB [-------------------->__________________________] 43.89% 2.56 MiB p/s ETA 24s50.38 MiB / 113.84 MiB [-------------------->__________________________] 44.26% 2.56 MiB p/s ETA 24s50.64 MiB / 113.84 MiB [-------------------->__________________________] 44.49% 2.56 MiB p/s ETA 24s51.28 MiB / 113.84 MiB [--------------------->_________________________] 45.04% 2.54 MiB p/s ETA 24s51.72 MiB / 113.84 MiB [--------------------->_________________________] 45.43% 2.54 MiB p/s ETA 24s51.93 MiB / 113.84 MiB [--------------------->_________________________] 45.62% 2.54 MiB p/s ETA 24s52.60 MiB / 113.84 MiB [--------------------->_________________________] 46.21% 2.52 MiB p/s ETA 24s53.03 MiB / 113.84 MiB [--------------------->_________________________] 46.59% 2.52 MiB p/s ETA 24s53.47 MiB / 113.84 MiB [---------------------->________________________] 46.97% 2.52 MiB p/s ETA 23s53.92 MiB / 113.84 MiB [---------------------->________________________] 47.36% 2.50 MiB p/s ETA 24s54.45 MiB / 113.84 MiB [---------------------->________________________] 47.83% 2.50 MiB p/s ETA 23s54.94 MiB / 113.84 MiB [---------------------->________________________] 48.26% 2.50 MiB p/s ETA 23s55.54 MiB / 113.84 MiB [---------------------->________________________] 48.79% 2.51 MiB p/s ETA 23s56.08 MiB / 113.84 MiB [----------------------->_______________________] 49.26% 2.51 MiB p/s ETA 23s56.73 MiB / 113.84 MiB [----------------------->_______________________] 49.83% 2.51 MiB p/s ETA 22s57.22 MiB / 113.84 MiB [----------------------->_______________________] 50.27% 2.53 MiB p/s ETA 22s57.86 MiB / 113.84 MiB [----------------------->_______________________] 50.83% 2.53 MiB p/s ETA 22s58.34 MiB / 113.84 MiB [------------------------>______________________] 51.25% 2.53 MiB p/s ETA 21s58.96 MiB / 113.84 MiB [------------------------>______________________] 51.80% 2.55 MiB p/s ETA 21s59.44 MiB / 113.84 MiB [------------------------>______________________] 52.22% 2.55 MiB p/s ETA 21s60.09 MiB / 113.84 MiB [------------------------>______________________] 52.79% 2.55 MiB p/s ETA 21s60.74 MiB / 113.84 MiB [------------------------->_____________________] 53.35% 2.58 MiB p/s ETA 20s61.39 MiB / 113.84 MiB [------------------------->_____________________] 53.93% 2.58 MiB p/s ETA 20s61.92 MiB / 113.84 MiB [------------------------->_____________________] 54.39% 2.58 MiB p/s ETA 20s62.56 MiB / 113.84 MiB [------------------------->_____________________] 54.95% 2.61 MiB p/s ETA 19s62.79 MiB / 113.84 MiB [------------------------->_____________________] 55.16% 2.61 MiB p/s ETA 19s63.12 MiB / 113.84 MiB [-------------------------->____________________] 55.45% 2.61 MiB p/s ETA 19s64.45 MiB / 113.84 MiB [-------------------------->____________________] 56.62% 2.64 MiB p/s ETA 18s64.95 MiB / 113.84 MiB [-------------------------->____________________] 57.05% 2.64 MiB p/s ETA 18s65.50 MiB / 113.84 MiB [--------------------------->___________________] 57.53% 2.64 MiB p/s ETA 18s66.05 MiB / 113.84 MiB [--------------------------->___________________] 58.02% 2.64 MiB p/s ETA 18s66.69 MiB / 113.84 MiB [--------------------------->___________________] 58.58% 2.64 MiB p/s ETA 17s67.30 MiB / 113.84 MiB [--------------------------->___________________] 59.12% 2.64 MiB p/s ETA 17s67.94 MiB / 113.84 MiB [---------------------------->__________________] 59.68% 2.68 MiB p/s ETA 17s68.45 MiB / 113.84 MiB [---------------------------->__________________] 60.13% 2.68 MiB p/s ETA 16s68.71 MiB / 113.84 MiB [---------------------------->__________________] 60.35% 2.68 MiB p/s ETA 16s69.12 MiB / 113.84 MiB [---------------------------->__________________] 60.72% 2.63 MiB p/s ETA 16s69.56 MiB / 113.84 MiB [---------------------------->__________________] 61.11% 2.63 MiB p/s ETA 16s70.28 MiB / 113.84 MiB [----------------------------->_________________] 61.74% 2.63 MiB p/s ETA 16s70.78 MiB / 113.84 MiB [----------------------------->_________________] 62.18% 2.64 MiB p/s ETA 16s71.52 MiB / 113.84 MiB [----------------------------->_________________] 62.83% 2.64 MiB p/s ETA 16s72.02 MiB / 113.84 MiB [----------------------------->_________________] 63.26% 2.64 MiB p/s ETA 15s72.71 MiB / 113.84 MiB [------------------------------>________________] 63.87% 2.68 MiB p/s ETA 15s73.29 MiB / 113.84 MiB [------------------------------>________________] 64.38% 2.68 MiB p/s ETA 15s73.85 MiB / 113.84 MiB [------------------------------>________________] 64.87% 2.68 MiB p/s ETA 14s74.44 MiB / 113.84 MiB [------------------------------>________________] 65.39% 2.69 MiB p/s ETA 14s74.92 MiB / 113.84 MiB [------------------------------>________________] 65.81% 2.69 MiB p/s ETA 14s75.63 MiB / 113.84 MiB [------------------------------->_______________] 66.44% 2.69 MiB p/s ETA 14s76.14 MiB / 113.84 MiB [------------------------------->_______________] 66.89% 2.70 MiB p/s ETA 13s76.57 MiB / 113.84 MiB [------------------------------->_______________] 67.26% 2.70 MiB p/s ETA 13s77.43 MiB / 113.84 MiB [------------------------------->_______________] 68.02% 2.70 MiB p/s ETA 13s78.14 MiB / 113.84 MiB [-------------------------------->______________] 68.64% 2.74 MiB p/s ETA 13s78.62 MiB / 113.84 MiB [-------------------------------->______________] 69.06% 2.74 MiB p/s ETA 12s79.00 MiB / 113.84 MiB [-------------------------------->______________] 69.40% 2.74 MiB p/s ETA 12s79.16 MiB / 113.84 MiB [-------------------------------->______________] 69.54% 2.67 MiB p/s ETA 12s80.55 MiB / 113.84 MiB [--------------------------------->_____________] 70.76% 2.67 MiB p/s ETA 12s81.05 MiB / 113.84 MiB [--------------------------------->_____________] 71.20% 2.67 MiB p/s ETA 12s81.28 MiB / 113.84 MiB [--------------------------------->_____________] 71.40% 2.73 MiB p/s ETA 11s81.58 MiB / 113.84 MiB [--------------------------------->_____________] 71.66% 2.73 MiB p/s ETA 11s82.16 MiB / 113.84 MiB [--------------------------------->_____________] 72.17% 2.73 MiB p/s ETA 11s82.70 MiB / 113.84 MiB [---------------------------------->____________] 72.65% 2.71 MiB p/s ETA 11s82.70 MiB / 113.84 MiB [---------------------------------->____________] 72.65% 2.71 MiB p/s ETA 11s83.75 MiB / 113.84 MiB [---------------------------------->____________] 73.57% 2.71 MiB p/s ETA 11s84.49 MiB / 113.84 MiB [---------------------------------->____________] 74.22% 2.72 MiB p/s ETA 10s84.84 MiB / 113.84 MiB [----------------------------------->___________] 74.53% 2.72 MiB p/s ETA 10s85.47 MiB / 113.84 MiB [----------------------------------->___________] 75.08% 2.72 MiB p/s ETA 10s86.08 MiB / 113.84 MiB [----------------------------------->___________] 75.62% 2.72 MiB p/s ETA 10s86.64 MiB / 113.84 MiB [----------------------------------->___________] 76.11% 2.72 MiB p/s ETA 10s87.06 MiB / 113.84 MiB [------------------------------------>___________] 76.47% 2.72 MiB p/s ETA 9s87.09 MiB / 113.84 MiB [----------------------------------->___________] 76.50% 2.65 MiB p/s ETA 10s87.67 MiB / 113.84 MiB [------------------------------------>___________] 77.01% 2.65 MiB p/s ETA 9s87.67 MiB / 113.84 MiB [------------------------------------>___________] 77.01% 2.65 MiB p/s ETA 9s88.28 MiB / 113.84 MiB [------------------------------------->__________] 77.55% 2.61 MiB p/s ETA 9s89.39 MiB / 113.84 MiB [------------------------------------->__________] 78.53% 2.61 MiB p/s ETA 9s89.80 MiB / 113.84 MiB [------------------------------------->__________] 78.89% 2.61 MiB p/s ETA 9s90.19 MiB / 113.84 MiB [-------------------------------------->_________] 79.23% 2.65 MiB p/s ETA 8s90.62 MiB / 113.84 MiB [-------------------------------------->_________] 79.60% 2.65 MiB p/s ETA 8s91.04 MiB / 113.84 MiB [-------------------------------------->_________] 79.97% 2.65 MiB p/s ETA 8s91.42 MiB / 113.84 MiB [-------------------------------------->_________] 80.31% 2.61 MiB p/s ETA 8s91.86 MiB / 113.84 MiB [-------------------------------------->_________] 80.69% 2.61 MiB p/s ETA 8s92.24 MiB / 113.84 MiB [-------------------------------------->_________] 81.03% 2.61 MiB p/s ETA 8s92.80 MiB / 113.84 MiB [--------------------------------------->________] 81.52% 2.59 MiB p/s ETA 8s92.80 MiB / 113.84 MiB [--------------------------------------->________] 81.52% 2.59 MiB p/s ETA 8s93.97 MiB / 113.84 MiB [--------------------------------------->________] 82.55% 2.59 MiB p/s ETA 7s94.36 MiB / 113.84 MiB [--------------------------------------->________] 82.89% 2.59 MiB p/s ETA 7s94.83 MiB / 113.84 MiB [--------------------------------------->________] 83.30% 2.59 MiB p/s ETA 7s95.38 MiB / 113.84 MiB [---------------------------------------->_______] 83.79% 2.59 MiB p/s ETA 7s95.86 MiB / 113.84 MiB [---------------------------------------->_______] 84.21% 2.58 MiB p/s ETA 6s96.38 MiB / 113.84 MiB [---------------------------------------->_______] 84.67% 2.58 MiB p/s ETA 6s96.76 MiB / 113.84 MiB [---------------------------------------->_______] 85.00% 2.58 MiB p/s ETA 6s97.22 MiB / 113.84 MiB [---------------------------------------->_______] 85.40% 2.56 MiB p/s ETA 6s97.73 MiB / 113.84 MiB [----------------------------------------->______] 85.85% 2.56 MiB p/s ETA 6s98.24 MiB / 113.84 MiB [----------------------------------------->______] 86.30% 2.56 MiB p/s ETA 6s98.66 MiB / 113.84 MiB [----------------------------------------->______] 86.67% 2.55 MiB p/s ETA 5s99.19 MiB / 113.84 MiB [----------------------------------------->______] 87.14% 2.55 MiB p/s ETA 5s99.60 MiB / 113.84 MiB [----------------------------------------->______] 87.50% 2.55 MiB p/s ETA 5s100.06 MiB / 113.84 MiB [----------------------------------------->_____] 87.90% 2.54 MiB p/s ETA 5s100.57 MiB / 113.84 MiB [----------------------------------------->_____] 88.34% 2.54 MiB p/s ETA 5s100.95 MiB / 113.84 MiB [----------------------------------------->_____] 88.68% 2.54 MiB p/s ETA 5s101.40 MiB / 113.84 MiB [----------------------------------------->_____] 89.07% 2.52 MiB p/s ETA 4s101.61 MiB / 113.84 MiB [----------------------------------------->_____] 89.26% 2.52 MiB p/s ETA 4s102.25 MiB / 113.84 MiB [------------------------------------------>____] 89.82% 2.52 MiB p/s ETA 4s102.34 MiB / 113.84 MiB [------------------------------------------>____] 89.91% 2.46 MiB p/s ETA 4s103.17 MiB / 113.84 MiB [------------------------------------------>____] 90.63% 2.46 MiB p/s ETA 4s103.60 MiB / 113.84 MiB [------------------------------------------>____] 91.01% 2.46 MiB p/s ETA 4s104.06 MiB / 113.84 MiB [------------------------------------------>____] 91.41% 2.48 MiB p/s ETA 3s104.52 MiB / 113.84 MiB [------------------------------------------->___] 91.81% 2.48 MiB p/s ETA 3s104.97 MiB / 113.84 MiB [------------------------------------------->___] 92.21% 2.48 MiB p/s ETA 3s105.40 MiB / 113.84 MiB [------------------------------------------->___] 92.59% 2.47 MiB p/s ETA 3s105.87 MiB / 113.84 MiB [------------------------------------------->___] 93.00% 2.47 MiB p/s ETA 3s106.31 MiB / 113.84 MiB [------------------------------------------->___] 93.39% 2.47 MiB p/s ETA 3s106.77 MiB / 113.84 MiB [-------------------------------------------->__] 93.79% 2.46 MiB p/s ETA 2s107.20 MiB / 113.84 MiB [-------------------------------------------->__] 94.17% 2.46 MiB p/s ETA 2s107.67 MiB / 113.84 MiB [-------------------------------------------->__] 94.58% 2.46 MiB p/s ETA 2s108.12 MiB / 113.84 MiB [-------------------------------------------->__] 94.98% 2.44 MiB p/s ETA 2s108.63 MiB / 113.84 MiB [-------------------------------------------->__] 95.43% 2.44 MiB p/s ETA 2s109.11 MiB / 113.84 MiB [--------------------------------------------->_] 95.84% 2.44 MiB p/s ETA 1s109.60 MiB / 113.84 MiB [--------------------------------------------->_] 96.28% 2.44 MiB p/s ETA 1s109.95 MiB / 113.84 MiB [--------------------------------------------->_] 96.59% 2.44 MiB p/s ETA 1s110.60 MiB / 113.84 MiB [--------------------------------------------->_] 97.16% 2.44 MiB p/s ETA 1s111.06 MiB / 113.84 MiB [--------------------------------------------->_] 97.56% 2.44 MiB p/s ETA 1s111.53 MiB / 113.84 MiB [---------------------------------------------->] 97.97% 2.44 MiB p/s ETA 0s112.01 MiB / 113.84 MiB [---------------------------------------------->] 98.40% 2.44 MiB p/s ETA 0s112.46 MiB / 113.84 MiB [---------------------------------------------->] 98.79% 2.44 MiB p/s ETA 0s112.92 MiB / 113.84 MiB [---------------------------------------------->] 99.20% 2.44 MiB p/s ETA 0s113.41 MiB / 113.84 MiB [---------------------------------------------->] 99.63% 2.44 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 2.43 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 2.43 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 2.43 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 2.27 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 2.27 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 2.27 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 2.12 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 2.12 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 2.12 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 1.99 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 1.99 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 1.99 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 1.86 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 1.86 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 1.86 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 1.74 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 1.74 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 1.74 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 1.63 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 1.63 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 1.63 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 1.52 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 1.52 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 1.52 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 1.42 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 1.42 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 1.42 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 1.33 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 1.33 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 1.33 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 1.25 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 1.25 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 1.25 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 1.17 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 1.17 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 1.17 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 1.09 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 1.09 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 1.09 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 1.02 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 1.02 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [--------------------------------------------->] 100.00% 1.02 MiB p/s ETA 0s113.84 MiB / 113.84 MiB [------------------------------------------->] 100.00% 976.80 KiB p/s ETA 0s113.84 MiB / 113.84 MiB [------------------------------------------->] 100.00% 976.80 KiB p/s ETA 0s113.84 MiB / 113.84 MiB [------------------------------------------->] 100.00% 976.80 KiB p/s ETA 0s113.84 MiB / 113.84 MiB [-------------------------------------------------] 100.00% 2.13 MiB p/s 54s2026-09-17T16:29:50Z	INFO	[vulndb] Artifact successfully downloaded	repo="mirror.gcr.io/aquasec/trivy-db:2"
+2026-09-17T16:29:50Z	INFO	[vuln] Vulnerability scanning is enabled
+2026-09-17T16:30:07Z	INFO	Detected OS	family="debian" version="13.7"
+2026-09-17T16:30:07Z	INFO	[debian] Detecting vulnerabilities...	os_version="13" pkg_num=6
+2026-09-17T16:30:07Z	INFO	Number of language-specific files	num=1
+2026-09-17T16:30:07Z	INFO	[gobinary] Detecting vulnerabilities...
+2026-09-17T16:30:07Z	WARN	Using severities from other vendors for some vulnerabilities. Read https://trivy.dev/docs/v0.74/guide/scanner/vulnerability#severity-selection for details.
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (6b. SCA — source (Trivy fs))
+[Pipeline] container
+[Pipeline] {
+[Pipeline] sh
++ echo checkoutservice
++ tr , ' '
++ echo '== trivy fs checkoutservice =='
+== trivy fs checkoutservice ==
++ trivy fs --scanners vuln --format json -o /home/jenkins/agent/workspace/boutique-app-ci/scan/checkoutservice.fs.json --severity CRITICAL,HIGH --ignore-unfixed /home/jenkins/agent/workspace/boutique-app-ci/src/checkoutservice
+2026-09-17T16:30:09Z	INFO	[vuln] Vulnerability scanning is enabled
+2026-09-17T16:30:09Z	INFO	Number of language-specific files	num=1
+2026-09-17T16:30:09Z	INFO	[gomod] Detecting vulnerabilities...
+2026-09-17T16:30:09Z	WARN	Using severities from other vendors for some vulnerabilities. Read https://trivy.dev/docs/v0.74/guide/scanner/vulnerability#severity-selection for details.
++ ls scan/checkoutservice.fs.json
++ wc -l
++ echo 'SCA reports: 1 (report-only during first week)'
+SCA reports: 1 (report-only during first week)
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (6c. IaC & manifests (Trivy config))
+[Pipeline] container
+[Pipeline] {
+[Pipeline] sh
++ trivy config --format json -o /home/jenkins/agent/workspace/boutique-app-ci/reports/iac.json /home/jenkins/agent/workspace/boutique-app-ci/gitops /home/jenkins/agent/workspace/boutique-app-ci/kustomize
+Scan config files for misconfigurations
+
+Usage:
+  trivy config [flags] DIR
+
+Aliases:
+  config, conf
+
+Cache Flags
+      --cache-backend string   [EXPERIMENTAL] cache backend (e.g. redis://localhost:6379) (default "memory")
+      --cache-ttl duration     cache TTL when using redis as cache backend
+      --redis-ca string        redis ca file location, if using redis as cache backend
+      --redis-cert string      redis certificate file location, if using redis as cache backend
+      --redis-key string       redis key file location, if using redis as cache backend
+      --redis-tls              enable redis TLS with public certificates, if using redis as cache backend
+
+Misconfiguration Flags
+      --ansible-extra-vars strings        set additional variables as key=value or @file (YAML/JSON)
+      --ansible-inventory strings         specify inventory host path or comma separated host list
+      --ansible-playbook strings          specify playbook file path(s) to scan
+      --cf-params strings                 specify paths to override the CloudFormation parameters files
+      --checks-bundle-repository string   OCI registry URL to retrieve checks bundle from (default "mirror.gcr.io/aquasec/trivy-checks:2")
+      --config-file-schemas strings       specify paths to JSON configuration file schemas to determine that a file matches some configuration and pass the schema to Rego checks for type checking
+      --helm-api-versions strings         Available API versions used for Capabilities.APIVersions. This flag is the same as the api-versions flag of the helm template command. (can specify multiple or separate values with commas: policy/v1/PodDisruptionBudget,apps/v1/Deployment)
+      --helm-kube-version string          Kubernetes version used for Capabilities.KubeVersion. This flag is the same as the kube-version flag of the helm template command.
+      --helm-set strings                  specify Helm values on the command line (can specify multiple or separate values with commas: key1=val1,key2=val2)
+      --helm-set-file strings             specify Helm values from respective files specified via the command line (can specify multiple or separate values with commas: key1=path1,key2=path2)
+      --helm-set-string strings           specify Helm string values on the command line (can specify multiple or separate values with commas: key1=val1,key2=val2)
+      --helm-values strings               specify paths to override the Helm values.yaml files
+      --include-non-failures              include successes, available with '--scanners misconfig'
+      --misconfig-scanners strings        comma-separated list of misconfig scanners to use for misconfiguration scanning (default [azure-arm,cloudformation,dockerfile,helm,kubernetes,terraform,terraformplan-json,terraformplan-snapshot,ansible])
+      --raw-config-scanners strings       specify the types of scanners that will also scan raw configurations. For example, scanners will scan a non-adapted configuration into a shared state (allowed values: terraform)
+      --render-cause strings              specify configuration types for which the rendered causes will be shown in the table report (allowed values: terraform,ansible)
+      --tf-exclude-downloaded-modules     exclude misconfigurations for downloaded terraform modules
+      --tf-vars strings                   specify paths to override the Terraform tfvars files
+
+Module Flags
+      --enable-modules strings   [EXPERIMENTAL] module names to enable
+      --module-dir string        specify directory to the wasm modules that will be loaded (default "/root/.trivy/modules")
+
+Registry Flags
+      --password strings        password. Comma-separated passwords allowed. TRIVY_PASSWORD should be used for security reasons.
+      --password-stdin          password from stdin. Comma-separated passwords are not supported.
+      --registry-token string   registry token
+      --username strings        username. Comma-separated usernames allowed.
+
+Rego Flags
+      --check-namespaces strings    Rego namespaces
+      --config-check strings        specify the paths to the Rego check files or to the directories containing them, applying config files
+      --config-data strings         specify paths from which data for the Rego checks will be recursively loaded
+      --include-deprecated-checks   include deprecated checks
+      --rego-error-limit int        maximum number of compile errors allowed during Rego policy evaluation (default 10)
+      --skip-check-update           skip fetching rego check updates
+      --trace-rego                  enable more verbose trace output for custom queries
+
+Kubernetes Flags
+      --k8s-version string   specify k8s version to validate outdated api by it (example: 1.21.0)
+
+Report Flags
+      --compliance string          compliance report to generate
+      --exit-code int              specify exit code when any security issues are found
+  -f, --format string              format
+                                   Allowed values:
+                                     - table
+                                     - json
+                                     - template
+                                     - sarif
+                                     - cyclonedx
+                                     - spdx
+                                     - spdx-json
+                                     - github
+                                     - cosign-vuln
+                                    (default "table")
+      --ignore-policy string       specify the Rego file path to evaluate each vulnerability
+      --ignorefile string          specify .trivyignore file (default ".trivyignore")
+  -o, --output string              output file name
+      --output-plugin-arg string   [EXPERIMENTAL] output plugin arguments
+      --report string              specify a compliance report format for the output (allowed values: all,summary) (default "all")
+  -s, --severity strings           severities of security issues to be displayed
+                                   Allowed values:
+                                     - UNKNOWN
+                                     - LOW
+                                     - MEDIUM
+                                     - HIGH
+                                     - CRITICAL
+                                    (default [UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL])
+      --table-mode strings         [EXPERIMENTAL] tables that will be displayed in 'table' format (allowed values: summary,detailed) (default [summary,detailed])
+  -t, --template string            output template (file path must have .tpl extension)
+
+Scan Flags
+      --disable-telemetry       disable sending anonymous usage data to Aqua
+      --file-patterns strings   specify config file patterns
+      --skip-dirs strings       specify the directories or glob patterns to skip
+      --skip-files strings      specify the files or glob patterns to skip
+      --skip-version-check      suppress notices about version updates and Trivy announcements
+
+Global Flags:
+      --cacert string             Path to PEM-encoded CA certificate file
+      --cache-dir string          cache directory (default "/root/.cache/trivy")
+  -c, --config string             config path (default "trivy.yaml")
+  -d, --debug                     debug mode
+      --generate-default-config   write the default config to trivy-default.yaml
+      --insecure                  allow insecure server connections
+  -q, --quiet                     suppress progress bar and log output
+      --timeout duration          timeout (default 5m0s)
+  -v, --version                   show version
+2026-09-17T16:30:10Z	FATAL	Fatal error	multiple targets cannot be specified
++ true
++ echo 'iac report written'
+iac report written
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (6d. License Scan (Trivy))
+[Pipeline] container
+[Pipeline] {
+[Pipeline] sh
++ echo checkoutservice
++ tr , ' '
++ trivy fs --scanners license --format json -o /home/jenkins/agent/workspace/boutique-app-ci/reports/license-checkoutservice.json /home/jenkins/agent/workspace/boutique-app-ci/src/checkoutservice
+2026-09-17T16:30:11Z	INFO	[license] License scanning is enabled
+2026-09-17T16:30:11Z	INFO	Number of language-specific files	num=1
++ + lswc reports/license-checkoutservice.json -l
+
++ echo 'license reports: 1'
+license reports: 1
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (7. SAST (Semgrep))
+[Pipeline] container
+[Pipeline] {
+[Pipeline] sh
++ echo checkoutservice
++ tr , ' '
++ semgrep --config p/default --json -o reports/semgrep-checkoutservice.json src/checkoutservice
++ ls reports/semgrep-checkoutservice.json
++ wc -l
++ echo 'semgrep reports: 1'
+semgrep reports: 1
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (7b. Exception Expiry Gate)
+[Pipeline] container
+[Pipeline] {
+[Pipeline] sh
++ python3 -c '
+import re, datetime, sys
+s = open('"'"'security/exceptions.yaml'"'"').read()
+exp = re.findall(r'"'"'expires:\s*([0-9]{4}-[0-9]{2}-[0-9]{2})'"'"', s)
+today = datetime.date.today()
+bad = [e for e in exp if datetime.date.fromisoformat(e) < today]
+print('"'"'exceptions:'"'"', len(exp), '"'"'expired:'"'"', bad)
+sys.exit(1 if bad else 0)
+'
+exceptions: 4 expired: []
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (8. Sign & Attest (cosign))
+[Pipeline] container
+[Pipeline] {
+[Pipeline] sh
++ set -e
++ SHA=ed9f55dd
++ '[' -f digest/checkoutservice.txt ]
++ basename digest/checkoutservice.txt .txt
++ svc=checkoutservice
++ cat digest/checkoutservice.txt
++ img=192.168.1.8:30082/boutique/checkoutservice@sha256:4472372db6237ae75e25ee0da62f2c0641900ccbabdaa717858b112e573a3712
++ cat
++ cosign sign --key /cosign/cosign.key --yes --allow-insecure-registry 192.168.1.8:30082/boutique/checkoutservice@sha256:4472372db6237ae75e25ee0da62f2c0641900ccbabdaa717858b112e573a3712
+Signing artifact...
++ cosign attest --key /cosign/cosign.key --yes --allow-insecure-registry --predicate /home/jenkins/agent/workspace/boutique-app-ci/sbom/checkoutservice.cdx.json --type cyclonedx 192.168.1.8:30082/boutique/checkoutservice@sha256:4472372db6237ae75e25ee0da62f2c0641900ccbabdaa717858b112e573a3712
+Using payload from: /home/jenkins/agent/workspace/boutique-app-ci/sbom/checkoutservice.cdx.json
+Signing artifact...
++ cosign attest --key /cosign/cosign.key --yes --allow-insecure-registry --predicate /home/jenkins/agent/workspace/boutique-app-ci/provenance-checkoutservice.json --type slsaprovenance 192.168.1.8:30082/boutique/checkoutservice@sha256:4472372db6237ae75e25ee0da62f2c0641900ccbabdaa717858b112e573a3712
+Using payload from: /home/jenkins/agent/workspace/boutique-app-ci/provenance-checkoutservice.json
+Signing artifact...
++ echo 'signed+attested checkoutservice'
+signed+attested checkoutservice
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (9. Verify (cosign))
+[Pipeline] fileExists
+[Pipeline] container
+[Pipeline] {
+[Pipeline] sh
++ set -e
++ '[' -f digest/checkoutservice.txt ]
++ basename digest/checkoutservice.txt .txt
++ svc=checkoutservice
++ cat digest/checkoutservice.txt
++ img=192.168.1.8:30082/boutique/checkoutservice@sha256:4472372db6237ae75e25ee0da62f2c0641900ccbabdaa717858b112e573a3712
++ cosign verify --key /home/jenkins/agent/workspace/boutique-app-ci/security/cosign.pub --allow-insecure-registry 192.168.1.8:30082/boutique/checkoutservice@sha256:4472372db6237ae75e25ee0da62f2c0641900ccbabdaa717858b112e573a3712
+
+Verification for 192.168.1.8:30082/boutique/checkoutservice@sha256:4472372db6237ae75e25ee0da62f2c0641900ccbabdaa717858b112e573a3712 --
+The following checks were performed on each of these signatures:
+  - The cosign claims were validated
+  - Existence of the claims in the transparency log was verified offline
+  - The signatures were verified against the specified public key
++ cosign verify-attestation --key /home/jenkins/agent/workspace/boutique-app-ci/security/cosign.pub --type cyclonedx --allow-insecure-registry 192.168.1.8:30082/boutique/checkoutservice@sha256:4472372db6237ae75e25ee0da62f2c0641900ccbabdaa717858b112e573a3712
+
+Verification for 192.168.1.8:30082/boutique/checkoutservice@sha256:4472372db6237ae75e25ee0da62f2c0641900ccbabdaa717858b112e573a3712 --
+The following checks were performed on each of these signatures:
+  - The cosign claims were validated
+  - Existence of the claims in the transparency log was verified offline
+  - The signatures were verified against the specified public key
++ echo 'verified checkoutservice (signature + cyclonedx attestation)'
+verified checkoutservice (signature + cyclonedx attestation)
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Declarative: Post Actions)
+[Pipeline] archiveArtifacts
+Archiving artifacts
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // timeout
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // container
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] }
+[Pipeline] // podTemplate
+[Pipeline] End of Pipeline
+Finished: SUCCESS

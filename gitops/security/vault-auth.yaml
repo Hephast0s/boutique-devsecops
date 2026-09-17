@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: boutique-security
+  labels:
+    app.kubernetes.io/part-of: online-boutique
+    environment: security
+    pod-security.kubernetes.io/enforce: baseline
+---
+# ServiceAccount whose token Vault uses to call the Kubernetes TokenReview API.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vault-auth
+  namespace: boutique-security
+  labels:
+    app.kubernetes.io/part-of: online-boutique
+---
+# Grants the vault-auth SA the right to create TokenReview/SubjectAccessReview requests.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: boutique-vault-auth-delegator
+  labels:
+    app.kubernetes.io/part-of: online-boutique
+subjects:
+  - kind: ServiceAccount
+    name: vault-auth
+    namespace: boutique-security
+roleRef:
+  kind: ClusterRole
+  name: system:auth-delegator
+  apiGroup: rbac.authorization.k8s.io

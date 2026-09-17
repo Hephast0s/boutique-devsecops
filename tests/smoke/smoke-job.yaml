@@ -41,6 +41,7 @@ spec:
         app: smoke
     spec:
       restartPolicy: Never
+      automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -68,6 +69,7 @@ spec:
               echo "$OUT" | grep -q 'Your order' || { echo "checkout FAIL"; exit 1; }
               echo "SMOKE OK"
           securityContext:
+            privileged: false
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             capabilities:

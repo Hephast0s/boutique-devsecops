@@ -10,7 +10,7 @@ spec:
   project: boutique
   source:
     repoURL: https://github.com/Hephast0s/boutique-devsecops.git
-    targetRevision: devsecops
+    targetRevision: main
     path: gitops/environments/staging
   destination:
     server: https://kubernetes.default.svc

@@ -45,3 +45,64 @@ patches:
       - op: replace
         path: /spec/type
         value: ClusterIP
+
+  # ── Right-sized resources ────────────────────────────────────────────────────────────────
+  # Requests set near measured idle/steady usage; limits ~2–3x measured peak for burst headroom.
+  # Measured peaks (1h): adservice 97Mi, cartservice 71Mi, currency 45Mi, email 41Mi, payment 44Mi,
+  # recommendation 35Mi, frontend 17Mi, mailpit 14Mi, productcatalog/shipping 11Mi, checkout 10Mi,
+  # redis 7Mi; CPU ~1–6m per pod. This frees cluster reservation without starving bursts.
+  - target: {group: apps, version: v1, kind: Deployment, name: adservice}
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value: {requests: {cpu: "50m", memory: "128Mi"}, limits: {cpu: "300m", memory: "256Mi"}}
+  - target: {group: apps, version: v1, kind: Deployment, name: cartservice}
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value: {requests: {cpu: "25m", memory: "64Mi"}, limits: {cpu: "200m", memory: "192Mi"}}
+  - target: {group: apps, version: v1, kind: Deployment, name: checkoutservice}
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value: {requests: {cpu: "10m", memory: "32Mi"}, limits: {cpu: "150m", memory: "96Mi"}}
+  - target: {group: apps, version: v1, kind: Deployment, name: currencyservice}
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value: {requests: {cpu: "15m", memory: "48Mi"}, limits: {cpu: "150m", memory: "128Mi"}}
+  - target: {group: apps, version: v1, kind: Deployment, name: emailservice}
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value: {requests: {cpu: "15m", memory: "48Mi"}, limits: {cpu: "150m", memory: "128Mi"}}
+  - target: {group: apps, version: v1, kind: Deployment, name: frontend}
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value: {requests: {cpu: "15m", memory: "32Mi"}, limits: {cpu: "150m", memory: "96Mi"}}
+  - target: {group: apps, version: v1, kind: Deployment, name: paymentservice}
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value: {requests: {cpu: "15m", memory: "48Mi"}, limits: {cpu: "150m", memory: "128Mi"}}
+  - target: {group: apps, version: v1, kind: Deployment, name: productcatalogservice}
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value: {requests: {cpu: "10m", memory: "32Mi"}, limits: {cpu: "150m", memory: "96Mi"}}
+  - target: {group: apps, version: v1, kind: Deployment, name: recommendationservice}
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value: {requests: {cpu: "25m", memory: "64Mi"}, limits: {cpu: "200m", memory: "192Mi"}}
+  - target: {group: apps, version: v1, kind: Deployment, name: redis-cart}
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value: {requests: {cpu: "15m", memory: "32Mi"}, limits: {cpu: "100m", memory: "96Mi"}}
+  - target: {group: apps, version: v1, kind: Deployment, name: shippingservice}
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value: {requests: {cpu: "10m", memory: "32Mi"}, limits: {cpu: "150m", memory: "96Mi"}}

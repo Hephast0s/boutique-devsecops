@@ -51,7 +51,7 @@ data:
           "gridPos": {"h": 9, "w": 12, "x": 0, "y": 6},
           "fieldConfig": {"defaults": {"unit": "cores", "custom": {"drawStyle": "line", "fillOpacity": 10}}, "overrides": []},
           "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"]}, "tooltip": {"mode": "multi"}},
-          "targets": [{"refId": "A", "datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=~\"boutique-.*\",container!=\"POD\"}[5m])) by (pod)", "legendFormat": "{{pod}}"}]
+          "targets": [{"refId": "A", "datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=~\"boutique-.*\",container!=\"POD\"}[5m])) by (pod)", "legendFormat": "{{namespace}}/{{pod}}"}]
         },
         {
           "id": 5, "type": "timeseries", "title": "Memory working set by pod (bytes)",
@@ -59,7 +59,7 @@ data:
           "gridPos": {"h": 9, "w": 12, "x": 12, "y": 6},
           "fieldConfig": {"defaults": {"unit": "bytes", "custom": {"drawStyle": "line", "fillOpacity": 10}}, "overrides": []},
           "options": {"legend": {"displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"]}, "tooltip": {"mode": "multi"}},
-          "targets": [{"refId": "A", "datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "sum(container_memory_working_set_bytes{namespace=~\"boutique-.*\",container!=\"POD\"}) by (pod)", "legendFormat": "{{pod}}"}]
+          "targets": [{"refId": "A", "datasource": {"type": "prometheus", "uid": "prometheus"}, "expr": "sum(container_memory_working_set_bytes{namespace=~\"boutique-.*\",container!=\"POD\"}) by (pod)", "legendFormat": "{{namespace}}/{{pod}}"}]
         }
       ]
     }

@@ -28,6 +28,9 @@ metadata:
   labels:
     app.kubernetes.io/part-of: online-boutique
     app: smoke
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
 spec:
   backoffLimit: 0
   ttlSecondsAfterFinished: 300

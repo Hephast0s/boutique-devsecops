@@ -40,3 +40,17 @@ Load:  GET / — n=120 avg=90ms p50=19ms p95=138ms
 
 Phase 11 — observability (ServiceMonitor/PodMonitor, Grafana dashboards, alerts). Loki is absent and
 recorded as a gap.
+
+---
+
+## Addendum — smoke hook attempt
+
+The smoke Job was wired as an Argo CD **PostSync** hook (`tests/smoke/smoke-job.yaml` + `kustomization.yaml`).
+The pod template is policy-compliant (verified: an identical Pod is admitted; only the Audit
+`verify-images` warning fires). However, the hook Job got **stuck in `Terminating`** in this environment and
+Argo kept recreating it from a stale manifest, so the wiring was **reverted** to keep the namespace clean.
+The smoke test itself is proven via `tests/smoke/smoke.sh` (7/7 on dev/staging/prod). The Job manifest is
+kept for a future wiring attempt once the hook-finalizer behaviour is understood.
+
+Status: **hook wiring ⏸ (reverted, documented); smoke test ✅.**
+

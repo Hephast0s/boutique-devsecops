@@ -1,59 +1,54 @@
-<div align="center">
+> **Note:** This is an independent **DevSecOps implementation** built on top of Google's [Online Boutique](https://github.com/GoogleCloudPlatform/microservices-demo). The original upstream README is preserved at [docs/UPSTREAM-README.md](docs/UPSTREAM-README.md).
 
-# Online Boutique — End-to-End DevSecOps on k3s
+<h1 align="center">Online Boutique — End-to-End DevSecOps on k3s</h1>
 
-**A production-grade software supply chain and GitOps platform around Google's Online Boutique (11 polyglot microservices + Redis), running on a 3-node k3s homelab.**
+<p align="center">
+A production-grade <b>software supply chain</b> and <b>GitOps</b> platform around 11 polyglot microservices + Redis, running on a 3-node k3s homelab.
+</p>
 
-`Jenkins CI` · `Kaniko (no Docker socket)` · `Syft SBOM` · `Trivy` · `Semgrep` · `cosign sign/attest` · `Harbor` · `Vault + External Secrets` · `Argo CD` · `Kyverno` · `NetworkPolicy` · `Prometheus/Grafana`
+<p align="center">
+<a href="docs/ARCHITECTURE.md">Documentation</a> ·
+<a href="http://boutique-dev.192.168.1.8.nip.io/">Live demo (dev)</a> ·
+<a href="docs/DEMO.md">Demo script</a> ·
+<a href="docs/EVIDENCE.md">Evidence</a>
+</p>
 
-</div>
+<p align="center">
+<img alt="License" src="https://img.shields.io/badge/License-Apache%202.0-blue.svg">
+<img alt="Kubernetes" src="https://img.shields.io/badge/Kubernetes-k3s-326ce5.svg">
+<img alt="CI" src="https://img.shields.io/badge/CI-Jenkins%20%C2%B7%20Kaniko-d24939.svg">
+<img alt="Supply chain" src="https://img.shields.io/badge/Supply%20chain-SBOM%20%2B%20cosign-4b5563.svg">
+<img alt="GitOps" src="https://img.shields.io/badge/GitOps-Argo%20CD-ef7b4d.svg">
+<img alt="Policy" src="https://img.shields.io/badge/Policy-Kyverno-326ce5.svg">
+</p>
 
----
+Kubernetes makes deployment easy and supply-chain security hard. This project shows the whole chain
+end-to-end: a commit is built, scanned, given an SBOM, **signed by digest**, attested, and then
+deployed by GitOps — with the cluster **enforcing** the rules through admission policy and network
+segmentation. Every claim is backed by real evidence under [`docs/`](docs).
 
-## Overview
+## What you get 🚀
 
-This repository takes the upstream Online Boutique demo and wraps it in a **verifiable, enforced
-software supply chain**:
-
-- **Build → prove → sign → deploy.** Every image is built daemonlessly, scanned, given an SBOM, signed
-  by digest, attested, and verified before it can run.
-- **Git is the single source of truth.** Three environments (dev / staging / prod) are reconciled by one
-  GitOps controller; promotion happens **by digest**, never by rebuild.
-- **The cluster enforces the rules.** Admission policy, network segmentation and (where the platform
-  permits) runtime detection turn the controls from advice into guarantees.
-- **Everything is evidenced.** Claims are backed by command transcripts, digests and policy reports in
-  [`docs/`](docs) — including an honest list of what is *not* done and why.
+- **Verifiable supply chain** — gitleaks → hadolint → unit tests → Kaniko build → Syft SBOM → Trivy
+  gate → Semgrep → cosign **sign + attest + verify**, all in one Jenkins pipeline.
+- **Promotion by digest** — dev → staging → prod move the *same* signed `@sha256:…`; nothing is rebuilt.
+- **Enforced at the cluster** — Kyverno (`restricted`, registry, digest, resources, probes, labels,
+  SA-token) and default-deny NetworkPolicy with explicit egress + DNS.
+- **Secrets never in Git** — Vault → External Secrets Operator → Kubernetes Secret, with rotation.
+- **Evidence-first** — threat model, ADRs, per-phase reports, runbooks and an honest limitations list.
 
 ## Architecture
 
 ```
- commit ─► Jenkins (k8s pod agents, boutique-ci)
-            ├─ 3  gitleaks        secrets scan                 [blocking]
-            ├─ 3b hadolint        Dockerfile lint              [blocking]
-            ├─ 5b go test / dotnet test  unit tests            [blocking]
-            ├─ 4  Kaniko          daemonless build → Harbor
-            ├─ 5  Syft            SBOM (CycloneDX + SPDX)
-            ├─ 6  Trivy image     CVE gate (CRIT/HIGH-with-fix) [blocking]
-            ├─ 6b Trivy fs        SCA (source)
-            ├─ 6c Trivy config    IaC / manifests
-            ├─ 6d Trivy license   license scan
-            ├─ 7  Semgrep         SAST
-            ├─ 7b exceptions       expiry gate                   [blocking]
-            ├─ 8  cosign          sign + attest(SBOM, provenance)
-            └─ 9  cosign          verify (signature + attestation)
-                     │
-                     ▼
-             Harbor project `boutique`   (digest-pinned, immutable tags, retention, robots)
-                     │
-                     ▼
-             Argo CD  (AppProject `boutique`)  ──►  boutique-dev / boutique-staging / boutique-prod
-                     │                                   ├─ Kyverno admission (restricted, registry, digest,
-                     │                                   │   resources, probes, labels, SA-token)
-                     │                                   ├─ NetworkPolicy (default-deny + explicit egress + DNS)
-                     │                                   ├─ Vault → ESO → Secrets (redis, Gmail SMTP)
-                     │                                   └─ Grafana / Prometheus (health, policy, supply chain)
-                     ▼
-             prod = manual sync + PodDisruptionBudgets
+commit ─► Jenkins (pod agents) ─► Kaniko ─► Harbor (digest, immutable, signed)
+        gitleaks · hadolint · unit tests · Syft SBOM · Trivy · Semgrep · cosign
+                                                     │
+                                                     ▼
+                              Argo CD ─► dev / staging / prod
+                                         ├─ Kyverno admission
+                                         ├─ NetworkPolicy (default-deny + egress + DNS)
+                                         ├─ Vault + ESO secrets
+                                         └─ Prometheus / Grafana
 ```
 
 ## Environments
@@ -64,285 +59,67 @@ software supply chain**:
 | staging | `boutique-staging` | http://boutique-staging.192.168.1.8.nip.io/ | automated |
 | prod | `boutique-prod` | http://boutique-prod.192.168.1.8.nip.io/ | **manual** + PDBs |
 
-Supporting namespaces: `boutique-ci` (Jenkins agents), `boutique-security` (ESO, observability),
-`boutique-bench` (transient), plus the pre-existing platform (Harbor, Vault, Argo CD, Kyverno, …).
+## Security controls 🔐
 
-## Security controls
+| Area | Control |
+|---|---|
+| Secrets | gitleaks + pre-commit + forbidden-file guard |
+| SAST / SCA / IaC / License | Semgrep · Trivy (fs + image + config + license) |
+| Dockerfile hygiene | hadolint |
+| SBOM | Syft (CycloneDX + SPDX), attached as a cosign attestation |
+| Signing & provenance | cosign (key-based, **by digest**), SLSA-style provenance |
+| Admission | Kyverno `boutique-*` — 7 policies **Enforce** (verifyImages **Audit**) |
+| Network | default-deny + explicit egress + DNS allow |
+| Runtime secrets | Vault KV `boutique/` → ESO → Kubernetes Secret |
+| Git & GitOps | protected branches, signed commits, one controller, promotion by digest |
 
-| Area | Control | Enforced by |
-|---|---|---|
-| Secrets in source | gitleaks + pre-commit + forbidden-file guard | CI (blocking) |
-| SAST | Semgrep | CI |
-| SCA (source & image) | Trivy fs / Trivy image (CRIT, or HIGH with a fix) | CI (image blocking) |
-| License | Trivy license | CI (report) |
-| IaC / manifests | Trivy config (+ KubeLinter/Checkov ready) | CI (report) |
-| Dockerfile hygiene | hadolint | CI (blocking on errors) |
-| SBOM | Syft (CycloneDX + SPDX), attached as a cosign attestation | CI |
-| Signing & provenance | cosign key-based, **by digest**; SLSA-style provenance attestation | CI + Harbor |
-| Admission | Kyverno `boutique-*` policies (7 **Enforce**, verifyImages **Audit**) | cluster |
-| Network | default-deny + explicit per-service egress + DNS allow | cluster |
-| Secrets at runtime | Vault KV `boutique/` → External Secrets Operator → Kubernetes Secret | cluster |
-| GitOps integrity | protected branches, signed commits, promotion by digest, one controller | GitHub + Argo CD |
-| Supply-chain analytics | Argo CD / Kyverno / Trivy Operator metrics → Grafana | cluster |
-
-## Repository layout
-
-```
-src/                         # 12 services (11 deployable + shoppingassistantservice: scan-only)
-protos/                      # gRPC contracts
-kubernetes-manifests/,       # upstream manifests (base)
-kustomize/                   # upstream kustomize base + components
-helm-chart/                  # upstream Helm chart
-ci/
-  services.yaml              # SINGLE SOURCE OF TRUTH: the build/test matrix
-  agents/pod-templates.yaml  # CI pod template as code
-  k8s/boutique-ci.yaml       # CI namespace + RBAC
-  scripts/                   # detect-changes, generate-ignores, commit-msg, forbidden-files
-Jenkinsfile                  # declarative pipeline (15 stages)
-gitops/
-  components/                # boutique-hardening, boutique-network (shared overlays)
-  environments/{dev,staging,prod}/   # digest-pinned kustomize overlays
-  security/                  # ESO SecretStores / ExternalSecrets, Vault auth
-  policies/                  # Kyverno ClusterPolicies (boutique-*)
-  observability/             # Grafana dashboards, Prometheus rules, ServiceMonitors
-  argocd/                    # AppProject + Applications
-security/
-  cosign.pub                 # signing public key (private key lives in Vault)
-  exceptions.yaml            # accepted risks with owner + expiry (drives tool ignores)
-  falco/                     # custom runtime rules (ready; see limitations)
-tests/smoke/                 # smoke test script + Job manifest
-docs/                        # architecture, threat model, per-phase reports, ADRs, runbooks, evidence
-```
-
-## Running it
+## Getting started
 
 ```bash
-# 1. build a GitOps overlay and inspect it
-kubectl kustomize gitops/environments/dev
-
-# 2. deploy (CI normally commits digest pins; Argo CD reconciles automatically)
+# render / deploy an environment (Argo CD reconciles automatically from Git)
 kubectl kustomize gitops/environments/dev | kubectl apply -f -
 
-# 3. run the Jenkins pipeline for a service (or FORCE_ALL=true)
-curl -u <user>:<token> -X POST \
-  'http://<jenkins>/job/boutique-app-ci/buildWithParameters?SERVICE=frontend'
+# run the pipeline for a service (or FORCE_ALL=true)
+curl -u <user>:<token> -X POST 'http://<jenkins>/job/boutique-app-ci/buildWithParameters?SERVICE=frontend'
 
-# 4. smoke test any environment
+# smoke test
 bash tests/smoke/smoke.sh http://boutique-dev.192.168.1.8.nip.io
 
-# 5. verify an image was signed and has an SBOM
+# verify signature + SBOM
 cosign verify --key security/cosign.pub --allow-insecure-registry <image>@sha256:...
-cosign verify-attestation --key security/cosign.pub --type cyclonedx --allow-insecure-registry <image>@sha256:...
 ```
+
+## Core tools
+
+| Tool | Purpose |
+|---|---|
+| Kubernetes (k3s) | cluster |
+| Jenkins + Kaniko | CI, daemonless image builds (no Docker socket) |
+| Harbor | registry (immutability, retention, robots) |
+| Syft · Trivy · Semgrep · gitleaks · hadolint | SBOM + scanning + linting |
+| cosign (Sigstore) | image signing & attestation |
+| Vault + External Secrets | secret management |
+| Argo CD | GitOps (dev/staging/prod) |
+| Kyverno | admission policy as code |
+| Prometheus · Grafana | metrics, alerts, dashboards |
 
 ## Documentation
 
 | Doc | Contents |
 |---|---|
-| [`docs/00-application-analysis.md`](docs/00-application-analysis.md) | service-by-service analysis with source citations |
-| [`docs/00-threat-model.md`](docs/00-threat-model.md) | STRIDE + 20-risk register mapped to controls |
-| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | as-built topology |
-| [`docs/SECURITY.md`](docs/SECURITY.md) | control catalogue with verification |
-| [`docs/05-supply-chain.md`](docs/05-supply-chain.md) | SBOM/signing/attestation flow |
-| [`docs/06-secrets-management.md`](docs/06-secrets-management.md) | Vault + ESO model, rotation runbook |
-| [`docs/07-gitops.md`](docs/07-gitops.md) | promotion, sync policies, rollback |
-| [`docs/08-policy-as-code.md`](docs/08-policy-as-code.md) | Kyverno policy catalogue |
-| [`docs/09-network-security.md`](docs/09-network-security.md) | allowed-flow matrix + test transcript |
-| [`docs/EVIDENCE.md`](docs/EVIDENCE.md) | indexed evidence bundle |
-| [`docs/METRICS.md`](docs/METRICS.md) | measured outcomes |
-| [`docs/DEMO.md`](docs/DEMO.md) · [`docs/INTERVIEW-NOTES.md`](docs/INTERVIEW-NOTES.md) | walkthrough + Q&A |
-| [`docs/CHANGE_REQUESTS.md`](docs/CHANGE_REQUESTS.md) | blocked items requiring operator decisions |
-| [`docs/phases/`](docs/phases) | per-phase reports with Definition-of-Done |
+| [Architecture](docs/ARCHITECTURE.md) · [Threat model](docs/00-threat-model.md) | as-built + STRIDE/20 risks |
+| [Security](docs/SECURITY.md) · [Supply chain](docs/05-supply-chain.md) | controls & verification |
+| [Secrets](docs/06-secrets-management.md) · [GitOps](docs/07-gitops.md) · [Policy](docs/08-policy-as-code.md) · [Network](docs/09-network-security.md) | deep dives |
+| [Evidence](docs/EVIDENCE.md) · [Metrics](docs/METRICS.md) · [Demo](docs/DEMO.md) · [Interview notes](docs/INTERVIEW-NOTES.md) | proof & walkthrough |
+| [Per-phase reports](docs/phases) · [Change requests](docs/CHANGE_REQUESTS.md) | progress & open items |
 
-## Honest limitations
+## Limitations (honest)
 
-This is a homelab on a 3-node k3s cluster; some controls are constrained by the environment and are
-documented rather than faked:
-
-- **Signature admission is Audit, not Enforce.** Kyverno cannot verify signatures from Harbor because it
-  is served over HTTP at a private IP (Kyverno/go-containerregistry refuses the auth realm). See
-  `CHANGE_REQUESTS.md` **CR-KYVERNO-1**. Foreign-registry, `:latest`, privileged and no-limits pods *are*
-  rejected.
-- **Falco is not running.** It was installed and did detect events, but crash-looped on kernel 7.0.0
-  (driver/plugin bug); custom rules are ready in `security/falco/`.
-- **Trivy Operator vulnerability scanning is disabled** (capacity); its config-audit and exposed-secret
-  scanning run. **Loki is not installed** (capacity), so logs are not centrally aggregated.
-- Delivery/DORA dashboards and Backstage registration need a Jenkins metrics plugin and a portal token
-  (see change requests).
-- `src/shoppingassistantservice` requires Google Cloud and is **scanned but never deployed**.
-
----
-
-## Upstream project (Online Boutique)
-
-The following is the original description of the application this project is built on.
-
-![Continuous Integration](https://github.com/GoogleCloudPlatform/microservices-demo/workflows/Continuous%20Integration%20-%20Main/Release/badge.svg)
-
-**Online Boutique** is a cloud-first microservices demo application. The application is a
-web-based e-commerce app where users can browse items, add them to the cart, and purchase them.
-
-Google uses this application to demonstrate how developers can modernize enterprise applications using Google Cloud products, including: [Google Kubernetes Engine (GKE)](https://cloud.google.com/kubernetes-engine), [Cloud Service Mesh (CSM)](https://cloud.google.com/service-mesh), [gRPC](https://grpc.io/), [Cloud Operations](https://cloud.google.com/products/operations), [Spanner](https://cloud.google.com/spanner), [Memorystore](https://cloud.google.com/memorystore), [AlloyDB](https://cloud.google.com/alloydb), and [Gemini](https://ai.google.dev/). This application works on any Kubernetes cluster.
-
-If you’re using this demo, please **★Star** this repository to show your interest!
-
-**Note to Googlers:** Please fill out the form at [go/microservices-demo](http://go/microservices-demo).
-
-### Upstream architecture
-
-**Online Boutique** is composed of 11 microservices written in different
-languages that talk to each other over gRPC.
-
-[![Architecture of microservices](/docs/img/architecture-diagram.png)](/docs/img/architecture-diagram.png)
-
-Find **Protocol Buffers Descriptions** at the [`./protos` directory](/protos).
-
-| Service                                              | Language      | Description                                                                                                                       |
-| ---------------------------------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| [frontend](/src/frontend)                           | Go            | Exposes an HTTP server to serve the website. Does not require signup/login and generates session IDs for all users automatically. |
-| [cartservice](/src/cartservice)                     | C#            | Stores the items in the user's shopping cart in Redis and retrieves it.                                                           |
-| [productcatalogservice](/src/productcatalogservice) | Go            | Provides the list of products from a JSON file and ability to search products and get individual products.                        |
-| [currencyservice](/src/currencyservice)             | Node.js       | Converts one money amount to another currency. Uses real values fetched from European Central Bank. It's the highest QPS service. |
-| [paymentservice](/src/paymentservice)               | Node.js       | Charges the given credit card info (mock) with the given amount and returns a transaction ID.                                     |
-| [shippingservice](/src/shippingservice)             | Go            | Gives shipping cost estimates based on the shopping cart. Ships items to the given address (mock)                                 |
-| [emailservice](/src/emailservice)                   | Python        | Sends users an order confirmation email (mock).                                                                                   |
-| [checkoutservice](/src/checkoutservice)             | Go            | Retrieves user cart, prepares order and orchestrates the payment, shipping and the email notification.                            |
-| [recommendationservice](/src/recommendationservice) | Python        | Recommends other products based on what's given in the cart.                                                                      |
-| [adservice](/src/adservice)                         | Java          | Provides text ads based on given context words.                                                                                   |
-| [loadgenerator](/src/loadgenerator)                 | Python/Locust | Continuously sends requests imitating realistic user shopping flows to the frontend.                                              |
-
-### Screenshots
-
-| Home Page                                                                                                         | Checkout Screen                                                                                                    |
-| ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| [![Screenshot of store homepage](/docs/img/online-boutique-frontend-1.png)](/docs/img/online-boutique-frontend-1.png) | [![Screenshot of checkout screen](/docs/img/online-boutique-frontend-2.png)](/docs/img/online-boutique-frontend-2.png) |
-
-### Quickstart (GKE)
-
-1. Ensure you have the following requirements:
-   - [Google Cloud project](https://cloud.google.com/resource-manager/docs/creating-managing-projects#creating_a_project).
-   - Shell environment with `gcloud`, `git`, and `kubectl`.
-
-2. Clone the latest major version.
-
-   ```sh
-   git clone --depth 1 --branch v0 https://github.com/GoogleCloudPlatform/microservices-demo.git
-   cd microservices-demo/
-   ```
-
-   The `--depth 1` argument skips downloading git history.
-
-3. Set the Google Cloud project and region and ensure the Google Kubernetes Engine API is enabled.
-
-   ```sh
-   export PROJECT_ID=<PROJECT_ID>
-   export REGION=us-central1
-   gcloud services enable container.googleapis.com \
-     --project=${PROJECT_ID}
-   ```
-
-   Substitute `<PROJECT_ID>` with the ID of your Google Cloud project.
-
-4. Create a GKE cluster and get the credentials for it.
-
-   ```sh
-   gcloud container clusters create-auto online-boutique \
-     --project=${PROJECT_ID} --region=${REGION} \
-     --labels dev-tutorial=online-boutique
-   ```
-
-   Creating the cluster may take a few minutes.
-
-5. Deploy Online Boutique to the cluster.
-
-   ```sh
-   kubectl apply -f ./release/kubernetes-manifests.yaml
-   ```
-
-6. Wait for the pods to be ready.
-
-   ```sh
-   kubectl get pods
-   ```
-
-   After a few minutes, you should see the Pods in a `Running` state:
-
-   ```
-   NAME                                     READY   STATUS    RESTARTS   AGE
-   adservice-76bdd69666-ckc5j               1/1     Running   0          2m58s
-   cartservice-66d497c6b7-dp5jr             1/1     Running   0          2m59s
-   checkoutservice-666c784bd6-4jd22         1/1     Running   0          3m1s
-   currencyservice-5d5d496984-4jmd7         1/1     Running   0          2m59s
-   emailservice-667457d9d6-75jcq            1/1     Running   0          3m2s
-   frontend-6b8d69b9fb-wjqdg                1/1     Running   0          3m1s
-   loadgenerator-665b5cd444-gwqdq           1/1     Running   0          3m
-   paymentservice-68596d6dd6-bf6bv          1/1     Running   0          3m
-   productcatalogservice-557d474574-888kr   1/1     Running   0          3m
-   recommendationservice-69c56b74d4-7z8r5   1/1     Running   0          3m1s
-   redis-cart-5f59546cdd-5jnqf              1/1     Running   0          2m58s
-   shippingservice-6ccc89f8fd-v686r         1/1     Running   0          2m58s
-   ```
-
-7. Access the web frontend in a browser using the frontend's external IP.
-
-   ```sh
-   kubectl get service frontend-external | awk '{print $4}'
-   ```
-
-   Visit `http://EXTERNAL_IP` in a web browser to access your instance of Online Boutique.
-
-8. Congrats! You've deployed the default Online Boutique. To deploy a different variation of Online Boutique (e.g., with Google Cloud Operations tracing, Istio, etc.), see [Deploy Online Boutique variations with Kustomize](#deploy-online-boutique-variations-with-kustomize).
-
-9. Once you are done with it, delete the GKE cluster.
-
-   ```sh
-   gcloud container clusters delete online-boutique \
-     --project=${PROJECT_ID} --region=${REGION}
-   ```
-
-   Deleting the cluster may take a few minutes.
-
-### Additional deployment options
-
-- **Terraform**: [See these instructions](/terraform) to learn how to deploy Online Boutique using [Terraform](https://www.terraform.io/intro).
-- **Istio / Cloud Service Mesh**: [See these instructions](/kustomize/components/service-mesh-istio/README.md) to deploy Online Boutique alongside an Istio-backed service mesh.
-- **Non-GKE clusters (Minikube, Kind, etc)**: See the [Development guide](/docs/development-guide.md) to learn how you can deploy Online Boutique on non-GKE clusters.
-- **AI assistant using Gemini**: [See these instructions](/kustomize/components/shopping-assistant/README.md) to deploy a Gemini-powered AI assistant that suggests products to purchase based on an image.
-- **And more**: The [`/kustomize` directory](/kustomize) contains instructions for customizing the deployment of Online Boutique with other variations.
-
-### Documentation (upstream)
-
-- [Development](/docs/development-guide.md) to learn how to run and develop this app locally.
-
-### Demos featuring Online Boutique
-
-- [Security hardening of the OnlineBoutique sample apps with the Docker Hardened Images (DHI)](https://medium.com/google-cloud/security-hardening-of-the-onlineboutique-sample-apps-with-docker-hardened-images-dhi-ca1fad348343)
-- [alpine, distroless or scratch?](https://medium.com/google-cloud/alpine-distroless-or-scratch-caac35250e0b)
-- [Platform Engineering in action: Deploy the Online Boutique sample apps with Score and Humanitec](https://medium.com/p/d99101001e69)
-- [The new Kubernetes Gateway API with Istio and Anthos Service Mesh (ASM)](https://medium.com/p/9d64c7009cd)
-- [Use Azure Redis Cache with the Online Boutique sample on AKS](https://medium.com/p/981bd98b53f8)
-- [Sail Sharp, 8 tips to optimize and secure your .NET containers for Kubernetes](https://medium.com/p/c68ba253844a)
-- [Deploy multi-region application with Anthos and Google cloud Spanner](https://medium.com/google-cloud/a2ea3493ed0)
-- [Use Google Cloud Memorystore (Redis) with the Online Boutique sample on GKE](https://medium.com/p/82f7879a900d)
-- [Use Helm to simplify the deployment of Online Boutique, with a Service Mesh, GitOps, and more!](https://medium.com/p/246119e46d53)
-- [How to reduce microservices complexity with Apigee and Anthos Service Mesh](https://cloud.google.com/blog/products/application-modernization/api-management-and-service-mesh-go-together)
-- [gRPC health probes with Kubernetes 1.24+](https://medium.com/p/b5bd26253a4c)
-- [Use Google Cloud Spanner with the Online Boutique sample](https://medium.com/p/f7248e077339)
-- [Seamlessly encrypt traffic from any apps in your Mesh to Memorystore (redis)](https://medium.com/google-cloud/64b71969318d)
-- [Strengthen your app's security with Cloud Service Mesh and Anthos Config Management](https://cloud.google.com/service-mesh/docs/strengthen-app-security)
-- [From edge to mesh: Exposing service mesh applications through GKE Ingress](https://cloud.google.com/architecture/exposing-service-mesh-apps-through-gke-ingress)
-- [Take the first step toward SRE with Cloud Operations Sandbox](https://cloud.google.com/blog/products/operations/on-the-road-to-sre-with-cloud-operations-sandbox)
-- [Deploying the Online Boutique sample application on Cloud Service Mesh](https://cloud.google.com/service-mesh/docs/onlineboutique-install-kpt)
-- [Anthos Service Mesh Workshop: Lab Guide](https://codelabs.developers.google.com/codelabs/anthos-service-mesh-workshop)
-- [KubeCon EU 2019 - Reinventing Networking: A Deep Dive into Istio's Multicluster Gateways - Steve Dake, Independent](https://youtu.be/-t2BfT59zJA?t=982)
-- Google Cloud Next'18 SF
-  - [Day 1 Keynote](https://youtu.be/vJ9OaAqfxo4?t=2416) showing GKE On-Prem
-  - [Day 3 Keynote](https://youtu.be/JQPOPV_VH5w?t=815) showing Stackdriver
-    APM (Tracing, Code Search, Profiler, Google Cloud Build)
-  - [Introduction to Service Management with Istio](https://www.youtube.com/watch?v=wCJrdKdD6UM&feature=youtu.be&t=586)
-- [Google Cloud Next'18 London – Keynote](https://youtu.be/nIq2pkNcfEI?t=3071)
-  showing Stackdriver Incident Response Management
-- [Microservices demo showcasing Go Micro](https://github.com/go-micro/demo)
+This is a 3-node homelab, so a few controls are constrained and documented rather than faked:
+`verifyImages` is **Audit** (Kyverno refuses the HTTP/private-IP registry auth realm), **Falco** is not
+running (kernel 7.0.0 driver bug), **Loki** is absent, and **Trivy Operator** vulnerability scanning is
+disabled for capacity. Details and remediation options are in
+[docs/CHANGE_REQUESTS.md](docs/CHANGE_REQUESTS.md) and [docs/09-runtime-security.md](docs/09-runtime-security.md).
 
 ## License
 

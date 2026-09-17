@@ -9,6 +9,7 @@ resources:
   - namespace.yaml
   - ingress.yaml
   - mailpit.yaml
+  - ../../../tests/smoke
 
 components:
   - ../../../kustomize/components/container-images-registry

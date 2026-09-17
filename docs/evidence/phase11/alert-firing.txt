@@ -1,0 +1,10 @@
+BoutiqueDeploymentReplicasMismatch | state= firing | alerts= 3
+   alert: alert-selftest firing
+   alert: alert-selftest pending
+   alert: alert-selftest pending
+BoutiquePodCrashLooping | state= pending | alerts= 4
+   alert: None pending
+   alert: None pending
+   alert: None pending
+   alert: None pending
+BoutiquePodNotReady | state= inactive | alerts= 0

@@ -1,0 +1,51 @@
+# ServiceMonitors so the existing Prometheus scrapes the platform components' metrics.
+# Label release=prometheus matches the Prometheus serviceMonitorSelector.
+# These are NEW objects; the components themselves are not modified.
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata: {name: boutique-argocd-metrics, namespace: monitoring, labels: {release: prometheus, app.kubernetes.io/part-of: online-boutique}}
+spec:
+  namespaceSelector: {matchNames: [argocd]}
+  selector: {matchLabels: {app.kubernetes.io/name: argocd-metrics}}
+  endpoints: [{port: metrics, interval: 30s}]
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata: {name: boutique-argocd-server-metrics, namespace: monitoring, labels: {release: prometheus, app.kubernetes.io/part-of: online-boutique}}
+spec:
+  namespaceSelector: {matchNames: [argocd]}
+  selector: {matchLabels: {app.kubernetes.io/name: argocd-server-metrics}}
+  endpoints: [{port: metrics, interval: 30s}]
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata: {name: boutique-argocd-repo-server, namespace: monitoring, labels: {release: prometheus, app.kubernetes.io/part-of: online-boutique}}
+spec:
+  namespaceSelector: {matchNames: [argocd]}
+  selector: {matchLabels: {app.kubernetes.io/name: argocd-repo-server}}
+  endpoints: [{port: metrics, interval: 30s}]
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata: {name: boutique-kyverno-metrics, namespace: monitoring, labels: {release: prometheus, app.kubernetes.io/part-of: online-boutique}}
+spec:
+  namespaceSelector: {matchNames: [kyverno]}
+  selector: {matchLabels: {app.kubernetes.io/component: admission-controller}}
+  endpoints: [{port: metrics-port, interval: 30s}]
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata: {name: boutique-policy-reporter, namespace: monitoring, labels: {release: prometheus, app.kubernetes.io/part-of: online-boutique}}
+spec:
+  namespaceSelector: {matchNames: [kyverno]}
+  selector: {matchLabels: {app.kubernetes.io/name: policy-reporter}}
+  endpoints: [{port: http, interval: 30s, path: /metrics}]
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata: {name: boutique-trivy-operator, namespace: monitoring, labels: {release: prometheus, app.kubernetes.io/part-of: online-boutique}}
+spec:
+  namespaceSelector: {matchNames: [trivy-system]}
+  selector: {matchLabels: {app.kubernetes.io/name: trivy-operator}}
+  endpoints: [{port: metrics, interval: 60s}]

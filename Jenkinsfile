@@ -81,7 +81,7 @@ spec:
   }
 
   parameters {
-    string(name: 'SERVICE', defaultValue: 'frontend', description: 'Service(s) to build, comma-separated (from ci/services.yaml)')
+    string(name: 'SERVICE', defaultValue: '', description: 'Service(s) to build, comma-separated (empty = auto-detect from changes; use FORCE_ALL for all)')
     booleanParam(name: 'FORCE_ALL', defaultValue: false, description: 'Build every service')
   }
 
@@ -221,7 +221,18 @@ spec:
 
     stage('6c. IaC & manifests (Trivy config)') {
       steps { container('trivy') {
-        sh 'trivy config --format json -o "$WORKSPACE/reports/iac.json" "$WORKSPACE/gitops" "$WORKSPACE/kustomize" || true; echo "iac report written"'
+        sh '''
+          set -e
+          for d in gitops kustomize/base; do
+            name=$(basename "$d")
+            extra=""
+            [ "$d" = "gitops" ] && extra="--severity CRITICAL --exit-code 1"
+            trivy config $extra --format json -o "$WORKSPACE/reports/iac-$name.json" "$WORKSPACE/$d" \
+              || { echo "IaC GATE FAILED: $d"; exit 1; }
+            test -s "$WORKSPACE/reports/iac-$name.json" || { echo "IaC report missing: $d"; exit 1; }
+            echo "iac report written: iac-$name.json"
+          done
+        '''
       } }
     }
 
@@ -271,14 +282,16 @@ sys.exit(1 if bad else 0)
         sh '''
           set -e
           SHA="${GIT_SHA:-manual}"
+          FULL_SHA="$(git rev-parse HEAD)"
+          START_TS="$(date -u +%FT%TZ)"
           for f in digest/*.txt; do [ -f "$f" ] || continue
             svc=$(basename "$f" .txt); img="$REGISTRY/$svc@$(cat $f)"
             cat > "$WORKSPACE/provenance-$svc.json" <<EOF
 {
   "builder": {"id": "jenkins://boutique-app-ci"},
   "buildType": "https://jenkins.io/pipeline@v1",
-  "invocation": {"configSource": {"uri": "https://github.com/Hephast0s/boutique-devsecops", "digest": {"sha1": "$SHA"}}, "parameters": {"service": "$svc"}},
-  "metadata": {"buildInvocationId": "boutique-app-ci#${BUILD_NUMBER}", "buildStartedOn": "2026-09-16T00:00:00Z", "completeness": {"parameters": true, "environment": false, "materials": false}, "reproducible": false}
+  "invocation": {"configSource": {"uri": "https://github.com/Hephast0s/boutique-devsecops", "digest": {"sha1": "$FULL_SHA"}}, "parameters": {"service": "$svc"}},
+  "metadata": {"buildInvocationId": "boutique-app-ci#${BUILD_NUMBER}", "buildStartedOn": "$START_TS", "completeness": {"parameters": true, "environment": false, "materials": false}, "reproducible": false}
 }
 EOF
             cosign sign --key /cosign/cosign.key --yes --allow-insecure-registry "$img"

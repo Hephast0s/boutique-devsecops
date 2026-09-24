@@ -18,6 +18,7 @@ from concurrent import futures
 import argparse
 import os
 import smtplib
+import ssl
 import sys
 import time
 import grpc
@@ -143,14 +144,16 @@ class SMTPEmailService(BaseEmailService):
     msg['To'] = email
 
     try:
+      # TLS certificate verification is ON by default (create_default_context verifies cert + hostname).
+      tls_context = ssl.create_default_context()
       if use_ssl:
-        smtp = smtplib.SMTP_SSL(host, port, timeout=20)
+        smtp = smtplib.SMTP_SSL(host, port, timeout=20, context=tls_context)
       else:
         smtp = smtplib.SMTP(host, port, timeout=20)
       with smtp:
         if use_tls and not use_ssl:
           smtp.ehlo()
-          smtp.starttls()
+          smtp.starttls(context=tls_context)
           smtp.ehlo()
         if user:
           smtp.login(user, password)

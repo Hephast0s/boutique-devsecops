@@ -26,6 +26,11 @@ spec:
       image: python:3.14-alpine
       command: ['sleep']
       args: ['3600']
+      resources: {requests: {cpu: "50m", memory: "128Mi"}, limits: {cpu: "1000m", memory: "1Gi"}}
+    - name: sign
+      image: alpine:3.21
+      command: ['sleep']
+      args: ['3600']
       env:
         - name: COSIGN_PASSWORD
           valueFrom: {secretKeyRef: {name: cosign-key, key: COSIGN_PASSWORD}}
@@ -34,7 +39,7 @@ spec:
       volumeMounts:
         - {name: cosign-key, mountPath: /cosign, readOnly: true}
         - {name: docker-config, mountPath: /dockercfg, readOnly: true}
-      resources: {requests: {cpu: "50m", memory: "128Mi"}, limits: {cpu: "1000m", memory: "1Gi"}}
+      resources: {requests: {cpu: "20m", memory: "128Mi"}, limits: {cpu: "500m", memory: "512Mi"}}
     - name: gitleaks
       image: ghcr.io/gitleaks/gitleaks:v8.30.0
       command: ['sleep']
@@ -93,12 +98,17 @@ spec:
 
   stages {
     stage('1. Preflight') {
-      steps { container('tools') { script {
-        sh 'apk add --no-cache git bash syft cosign >/dev/null 2>&1 || true; git config --global --add safe.directory "*" || true'
-        sh 'bash ci/scripts/test-build-target.sh'
-        env.GIT_SHA = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
-        echo "git_sha=${env.GIT_SHA}"
-      } } }
+      steps {
+        container('tools') {
+          sh 'apk add --no-cache git bash syft >/dev/null 2>&1; git config --global --add safe.directory "*"'
+          sh 'bash ci/scripts/test-build-target.sh'
+          script { env.GIT_SHA = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim() }
+          echo "workspace=${WORKSPACE} git_sha=${env.GIT_SHA}"
+        }
+        container('sign') {
+          sh 'apk add --no-cache cosign >/dev/null 2>&1'
+        }
+      }
     }
 
     stage('2. Change Detection') {
@@ -107,6 +117,10 @@ spec:
         env.CHANGED_SERVICES = changed.replace('\n', ',')
         def allSvcs = sh(script: "grep -E '^  - name:' ci/services.yaml | sed 's/.*name: //' | paste -sd, -", returnStdout: true).trim()
         env.BUILD_TARGET = params.FORCE_ALL ? allSvcs : (params.SERVICE ?: env.CHANGED_SERVICES)
+        if (env.BUILD_TARGET == '') {
+          echo "No services to build (no changed services and no SERVICE/FORCE_ALL). This build does not exercise a pipeline."
+          currentBuild.result = 'UNSTABLE'
+        }
         echo "changed=${env.CHANGED_SERVICES ?: '(none)'} target=${env.BUILD_TARGET}"
       } } }
     }
@@ -278,7 +292,7 @@ sys.exit(1 if bad else 0)
 
     stage('8. Sign & Attest (cosign)') {
       when { expression { return env.BUILD_TARGET != '' } }
-      steps { container('tools') {
+      steps { container('sign') {
         sh '''
           set -e
           SHA="${GIT_SHA:-manual}"
@@ -308,7 +322,7 @@ EOF
     stage('9. Verify (cosign)') {
       when { expression { return fileExists('digest') } }
       steps {
-        container('tools') {
+        container('sign') {
           sh '''
             set -e
             for f in digest/*.txt; do [ -f "$f" ] || continue

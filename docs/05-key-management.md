@@ -20,9 +20,11 @@ The private key is **gitignored** and never committed. The public key is safe to
 - **Sign by digest:** `cosign sign --key cosign.key <repo>@sha256:...`
 - **Attest:** `cosign attest --type cyclonedx` (SBOM) and `--type slsaprovenance` (provenance).
 - **Verify:** `cosign verify --key cosign.pub` and `cosign verify-attestation --type cyclonedx`.
-- In CI, transparency-log upload is disabled (`--tlog-upload=false`) because the homelab cannot rely on
-  the public Rekor log; verification therefore uses the key only. This is a **homelab trade-off**, recorded
-  honestly — it means there is no independent transparency proof for these signatures.
+- In CI, transparency-log upload uses the **public Rekor** log (cosign default). Signature/attestation
+  verification is key-based against `security/cosign.pub`. Trade-off: Rekor gives an independent
+  transparency record, but image references (`192.168.1.8:30082/...`) are recorded in a public log — an
+  internal Rekor (or `--tlog-upload=false` with `--insecure-ignore-tlog=true` on verify) would avoid that
+  and is a documented next step.
 
 ## Provenance accuracy
 

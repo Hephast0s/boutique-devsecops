@@ -12,7 +12,13 @@ spec:
   destinations:
     - server: https://kubernetes.default.svc
       namespace: 'boutique-*'
+    - server: https://kubernetes.default.svc
+      namespace: 'monitoring'
   clusterResourceWhitelist:
     - group: ''
       kind: Namespace
+    - group: 'kyverno.io'
+      kind: ClusterPolicy
+    - group: 'rbac.authorization.k8s.io'
+      kind: ClusterRoleBinding
   namespaceResourceBlacklist: []

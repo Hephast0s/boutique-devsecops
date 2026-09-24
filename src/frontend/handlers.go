@@ -509,9 +509,11 @@ func (fe *frontendServer) setCurrencyHandler(w http.ResponseWriter, r *http.Requ
 
 	if payload.Currency != "" {
 		http.SetCookie(w, &http.Cookie{
-			Name:   cookieCurrency,
-			Value:  payload.Currency,
-			MaxAge: cookieMaxAge,
+			Name:     cookieCurrency,
+			Value:    payload.Currency,
+			MaxAge:   cookieMaxAge,
+			HttpOnly: true,
+			SameSite: http.SameSiteLaxMode,
 		})
 	}
 	referer := r.Header.Get("referer")

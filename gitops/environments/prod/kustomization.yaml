@@ -55,10 +55,10 @@ images:
 replicas:
   - {name: adservice, count: 1}
   - {name: cartservice, count: 1}
-  - {name: checkoutservice, count: 1}
+  - {name: checkoutservice, count: 2}
   - {name: currencyservice, count: 1}
   - {name: emailservice, count: 1}
-  - {name: frontend, count: 1}
+  - {name: frontend, count: 2}
   - {name: paymentservice, count: 1}
   - {name: productcatalogservice, count: 1}
   - {name: recommendationservice, count: 1}

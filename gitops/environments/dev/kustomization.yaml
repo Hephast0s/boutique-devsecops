@@ -8,7 +8,6 @@ resources:
   - ../../../kustomize/base
   - namespace.yaml
   - ingress.yaml
-  - mailpit.yaml
 
 components:
   - ../../../kustomize/components/container-images-registry

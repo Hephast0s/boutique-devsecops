@@ -49,7 +49,7 @@ patches:
   # ── Right-sized resources ────────────────────────────────────────────────────────────────
   # Requests set near measured idle/steady usage; limits ~2–3x measured peak for burst headroom.
   # Measured peaks (1h): adservice 97Mi, cartservice 71Mi, currency 45Mi, email 41Mi, payment 44Mi,
-  # recommendation 35Mi, frontend 17Mi, mailpit 14Mi, productcatalog/shipping 11Mi, checkout 10Mi,
+  # recommendation 35Mi, frontend 17Mi, productcatalog/shipping 11Mi, checkout 10Mi,
   # redis 7Mi; CPU ~1–6m per pod. This frees cluster reservation without starving bursts.
   - target: {group: apps, version: v1, kind: Deployment, name: adservice}
     patch: |-

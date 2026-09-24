@@ -26,12 +26,13 @@ metadata:
   labels:
     app.kubernetes.io/part-of: online-boutique
 rules:
+  # Least privilege for the Jenkins Kubernetes plugin: provision/exec/log/delete ephemeral agent pods.
   - apiGroups: [""]
-    resources: ["pods", "pods/log", "pods/exec", "events", "configmaps", "secrets", "services", "persistentvolumeclaims"]
+    resources: ["pods", "pods/log", "pods/exec", "pods/portforward", "events"]
     verbs: ["get", "list", "watch", "create", "delete", "patch", "update"]
   - apiGroups: [""]
-    resources: ["pods/exec"]
-    verbs: ["create", "get"]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding

@@ -51,7 +51,7 @@ SA-token read, package manager, crypto-mining).
 | Trivy Operator vulnerability scanning | **disabled** — capacity (recorded) |
 | Trivy Operator config/secret auditing | ✅ working |
 | Loki log aggregation | **not installed** — capacity |
-| kube-bench | not run (privileged one-shot) |
+| kube-bench | **run 2026-09-17** — 9 PASS / 7 FAIL / 37 WARN (see `docs/evidence/phase9/kube-bench.txt`) |
 
 Compensating controls: admission policy (Phase 8), CI image scanning (Phase 5), network segmentation
 (Phase 9.1), Trivy Operator config auditing.

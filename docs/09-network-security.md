@@ -19,7 +19,7 @@ environment. It replaces the upstream per-service policies (which had wide-open 
 | `currencyservice` | ingress from frontend+checkout |
 | `shippingservice` | ingress from frontend+checkout |
 | `paymentservice` | ingress only from checkout |
-| `emailservice` | ingress from checkout; egress to Mailpit:1025 **and internet:587** (Gmail) |
+| `emailservice` | ingress from checkout; egress to SMTP:587 **restricted to Google's published IP ranges** (Gmail) |
 | `adservice` | ingress only from frontend |
 | `mailpit` | ingress from emailservice:1025 and the ingress controller:8025 |
 

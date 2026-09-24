@@ -1,6 +1,8 @@
 # hadolint policy for the 12 service Dockerfiles.
 # Only `error`-level findings fail the hook; warnings are reported but non-blocking.
+# NOTE: base images are NOT all digest-pinned upstream — the four Go services' final
+# `gcr.io/distroless/static` stage is pinned by this project (see the Dockerfiles).
 failure-threshold: error
 ignored:
-  - DL3008  # pin apt versions — base images are already digest-pinned
-  - DL3018  # pin apk versions — base images are already digest-pinned
+  - DL3008  # pin apt versions — most base images are digest-pinned
+  - DL3018  # pin apk versions — most base images are digest-pinned

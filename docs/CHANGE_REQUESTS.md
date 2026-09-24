@@ -112,4 +112,4 @@ Loki is absent; Falco/application logs are not aggregated. Subject to the 4 GiB 
   plugin panic) on kernel 7.0.0; legacy ebpf unsupported by the chart. Needs a different Falco
   version/driver or a runtime-security alternative. Evidence in `docs/09-runtime-security.md`.
 - **Loki NOT installed** — capacity; log aggregation remains a gap.
-- **kube-bench NOT run** (privileged one-shot).
+- **kube-bench RUN** (2026-09-17): 9 PASS / 7 FAIL / 37 WARN — the 7 FAILs are kubelet file-permission checks typical of k3s; see `docs/evidence/phase9/kube-bench.txt`.

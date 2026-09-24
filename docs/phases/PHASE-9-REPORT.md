@@ -53,6 +53,8 @@ Phase 10 — smoke tests + DAST (ZAP) + load. Runtime-security installs remain b
 - **Trivy Operator installed** (`trivy-system`): ConfigAuditReports (119) and ExposedSecretReports (1)
   are produced for `boutique-*`. Vulnerability scanning **disabled** (drove node CPU to ~70% and its DB
   init did not complete; capacity). A narrow Kyverno exclusion for `managed-by=trivy-operator` and a
+  scanner egress netpol were added at the time; **both were removed in a later review fix (they were
+  unnecessary — scan jobs run in `trivy-system` — and the label exclusion was a spoofable bypass).**
   scanner egress NetworkPolicy were added.
 - **Falco installed, detected 12 real events** (`Contact K8S API Server From Container`), then entered
   `CrashLoopBackOff` on 2/3 nodes due to a driver bug (`could not parse param … openat` + a container-plugin

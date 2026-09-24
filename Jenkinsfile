@@ -95,6 +95,7 @@ spec:
     stage('1. Preflight') {
       steps { container('tools') { script {
         sh 'apk add --no-cache git bash syft cosign >/dev/null 2>&1 || true; git config --global --add safe.directory "*" || true'
+        sh 'bash ci/scripts/test-build-target.sh'
         env.GIT_SHA = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
         echo "git_sha=${env.GIT_SHA}"
       } } }
@@ -102,9 +103,10 @@ spec:
 
     stage('2. Change Detection') {
       steps { container('tools') { script {
-        def changed = sh(script: 'bash ci/scripts/detect-changes.sh origin/devsecops || true', returnStdout: true).trim()
+        def changed = sh(script: 'bash ci/scripts/detect-changes.sh origin/main || true', returnStdout: true).trim()
         env.CHANGED_SERVICES = changed.replace('\n', ',')
-        env.BUILD_TARGET = params.FORCE_ALL ? 'ALL' : (params.SERVICE ?: env.CHANGED_SERVICES)
+        def allSvcs = sh(script: "grep -E '^  - name:' ci/services.yaml | sed 's/.*name: //' | paste -sd, -", returnStdout: true).trim()
+        env.BUILD_TARGET = params.FORCE_ALL ? allSvcs : (params.SERVICE ?: env.CHANGED_SERVICES)
         echo "changed=${env.CHANGED_SERVICES ?: '(none)'} target=${env.BUILD_TARGET}"
       } } }
     }
@@ -209,9 +211,10 @@ spec:
           for svc in $(echo "${BUILD_TARGET:-frontend}" | tr ',' ' '); do
             echo "== trivy fs $svc =="
             trivy fs --scanners vuln --format json -o "$WORKSPACE/scan/$svc.fs.json" \
-              --severity CRITICAL,HIGH --ignore-unfixed "$WORKSPACE/src/$svc" || true
+              --severity CRITICAL --ignore-unfixed --exit-code 1 "$WORKSPACE/src/$svc" \
+              || { echo "SCA GATE FAILED (CRITICAL, fixable): $svc"; exit 1; }
           done
-          echo "SCA reports: $(ls scan/*.fs.json 2>/dev/null | wc -l) (report-only during first week)"
+          echo "SCA: gated on CRITICAL; HIGH reported in scan/$svc.fs.json"
         '''
       } }
     }
@@ -239,7 +242,7 @@ spec:
       steps { container('semgrep') {
         sh '''
           for svc in $(echo "${BUILD_TARGET:-frontend}" | tr ',' ' '); do
-            semgrep --config p/default --json -o "reports/semgrep-$svc.json" "src/$svc" 2>/dev/null || true
+            semgrep --config p/default --severity ERROR --error --json -o "reports/semgrep-$svc.json" "src/$svc"
           done
           echo "semgrep reports: $(ls reports/semgrep-*.json 2>/dev/null | wc -l)"
         '''

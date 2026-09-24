@@ -64,6 +64,20 @@ spec:
                   - key: "{{ images.containers.\"{{element.name}}\".registry || '' }}"
                     operator: NotEquals
                     value: "192.168.1.8:30082"
+          - list: "request.object.spec.initContainers || []"
+            deny:
+              conditions:
+                all:
+                  - key: "{{ images.initContainers.\"{{element.name}}\".registry || '' }}"
+                    operator: NotEquals
+                    value: "192.168.1.8:30082"
+          - list: "request.object.spec.ephemeralContainers || []"
+            deny:
+              conditions:
+                all:
+                  - key: "{{ images.ephemeralContainers.\"{{element.name}}\".registry || '' }}"
+                    operator: NotEquals
+                    value: "192.168.1.8:30082"
 ---
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
@@ -92,6 +106,13 @@ spec:
                   - key: "{{ images.containers.\"{{element.name}}\".tag || '' }}"
                     operator: Equals
                     value: "latest"
+          - list: "request.object.spec.initContainers || []"
+            deny:
+              conditions:
+                any:
+                  - key: "{{ images.initContainers.\"{{element.name}}\".tag || '' }}"
+                    operator: Equals
+                    value: "latest"
     - name: require-digest
       match:
         any:
@@ -105,6 +126,12 @@ spec:
         pattern:
           spec:
             containers:
+              - (name): "*"
+                image: "*@sha256:?*"
+            =(initContainers):
+              - (name): "*"
+                image: "*@sha256:?*"
+            =(ephemeralContainers):
               - (name): "*"
                 image: "*@sha256:?*"
 ---
@@ -145,6 +172,15 @@ spec:
                   capabilities:
                     drop:
                       - ALL
+            =(initContainers):
+              - (name): "*"
+                securityContext:
+                  privileged: false
+                  allowPrivilegeEscalation: false
+                  readOnlyRootFilesystem: true
+                  capabilities:
+                    drop:
+                      - ALL
 ---
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
@@ -172,6 +208,11 @@ spec:
                 resources:
                   requests: {cpu: "?*", memory: "?*"}
                   limits: {cpu: "?*", memory: "?*"}
+            =(initContainers):
+              - (name): "*"
+                resources:
+                  requests: {cpu: "?*", memory: "?*"}
+                  limits: {cpu: "?*", memory: "?*"}
 ---
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
@@ -195,7 +236,10 @@ spec:
         deny:
           conditions:
             any:
-              - key: "{{ request.object.spec.containers[?!livenessProbe || !readinessProbe] | length(@) }}"
+              - key: "{{ (request.object.spec.containers || [])[?!livenessProbe || !readinessProbe] | length(@) }}"
+                operator: GreaterThan
+                value: 0
+              - key: "{{ (request.object.spec.initContainers || [])[?!livenessProbe || !readinessProbe] | length(@) }}"
                 operator: GreaterThan
                 value: 0
 ---

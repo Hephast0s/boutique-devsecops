@@ -146,9 +146,6 @@ spec:
     - from: [{podSelector: {matchLabels: {app: checkoutservice}}}]
       ports: [{protocol: TCP, port: 8080}]
   egress:
-    # local Mailpit sink
-    - to: [{podSelector: {matchLabels: {app: mailpit}}}]
-      ports: [{protocol: TCP, port: 1025}]
     # real SMTP delivery (Google/Gmail) — restricted to Google's published IP ranges (not 0.0.0.0/0)
     - to:
         - ipBlock: {cidr: 64.233.160.0/19}
@@ -176,17 +173,3 @@ spec:
   ingress:
     - from: [{podSelector: {matchLabels: {app: frontend}}}]
       ports: [{protocol: TCP, port: 9555}]
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata: {name: mailpit, labels: {app.kubernetes.io/part-of: online-boutique}}
-spec:
-  podSelector: {matchLabels: {app: mailpit}}
-  policyTypes: [Ingress]
-  ingress:
-    - from: [{podSelector: {matchLabels: {app: emailservice}}}]
-      ports: [{protocol: TCP, port: 1025}]
-    - from:
-        - namespaceSelector:
-            matchLabels: {kubernetes.io/metadata.name: kube-system}
-      ports: [{protocol: TCP, port: 8025}]

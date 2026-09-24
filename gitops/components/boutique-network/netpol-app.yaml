@@ -149,14 +149,22 @@ spec:
     # local Mailpit sink
     - to: [{podSelector: {matchLabels: {app: mailpit}}}]
       ports: [{protocol: TCP, port: 1025}]
-    # real SMTP delivery (Gmail) over the internet
+    # real SMTP delivery (Google/Gmail) — restricted to Google's published IP ranges (not 0.0.0.0/0)
     - to:
-        - ipBlock:
-            cidr: 0.0.0.0/0
-            except:
-              - 10.0.0.0/8
-              - 172.16.0.0/12
-              - 192.168.0.0/16
+        - ipBlock: {cidr: 64.233.160.0/19}
+        - ipBlock: {cidr: 66.102.0.0/20}
+        - ipBlock: {cidr: 66.249.80.0/20}
+        - ipBlock: {cidr: 72.14.192.0/18}
+        - ipBlock: {cidr: 74.125.0.0/16}
+        - ipBlock: {cidr: 108.177.0.0/17}
+        - ipBlock: {cidr: 142.250.0.0/15}
+        - ipBlock: {cidr: 142.251.0.0/16}
+        - ipBlock: {cidr: 172.217.0.0/19}
+        - ipBlock: {cidr: 172.253.0.0/16}
+        - ipBlock: {cidr: 173.194.0.0/16}
+        - ipBlock: {cidr: 209.85.128.0/17}
+        - ipBlock: {cidr: 216.239.32.0/19}
+        - ipBlock: {cidr: 216.58.192.0/19}
       ports: [{protocol: TCP, port: 587}]
 ---
 apiVersion: networking.k8s.io/v1

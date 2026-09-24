@@ -236,10 +236,7 @@ spec:
         deny:
           conditions:
             any:
-              - key: "{{ (request.object.spec.containers || [])[?!livenessProbe || !readinessProbe] | length(@) }}"
-                operator: GreaterThan
-                value: 0
-              - key: "{{ (request.object.spec.initContainers || [])[?!livenessProbe || !readinessProbe] | length(@) }}"
+              - key: "{{ request.object.spec.containers[?!livenessProbe || !readinessProbe] | length(@) }}"
                 operator: GreaterThan
                 value: 0
 ---

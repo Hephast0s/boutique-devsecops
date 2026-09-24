@@ -22,13 +22,6 @@ spec:
               namespaceSelector:
                 matchLabels:
                   app.kubernetes.io/part-of: online-boutique
-      # Narrow exclusion: in-cluster scanner jobs (Trivy Operator) are infrastructure, not app workloads.
-      exclude:
-        any:
-          - resources:
-              selector:
-                matchLabels:
-                  app.kubernetes.io/managed-by: trivy-operator
       verifyImages:
         - imageReferences:
             - "192.168.1.8:30082/boutique/*"
@@ -61,13 +54,6 @@ spec:
               namespaceSelector:
                 matchLabels:
                   app.kubernetes.io/part-of: online-boutique
-      # Narrow exclusion: in-cluster scanner jobs (Trivy Operator) are infrastructure, not app workloads.
-      exclude:
-        any:
-          - resources:
-              selector:
-                matchLabels:
-                  app.kubernetes.io/managed-by: trivy-operator
       validate:
         message: "Images must come from the Harbor project boutique (192.168.1.8:30082/boutique/)."
         foreach:
@@ -96,13 +82,6 @@ spec:
               namespaceSelector:
                 matchLabels:
                   app.kubernetes.io/part-of: online-boutique
-      # Narrow exclusion: in-cluster scanner jobs (Trivy Operator) are infrastructure, not app workloads.
-      exclude:
-        any:
-          - resources:
-              selector:
-                matchLabels:
-                  app.kubernetes.io/managed-by: trivy-operator
       validate:
         message: "The :latest tag is forbidden."
         foreach:
@@ -121,13 +100,6 @@ spec:
               namespaceSelector:
                 matchLabels:
                   app.kubernetes.io/part-of: online-boutique
-      # Narrow exclusion: in-cluster scanner jobs (Trivy Operator) are infrastructure, not app workloads.
-      exclude:
-        any:
-          - resources:
-              selector:
-                matchLabels:
-                  app.kubernetes.io/managed-by: trivy-operator
       validate:
         message: "Images must be pinned by digest (@sha256:...)."
         pattern:
@@ -153,13 +125,6 @@ spec:
               namespaceSelector:
                 matchLabels:
                   app.kubernetes.io/part-of: online-boutique
-      # Narrow exclusion: in-cluster scanner jobs (Trivy Operator) are infrastructure, not app workloads.
-      exclude:
-        any:
-          - resources:
-              selector:
-                matchLabels:
-                  app.kubernetes.io/managed-by: trivy-operator
       validate:
         message: "Pods must meet the restricted security profile (non-root, no priv-esc, drop ALL, RO rootfs, seccomp RuntimeDefault, no host namespaces/hostPath)."
         pattern:
@@ -198,13 +163,6 @@ spec:
               namespaceSelector:
                 matchLabels:
                   app.kubernetes.io/part-of: online-boutique
-      # Narrow exclusion: in-cluster scanner jobs (Trivy Operator) are infrastructure, not app workloads.
-      exclude:
-        any:
-          - resources:
-              selector:
-                matchLabels:
-                  app.kubernetes.io/managed-by: trivy-operator
       validate:
         message: "Every container must declare CPU and memory requests and limits."
         pattern:
@@ -232,13 +190,6 @@ spec:
               namespaceSelector:
                 matchLabels:
                   app.kubernetes.io/part-of: online-boutique
-      # Narrow exclusion: in-cluster scanner jobs (Trivy Operator) are infrastructure, not app workloads.
-      exclude:
-        any:
-          - resources:
-              selector:
-                matchLabels:
-                  app.kubernetes.io/managed-by: trivy-operator
       validate:
         message: "Every container must declare liveness and readiness probes."
         deny:
@@ -265,13 +216,6 @@ spec:
               namespaceSelector:
                 matchLabels:
                   app.kubernetes.io/part-of: online-boutique
-      # Narrow exclusion: in-cluster scanner jobs (Trivy Operator) are infrastructure, not app workloads.
-      exclude:
-        any:
-          - resources:
-              selector:
-                matchLabels:
-                  app.kubernetes.io/managed-by: trivy-operator
       validate:
         message: "Pods must carry the standard app.kubernetes.io/part-of label."
         pattern:
@@ -296,13 +240,6 @@ spec:
               namespaceSelector:
                 matchLabels:
                   app.kubernetes.io/part-of: online-boutique
-      # Narrow exclusion: in-cluster scanner jobs (Trivy Operator) are infrastructure, not app workloads.
-      exclude:
-        any:
-          - resources:
-              selector:
-                matchLabels:
-                  app.kubernetes.io/managed-by: trivy-operator
       validate:
         message: "automountServiceAccountToken must be false unless explicitly annotated."
         pattern:

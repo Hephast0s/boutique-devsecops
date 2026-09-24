@@ -104,6 +104,19 @@ requires a restart (shared config) → needs approval. Endpoint would then be sc
 ## CR-LOKI-1 — Install Loki for centralized logs (Medium)
 Loki is absent; Falco/application logs are not aggregated. Subject to the 4 GiB cap review.
 
+## CR-VAULT-PERSISTENCE — Vault storage is `emptyDir` (Critical for the secrets story)
+The pre-existing Vault release stores data on an **emptyDir**, so **every Vault restart wipes** the
+`boutique/` mount, the `kubernetes` auth method, the policy and the secrets. ExternalSecret then fails
+with `could not get secret data from provider` until Vault is re-seeded.
+- **Evidence:** `kubectl -n vault get sts vault -o jsonpath='{...volumes...}'` → `home -> {}` (emptyDir);
+  `vault secrets list | grep boutique` empty after a restart; ESO SecretStore `unable to create client`.
+- **Impact:** project secrets (and the operator's other projects) become unavailable after each Vault
+  restart; no rotation is durable.
+- **Stopgap:** `security/vault-bootstrap.sh` re-seeds from the live Kubernetes Secrets (idempotent).
+- **Fix (operator, shared component):** give Vault persistent storage (PVC) — e.g. change the Vault Helm
+  release to use `dataStorage` (PVC) with the cluster's `local-path` StorageClass, then re-init/unseal.
+  This is a change to an existing component and needs the operator's approval + a backup first.
+
 ## CR-003 — Runtime security / scanning — PARTIALLY RESOLVED
 - **Trivy Operator INSTALLED** (`trivy-system`); ConfigAuditReports + ExposedSecretReports produced for
   `boutique-*`. Vulnerability scanning disabled (capacity: node CPU hit ~70%, DB init did not complete).

@@ -1,0 +1,17 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: boutique-observability
+  namespace: argocd
+  labels: {app.kubernetes.io/part-of: online-boutique}
+spec:
+  project: boutique
+  source:
+    repoURL: https://github.com/Hephast0s/boutique-devsecops.git
+    targetRevision: main
+    path: gitops/observability
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: boutique-security
+  syncPolicy:
+    automated: {prune: false, selfHeal: false}

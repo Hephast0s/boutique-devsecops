@@ -25,7 +25,7 @@ images:
     digest: sha256:b5c29ddb3238474ea8d1842f07004fedeeae47f660627ab111a613a681cd0356
   - name: CONTAINER_IMAGES_REGISTRY/checkoutservice
     newName: 192.168.1.8:30082/boutique/checkoutservice
-    digest: sha256:ab40699b6d9e45c9a93b5427008f327fbe912465361e2ff7a1a1be7111e36134
+    digest: sha256:4472372db6237ae75e25ee0da62f2c0641900ccbabdaa717858b112e573a3712
   - name: CONTAINER_IMAGES_REGISTRY/currencyservice
     newName: 192.168.1.8:30082/boutique/currencyservice
     digest: sha256:7b2f3f804555c926861d67cd22c1b7c9e32d46b81cf1a64dd3089ae424d73be9
@@ -34,13 +34,13 @@ images:
     digest: sha256:77fd45d411b3550cbd39e30bda83ed6ea23d87fd6e58e69cf9fa2808e003984d
   - name: CONTAINER_IMAGES_REGISTRY/frontend
     newName: 192.168.1.8:30082/boutique/frontend
-    digest: sha256:c06df08eccd78568a37292cfbe889df42fac48691b7fb05f2deeba0ae8d669ef
+    digest: sha256:0c19e21f173849abd5207333f27cb005088d961018f3c77714381021275886cb
   - name: CONTAINER_IMAGES_REGISTRY/paymentservice
     newName: 192.168.1.8:30082/boutique/paymentservice
     digest: sha256:735b6d3255e2c74b0135a95cfc2337987e492f24e163c0bb9a853635876993c4
   - name: CONTAINER_IMAGES_REGISTRY/productcatalogservice
     newName: 192.168.1.8:30082/boutique/productcatalogservice
-    digest: sha256:fb8568ecfc948717eb07746a6ce360fb8e5f906ae8a874cbad666891f0d21790
+    digest: sha256:ca53dee2a4646cc2028bc2b7cbcdfcd42da578552095a5b3d99da347d13467b0
   - name: CONTAINER_IMAGES_REGISTRY/recommendationservice
     newName: 192.168.1.8:30082/boutique/recommendationservice
     digest: sha256:5d8321f2d24132889f654f75308e541b0626e6ae0cbacf81b170e5eb0921b415

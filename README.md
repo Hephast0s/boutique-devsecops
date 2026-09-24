@@ -83,6 +83,24 @@ commit ─► Jenkins (pod agents) ─► Kaniko ─► Harbor (digest, immutabl
 | Runtime secrets | Vault KV `boutique/` → ESO → Kubernetes Secret |
 | Git & GitOps | protected branches, signed commits, one controller, promotion by digest |
 
+## Image provenance
+
+Images are pulled from the Harbor project `boutique` and pinned **by digest**. Not every service is built
+by this project's CI yet — the rest are the upstream `v0.10.6` images mirrored into Harbor (the baseline
+control group). This table is the honest source of truth, per service.
+
+| Service | Source | Signed (cosign) |
+|---|---|---|
+| `frontend`, `productcatalogservice`, `checkoutservice` | **built by this project's Jenkins CI** | ✅ + SBOM & provenance attestations |
+| `emailservice` | built with the SMTP + TLS fix (this project) | ✅ |
+| `adservice`, `cartservice`, `currencyservice`, `paymentservice`, `recommendationservice`, `shippingservice`, `redis-cart` | upstream `v0.10.6` mirrored into Harbor (baseline) | ✅ (signed by this project) |
+| `loadgenerator` | upstream `v0.10.6` mirrored | ✅ (not deployed by default) |
+
+**Why not all CI-built?** The CI image gate (Trivy: CRITICAL or HIGH-with-a-fix) blocks several non-Go
+services whose base images still carry fixable OS CVEs. They must be remediated (base-image bumps) before
+CI can build and promote them. Until then they run as the signed baseline mirror — stated openly rather
+than implied as fully CI-built.
+
 ## Getting started
 
 ```bash

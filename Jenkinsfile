@@ -102,7 +102,10 @@ spec:
         container('tools') {
           sh 'apk add --no-cache git bash syft=1.42.4-r2; git config --global --add safe.directory "*"'
           sh 'bash ci/scripts/test-build-target.sh'
-          script { env.GIT_SHA = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim() }
+          script {
+            env.GIT_SHA = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+            env.FULL_SHA = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
+          }
           echo "workspace=${WORKSPACE} git_sha=${env.GIT_SHA}"
         }
         container('sign') {
@@ -296,7 +299,7 @@ sys.exit(1 if bad else 0)
         sh '''
           set -e
           SHA="${GIT_SHA:-manual}"
-          FULL_SHA="$(git rev-parse HEAD)"
+          FULL_SHA="${FULL_SHA:-unknown}"
           START_TS="$(date -u +%FT%TZ)"
           for f in digest/*.txt; do [ -f "$f" ] || continue
             svc=$(basename "$f" .txt); img="$REGISTRY/$svc@$(cat $f)"

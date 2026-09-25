@@ -1,0 +1,6 @@
+# gitleaks git (full history) — run 2026-09-25, image ghcr.io/gitleaks/gitleaks:v8.30.0
+# command: gitleaks git . --config .gitleaks.toml --redact --no-banner
+
+4:17AM INF 2737 commits scanned.
+4:17AM INF scanned ~17821812 bytes (17.82 MB) in 8.58s
+4:17AM INF no leaks found

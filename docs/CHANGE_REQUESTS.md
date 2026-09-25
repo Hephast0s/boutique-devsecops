@@ -135,6 +135,19 @@ meddle with the auth token exchange.
   switch the SecretStore to `https://vault.vault.svc:8200` with a `caProvider`. This changes a shared
   component and needs the operator's approval.
 
+## CR-EMAIL-BASE — emailservice rebuilt on a newer base crash-loops in k3s (Medium)
+After bumping the emailservice base to `python:3.14.7-alpine@sha256:9e9f…` (Alpine 3.24.2, to clear
+fixable CVEs) the pod **crash-loops in-cluster**: the gRPC health probe never connects (exit 137 after
+~30s), even though the exact image serves health `SERVING` locally. The older CI image
+(`…@sha256:2a937968…`, Alpine 3.24.1) runs fine, so it is deployed again.
+- **Evidence:** `kubectl -n boutique-dev describe pod -l app=emailservice` (probe failures); the image
+  runs and answers `grpc.health.v1.Health/Check` locally.
+- **Already tried:** IPv4-first bind (`0.0.0.0`), non-root `USER 1000`, dropping pip/ensurepip — all on
+  `main`; none changed the in-cluster result.
+- **Next:** compare the old/new base at the k3s runtime level (containerd image unpack / seccomp / IPv6),
+  or rebuild on an intermediate base; then re-promote. Until then the PII-log redaction and the
+  non-root/CVE fixes for emailservice are code-complete but **not deployed**.
+
 ## CR-UPSTREAM-REBASE — Source snapshot between upstream v0.10.6 and v0.10.7 (Low)
 The `src/` tree is a snapshot of upstream `main` that already contains post-v0.10.6 commits (e.g. Go
 toolchain 1.27.0 and the `checkoutservice` format-string fix), while the CI/image tags still say

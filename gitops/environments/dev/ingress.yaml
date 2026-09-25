@@ -36,4 +36,4 @@ spec:
     referrerPolicy: strict-origin-when-cross-origin
     stsSeconds: 31536000
     customResponseHeaders:
-      Content-Security-Policy: "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; frame-ancestors 'none'; base-uri 'self'"
+      Content-Security-Policy: "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://stackpath.bootstrapcdn.com https://fonts.googleapis.com; script-src 'self' https://stackpath.bootstrapcdn.com; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'"

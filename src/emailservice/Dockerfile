@@ -47,6 +47,13 @@ WORKDIR /email_server
 # Grab packages from builder
 COPY --from=builder /usr/local/lib/python3.14/ /usr/local/lib/python3.14/
 
+# Drop build-time Python tooling from the runtime image: the service does not need pip/
+# ensurepip/setuptools to run, and they carry vendored CVEs (msgpack inside pip; setuptools
+# bundled by ensurepip). This is runtime hardening, not a scanner suppression.
+RUN rm -rf /usr/local/lib/python3.14/site-packages/pip \
+           /usr/local/lib/python3.14/site-packages/pip-*.dist-info \
+           /usr/local/lib/python3.14/ensurepip
+
 # Add the application
 COPY . .
 

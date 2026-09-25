@@ -265,8 +265,9 @@ spec:
       when { expression { return env.BUILD_TARGET != '' } }
       steps { container('semgrep') {
         sh '''
+          sem_excl=$(bash ci/scripts/semgrep-excludes.sh | tr '\n' ' ')
           for svc in $(echo "${BUILD_TARGET:-frontend}" | tr ',' ' '); do
-            semgrep --config p/default --severity ERROR --error --json -o "reports/semgrep-$svc.json" "src/$svc"
+            semgrep --config p/default --severity ERROR --error $sem_excl --json -o "reports/semgrep-$svc.json" "src/$svc"
           done
           echo "semgrep reports: $(ls reports/semgrep-*.json 2>/dev/null | wc -l)"
         '''

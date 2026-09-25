@@ -40,3 +40,21 @@ exceptions:
     justification: Hardening header; not required for this demo. Tracked with security headers work.
     owner: Hephast0s
     expires: 2027-03-31
+  # --- Semgrep (review-3), triaged 2026-09-25 ---
+  - id: SEMGREP-GRPC-NODE
+    type: semgrep
+    identifier: "javascript.grpc.security.grpc-nodejs-insecure-connection.grpc-nodejs-insecure-connection"
+    justification: >
+      Inter-service gRPC is plaintext inside the cluster and is protected by default-deny
+      NetworkPolicies (only call-graph edges are allowed). mTLS for service-to-service traffic is a
+      documented roadmap item; there is no cross-trust boundary in this demo.
+    owner: Hephast0s
+    expires: 2027-03-31
+  - id: SEMGREP-GRPC-GO
+    type: semgrep
+    identifier: "go.grpc.security.grpc-server-insecure-connection.grpc-server-insecure-connection"
+    justification: >
+      Same rationale as SEMGREP-GRPC-NODE: in-cluster plaintext gRPC constrained by default-deny
+      NetworkPolicies; mTLS is the roadmap fix.
+    owner: Hephast0s
+    expires: 2027-03-31

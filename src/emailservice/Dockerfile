@@ -58,4 +58,5 @@ RUN rm -rf /usr/local/lib/python3.14/site-packages/pip \
 COPY . .
 
 EXPOSE 8080
+USER 1000:1000
 ENTRYPOINT [ "python", "email_server.py" ]

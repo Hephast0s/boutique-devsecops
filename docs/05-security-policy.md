@@ -22,7 +22,7 @@ SAST is wired (report-only). SCA/IaC/misconfig stages are defined here and land 
 
 ## Vulnerability baseline (day one)
 
-`frontend@sha256:6d85a5a7…` (CI-built, Go, distroless):
+`frontend@sha256:4a46fa79…` (CI-built, Go, distroless):
 `CRITICAL 0 · HIGH 0 · MEDIUM 2 · UNKNOWN 1`. Baseline recorded; a rising trend is itself a finding.
 
 ## Exception process

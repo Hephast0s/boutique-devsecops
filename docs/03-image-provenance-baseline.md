@@ -1,5 +1,9 @@
 # 03 — Image Provenance (baseline)
 
+> NOTE (2026-09-25): this is the Phase-3 mirror baseline (unsigned upstream images). For the current
+> deployed digests and their cosign verification, see `docs/evidence/verify-deployed-2026-09-25.txt`
+> (11/11 OK) and the README "Image provenance" table.
+
 Every runtime image is mirrored from upstream into Harbor `boutique` and pinned by digest.
 Source registry: `us-central1-docker.pkg.dev/online-boutique-ci/microservices-demo/<svc>:v0.10.6`
 (verified anonymously pullable during Phase 3).

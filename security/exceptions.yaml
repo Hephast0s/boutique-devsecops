@@ -40,6 +40,21 @@ exceptions:
     justification: Hardening header; not required for this demo. Tracked with security headers work.
     owner: Hephast0s
     expires: 2027-03-31
+  - id: ZAP-10055
+    type: dast
+    identifier: "CSP: Failure to Define Directive with No Fallback / style-src unsafe-inline"
+    justification: >
+      A CSP is now enforced (Traefik middleware) with default-src 'self' and frame-ancestors 'none'.
+      `style-src 'unsafe-inline'` is required because the upstream templates use inline style= attributes;
+      object-src/base-uri tightening is a hardening backlog item.
+    owner: Hephast0s
+    expires: 2027-03-31
+  - id: ZAP-10063
+    type: dast
+    identifier: "Permissions Policy Header Not Set"
+    justification: Permissions-Policy is a hardening header, not required for this demo. Backlog.
+    owner: Hephast0s
+    expires: 2027-03-31
   # --- Semgrep (review-3), triaged 2026-09-25 ---
   - id: SEMGREP-GRPC-NODE
     type: semgrep

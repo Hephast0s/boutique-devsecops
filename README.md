@@ -92,7 +92,7 @@ control group). This table is the honest source of truth, per service.
 | Service | Source | Signed (cosign) |
 |---|---|---|
 | `frontend`, `productcatalogservice`, `checkoutservice` | **built by this project's Jenkins CI** | ✅ + SBOM & provenance attestations |
-| `emailservice` | **built by this project's Jenkins CI** (SMTP+TLS fix, non-root, PII-safe logs), deployed to all envs | ✅ + SBOM & provenance attestations |
+| `emailservice` | built by this project's Jenkins CI (SMTP+TLS fix), deployed to all envs. The newer base-image rebuild (non-root, PII-safe logs, CVE-clean) is built+signed on `main` but **rolled back** — it crash-loops in k3s despite working locally (CR-EMAIL-BASE). | ✅ + SBOM & provenance attestations |
 | `adservice`, `cartservice`, `currencyservice`, `paymentservice`, `recommendationservice`, `shippingservice`, `redis-cart` | upstream `v0.10.6` mirrored into Harbor (baseline) | ✅ (signed by this project — verify: `docs/evidence/verify-deployed-*.txt`) |
 | `loadgenerator` | upstream `v0.10.6` mirrored | ✅ (not deployed by default) |
 

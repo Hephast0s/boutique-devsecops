@@ -42,4 +42,5 @@ COPY . .
 
 EXPOSE 50051
 
+USER 1000:1000
 ENTRYPOINT [ "node", "index.js" ]

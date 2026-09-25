@@ -42,4 +42,5 @@ COPY . .
 
 EXPOSE 7000
 
+USER 1000:1000
 ENTRYPOINT [ "node", "server.js" ]

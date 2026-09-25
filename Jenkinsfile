@@ -100,7 +100,7 @@ spec:
     stage('1. Preflight') {
       steps {
         container('tools') {
-          sh 'apk add --no-cache git bash syft=1.19.0-r5; git config --global --add safe.directory "*"'
+          sh 'apk add --no-cache git bash syft=1.42.4-r2; git config --global --add safe.directory "*"'
           sh 'bash ci/scripts/test-build-target.sh'
           script { env.GIT_SHA = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim() }
           echo "workspace=${WORKSPACE} git_sha=${env.GIT_SHA}"

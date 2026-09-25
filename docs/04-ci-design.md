@@ -48,7 +48,7 @@ build/scan skeleton they plug into.
 outcome   : SUCCESS
 duration  : 371734 ms (~6m12s), first cold build
 image     : 192.168.1.8:30082/boutique/frontend:v0.10.6-1139de7b-b5
-digest    : sha256:6d85a5a7919a87ec195a65ea30815d9b3c421270f6c4a416d276c6f8fd38feb0
+digest    : sha256:4a46fa79493346fc5760f4bb4b35e59127ac86a7c738f48b6940dda856cd2ec4
 ```
 Console archived at `docs/evidence/phase4/console-build5.txt`; the artifact is confirmed present in
 Harbor (two artifacts: the mirrored `v0.10.6` and the CI-built tag).

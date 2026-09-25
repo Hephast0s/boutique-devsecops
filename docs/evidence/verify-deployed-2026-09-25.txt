@@ -1,14 +1,13 @@
-cosign verify — deployed image digests — 2026-09-24T22:00:10Z
-key: security/cosign.pub  | every image signed by this project (tlog disabled for homelab)
+# cosign verify of every unique image pinned in dev/staging/prod, 2026-09-25T04:11:02Z
+# key: security/cosign.pub ; registry 192.168.1.8:30082 (HTTP); offline tlog+sct
 OK   192.168.1.8:30082/boutique/adservice@sha256:f580c4853e896dd2083f0c270c4b7aa5feda6dd56058a93b87d0c88334a4c07d
 OK   192.168.1.8:30082/boutique/cartservice@sha256:b5c29ddb3238474ea8d1842f07004fedeeae47f660627ab111a613a681cd0356
 OK   192.168.1.8:30082/boutique/checkoutservice@sha256:4472372db6237ae75e25ee0da62f2c0641900ccbabdaa717858b112e573a3712
 OK   192.168.1.8:30082/boutique/currencyservice@sha256:7b2f3f804555c926861d67cd22c1b7c9e32d46b81cf1a64dd3089ae424d73be9
-OK   192.168.1.8:30082/boutique/emailservice@sha256:2a937968ec034a8d621f447ddfb97da8ff3eeb0e3acb12d122eb0ff9c87c4c79
-OK   192.168.1.8:30082/boutique/frontend@sha256:0c19e21f173849abd5207333f27cb005088d961018f3c77714381021275886cb
+OK   192.168.1.8:30082/boutique/emailservice@sha256:32ec5b2b50a1c8115e27a017c8d08243234b0270124825e12b7334dfbc9949a6
+OK   192.168.1.8:30082/boutique/frontend@sha256:4a46fa79493346fc5760f4bb4b35e59127ac86a7c738f48b6940dda856cd2ec4
 OK   192.168.1.8:30082/boutique/paymentservice@sha256:735b6d3255e2c74b0135a95cfc2337987e492f24e163c0bb9a853635876993c4
 OK   192.168.1.8:30082/boutique/productcatalogservice@sha256:ca53dee2a4646cc2028bc2b7cbcdfcd42da578552095a5b3d99da347d13467b0
 OK   192.168.1.8:30082/boutique/recommendationservice@sha256:5d8321f2d24132889f654f75308e541b0626e6ae0cbacf81b170e5eb0921b415
 OK   192.168.1.8:30082/boutique/redis@sha256:9c3ecc609a8087c0f11c494fefaf37a8f7bf9a967631d4a0da8967a9810be354
 OK   192.168.1.8:30082/boutique/shippingservice@sha256:8527bafff8c8776e345f2dca0641f6e8595b053ce67f9a5af66f5a85d9eaca9d
-OK=11 FAIL=0

@@ -23,7 +23,7 @@
  Runtime (Falco, Trivy Operator)  ──►  Phase 9
 ```
 
-## Verified evidence (frontend, digest `sha256:6d85a5a7919a87ec195a65ea30815d9b3c421270f6c4a416d276c6f8fd38feb0`)
+## Verified evidence (frontend, digest `sha256:4a46fa79493346fc5760f4bb4b35e59127ac86a7c738f48b6940dda856cd2ec4`)
 
 ```
 SBOM   : 1002 components (CycloneDX json + SPDX json)

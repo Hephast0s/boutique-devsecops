@@ -92,7 +92,7 @@ control group). This table is the honest source of truth, per service.
 | Service | Source | Signed (cosign) |
 |---|---|---|
 | `frontend`, `productcatalogservice`, `checkoutservice` | **built by this project's Jenkins CI** | ✅ + SBOM & provenance attestations |
-| `emailservice` | built with the SMTP + TLS fix (this project), deployed to all envs | ✅ |
+| `emailservice` | **built by this project's Jenkins CI** (SMTP+TLS fix, non-root, PII-safe logs), deployed to all envs | ✅ + SBOM & provenance attestations |
 | `adservice`, `cartservice`, `currencyservice`, `paymentservice`, `recommendationservice`, `shippingservice`, `redis-cart` | upstream `v0.10.6` mirrored into Harbor (baseline) | ✅ (signed by this project — verify: `docs/evidence/verify-deployed-*.txt`) |
 | `loadgenerator` | upstream `v0.10.6` mirrored | ✅ (not deployed by default) |
 

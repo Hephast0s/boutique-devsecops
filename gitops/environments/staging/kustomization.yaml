@@ -30,10 +30,10 @@ images:
     digest: sha256:7b2f3f804555c926861d67cd22c1b7c9e32d46b81cf1a64dd3089ae424d73be9
   - name: CONTAINER_IMAGES_REGISTRY/emailservice
     newName: 192.168.1.8:30082/boutique/emailservice
-    digest: sha256:2a937968ec034a8d621f447ddfb97da8ff3eeb0e3acb12d122eb0ff9c87c4c79
+    digest: sha256:32ec5b2b50a1c8115e27a017c8d08243234b0270124825e12b7334dfbc9949a6
   - name: CONTAINER_IMAGES_REGISTRY/frontend
     newName: 192.168.1.8:30082/boutique/frontend
-    digest: sha256:0c19e21f173849abd5207333f27cb005088d961018f3c77714381021275886cb
+    digest: sha256:4a46fa79493346fc5760f4bb4b35e59127ac86a7c738f48b6940dda856cd2ec4
   - name: CONTAINER_IMAGES_REGISTRY/paymentservice
     newName: 192.168.1.8:30082/boutique/paymentservice
     digest: sha256:735b6d3255e2c74b0135a95cfc2337987e492f24e163c0bb9a853635876993c4

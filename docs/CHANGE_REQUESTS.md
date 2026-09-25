@@ -126,3 +126,18 @@ with `could not get secret data from provider` until Vault is re-seeded.
   version/driver or a runtime-security alternative. Evidence in `docs/09-runtime-security.md`.
 - **Loki NOT installed** — capacity; log aggregation remains a gap.
 - **kube-bench RUN** (2026-09-17): 9 PASS / 7 FAIL / 37 WARN — the 7 FAILs are kubelet file-permission checks typical of k3s; see `docs/evidence/phase9/kube-bench.txt`.
+
+## CR-VAULT-TLS — External Secrets talks to Vault over plain HTTP (Low)
+`gitops/security/eso-dev.yaml` points the SecretStore at `http://vault.vault.svc:8200` (in-cluster,
+unencrypted). Traffic stays on the cluster network, but any pod that can reach the service could sniff or
+meddle with the auth token exchange.
+- **Fix (operator, shared component):** enable TLS on the Vault listener (cert-manager-issued cert) and
+  switch the SecretStore to `https://vault.vault.svc:8200` with a `caProvider`. This changes a shared
+  component and needs the operator's approval.
+
+## CR-UPSTREAM-REBASE — Source snapshot between upstream v0.10.6 and v0.10.7 (Low)
+The `src/` tree is a snapshot of upstream `main` that already contains post-v0.10.6 commits (e.g. Go
+toolchain 1.27.0 and the `checkoutservice` format-string fix), while the CI/image tags still say
+`v0.10.6`. Upstream later released **v0.10.7** (2026-09-18).
+- **Fix:** rebase this project's deltas (emailservice SMTP/TLS, gitops/, ci/, security/) onto upstream
+  `v0.10.7` and retag. A controlled rebase, not a merge — schedule it with a full re-test.

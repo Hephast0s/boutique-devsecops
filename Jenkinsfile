@@ -23,12 +23,12 @@ spec:
           value: "http://jenkins.jenkins.svc.cluster.local:8080/"
       resources: {requests: {cpu: "100m", memory: "256Mi"}, limits: {cpu: "500m", memory: "512Mi"}}
     - name: tools
-      image: python:3.14-alpine
+      image: python:3.14.7-alpine@sha256:05b2b8b732ecd268fee8727a369f936f022d1321b59befd13c30ede22769dcdc
       command: ['sleep']
       args: ['3600']
       resources: {requests: {cpu: "50m", memory: "128Mi"}, limits: {cpu: "1000m", memory: "1Gi"}}
     - name: sign
-      image: alpine:3.21
+      image: alpine:3.21@sha256:ce64758a109eb420d874a118f87920e625e12d3634e03b4a5573fd9f6e5d3507
       command: ['sleep']
       args: ['3600']
       env:
@@ -52,17 +52,17 @@ spec:
       volumeMounts: [{name: docker-config, mountPath: /kaniko/.docker}]
       resources: {requests: {cpu: "200m", memory: "512Mi"}, limits: {cpu: "1500m", memory: "2Gi"}}
     - name: trivy
-      image: aquasec/trivy:latest
+      image: aquasec/trivy:0.74.0@sha256:62b1e65e8869bc4b4c6aa4fa2b21595256c7c2f6018a9d9ad61caf87187c1969
       command: ['sleep']
       args: ['3600']
       resources: {requests: {cpu: "50m", memory: "128Mi"}, limits: {cpu: "500m", memory: "1Gi"}}
     - name: semgrep
-      image: semgrep/semgrep:latest
+      image: semgrep/semgrep@sha256:acaac22ffc7b7cc5926de0751b223bce0b2491c33d18422fa72f632c78d81198
       command: ['sleep']
       args: ['3600']
       resources: {requests: {cpu: "50m", memory: "256Mi"}, limits: {cpu: "1000m", memory: "1Gi"}}
     - name: hadolint
-      image: hadolint/hadolint:latest-debian
+      image: hadolint/hadolint@sha256:9a3944b7fddcb947d1ffd90829ac1a6e5c30479223358f249d8b96c7d0019e27
       command: ['sleep']
       args: ['3600']
       resources: {requests: {cpu: "20m", memory: "64Mi"}, limits: {cpu: "200m", memory: "256Mi"}}
@@ -100,20 +100,20 @@ spec:
     stage('1. Preflight') {
       steps {
         container('tools') {
-          sh 'apk add --no-cache git bash syft >/dev/null 2>&1; git config --global --add safe.directory "*"'
+          sh 'apk add --no-cache git bash syft=1.19.0-r5; git config --global --add safe.directory "*"'
           sh 'bash ci/scripts/test-build-target.sh'
           script { env.GIT_SHA = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim() }
           echo "workspace=${WORKSPACE} git_sha=${env.GIT_SHA}"
         }
         container('sign') {
-          sh 'apk add --no-cache cosign >/dev/null 2>&1'
+          sh 'apk add --no-cache cosign=2.4.1-r5'
         }
       }
     }
 
     stage('2. Change Detection') {
       steps { container('tools') { script {
-        def changed = sh(script: 'bash ci/scripts/detect-changes.sh origin/main || true', returnStdout: true).trim()
+        def changed = sh(script: 'bash ci/scripts/detect-changes.sh origin/main', returnStdout: true).trim()
         env.CHANGED_SERVICES = changed.replace('\n', ',')
         def allSvcs = sh(script: "grep -E '^  - name:' ci/services.yaml | sed 's/.*name: //' | paste -sd, -", returnStdout: true).trim()
         env.BUILD_TARGET = params.FORCE_ALL ? allSvcs : (params.SERVICE ?: env.CHANGED_SERVICES)
@@ -239,10 +239,9 @@ spec:
           set -e
           for d in gitops kustomize/base; do
             name=$(basename "$d")
-            extra=""
-            [ "$d" = "gitops" ] && extra="--severity CRITICAL --exit-code 1"
-            trivy config $extra --format json -o "$WORKSPACE/reports/iac-$name.json" "$WORKSPACE/$d" \
-              || { echo "IaC GATE FAILED: $d"; exit 1; }
+            trivy config --severity CRITICAL --exit-code 1 --format json \
+              -o "$WORKSPACE/reports/iac-$name.json" "$WORKSPACE/$d" \
+              || { echo "IaC GATE FAILED: $d (CRITICAL)"; exit 1; }
             test -s "$WORKSPACE/reports/iac-$name.json" || { echo "IaC report missing: $d"; exit 1; }
             echo "iac report written: iac-$name.json"
           done

@@ -65,7 +65,7 @@ replicas:
   - {name: shippingservice, count: 1}
   - {name: redis-cart, count: 1}
 
-# Point emailservice at the local Mailpit SMTP sink (non-GCP email delivery).
+# Point emailservice at real SMTP delivery (Gmail) via the smtp-eso secret (Mailpit removed).
 patches:
   - target:
       group: apps

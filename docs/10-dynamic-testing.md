@@ -19,20 +19,35 @@ A Kubernetes Job form of the smoke test (for use as an Argo CD PostSync hook) is
 ## DAST — OWASP ZAP baseline (staging)
 
 `zap-baseline.py -t http://boutique-staging.192.168.1.8.nip.io` —
-report at `docs/evidence/phase10/zap-baseline.{html,json}`.
+report at `docs/evidence/phase10/zap-baseline.{html,json}` (run 2026-09-16).
 
 ```
 FAIL-NEW: 0   FAIL-INPROG: 0   WARN-NEW: 12   PASS: 55
 ```
+
+> NOTE: this report predates the review-2 fixes. CSP (10038) and Missing Anti-clickjacking (10020) are
+> now **fixed** by the Traefik `boutique-security-headers` middleware (`frameDeny: true` and a CSP with
+> `frame-ancestors 'none'`), deployed to dev/staging/prod; session and currency cookies now set
+> `HttpOnly; SameSite=Lax`. A re-run is needed for fresh evidence.
 
 ### Finding triage (all WARN, none FAIL)
 
 | Rule | Finding | Triage |
 |---|---|---|
 | 10202 | Absence of Anti-CSRF Tokens (×5) | Accepted (ZAP-10202); stateless demo, no privileged transitions |
+| 10020 | Missing Anti-clickjacking Header | **Fixed** — Traefik middleware `frameDeny: true` (all envs) |
+| 10038 | Content Security Policy (CSP) Header Not Set | **Fixed** — Traefik middleware CSP (all envs) |
 | 10112 | Session Management Response Identified (×4) | Accepted (ZAP-10112); informational |
 | 90003 | Sub Resource Integrity Attribute Missing (×5) | Accepted (ZAP-90003); same-origin assets |
 | 90004 | Cross-Origin-Embedder-Policy Header Missing (×2+) | Accepted (ZAP-90004); hardening backlog |
+
+Re-run across more endpoints (home, product, cart, checkout) once ZAP is available:
+
+```
+zap-baseline.py -t http://boutique-staging.192.168.1.8.nip.io \
+  -r docs/evidence/phase10/zap-baseline-$(date +%F).html \
+  -J docs/evidence/phase10/zap-baseline-$(date +%F).json
+```
 
 Every finding is triaged in `security/exceptions.yaml` with an owner and expiry.
 

@@ -30,7 +30,7 @@ images:
     digest: sha256:7b2f3f804555c926861d67cd22c1b7c9e32d46b81cf1a64dd3089ae424d73be9
   - name: CONTAINER_IMAGES_REGISTRY/emailservice
     newName: 192.168.1.8:30082/boutique/emailservice
-    digest: sha256:005b75c71da50a5b2786fa20e823ba438c143035c3a96be936f2bd3ac04ba77d
+    digest: sha256:426fafefbbf05bac2158a143525137dd2017f36b89105d3bca06241a7aecb559
   - name: CONTAINER_IMAGES_REGISTRY/frontend
     newName: 192.168.1.8:30082/boutique/frontend
     digest: sha256:4a46fa79493346fc5760f4bb4b35e59127ac86a7c738f48b6940dda856cd2ec4

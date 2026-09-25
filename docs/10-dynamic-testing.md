@@ -18,36 +18,32 @@ A Kubernetes Job form of the smoke test (for use as an Argo CD PostSync hook) is
 
 ## DAST — OWASP ZAP baseline (staging)
 
-`zap-baseline.py -t http://boutique-staging.192.168.1.8.nip.io` —
-report at `docs/evidence/phase10/zap-baseline.{html,json}` (run 2026-09-16).
+`zap-baseline.py -t http://boutique-staging.192.168.1.8.nip.io` (ZAP `stable`, host network).
+Latest run **2026-09-25**: `docs/evidence/phase10/zap-baseline-2026-09-25.{html,json}`
+(previous: `zap-baseline.{html,json}`, 2026-09-16).
 
 ```
-FAIL-NEW: 0   FAIL-INPROG: 0   WARN-NEW: 12   PASS: 55
+FAIL-NEW: 0   FAIL-INPROG: 0   WARN-NEW: 8   PASS: 59     (was WARN-NEW: 12, PASS: 55)
 ```
 
-> NOTE: this report predates the review-2 fixes. CSP (10038) and Missing Anti-clickjacking (10020) are
-> now **fixed** by the Traefik `boutique-security-headers` middleware (`frameDeny: true` and a CSP with
-> `frame-ancestors 'none'`), deployed to dev/staging/prod; session and currency cookies now set
-> `HttpOnly; SameSite=Lax`. A re-run is needed for fresh evidence.
+The 2026-09-25 re-run confirms the review-2 fixes: **CSP (10038)** and **Missing Anti-clickjacking
+(10020)** are no longer reported (Traefik `boutique-security-headers` middleware: `frameDeny: true`, CSP
+with `frame-ancestors 'none'`, deployed to dev/staging/prod), and cookies now set
+`HttpOnly; SameSite=Lax`. With a CSP present, ZAP now reports CSP *substance* findings (10055) instead.
 
 ### Finding triage (all WARN, none FAIL)
 
 | Rule | Finding | Triage |
 |---|---|---|
 | 10202 | Absence of Anti-CSRF Tokens (×5) | Accepted (ZAP-10202); stateless demo, no privileged transitions |
-| 10020 | Missing Anti-clickjacking Header | **Fixed** — Traefik middleware `frameDeny: true` (all envs) |
-| 10038 | Content Security Policy (CSP) Header Not Set | **Fixed** — Traefik middleware CSP (all envs) |
-| 10112 | Session Management Response Identified (×4) | Accepted (ZAP-10112); informational |
+| 10055 | CSP: Failure to Define Directive with No Fallback | Accepted (ZAP-10055); `default-src 'self'` is set; `object-src`/`base-uri` hardening backlog |
+| 10055 | CSP: style-src unsafe-inline | Accepted; the upstream templates use inline `style=` attributes |
 | 90003 | Sub Resource Integrity Attribute Missing (×5) | Accepted (ZAP-90003); same-origin assets |
-| 90004 | Cross-Origin-Embedder-Policy Header Missing (×2+) | Accepted (ZAP-90004); hardening backlog |
+| 90004 | COEP / COOP / CORP header missing | Accepted (ZAP-90004); hardening backlog |
+| 10063 | Permissions Policy Header Not Set | Accepted; hardening backlog |
+| 10029/10112 | Cookie Poisoning / Session Management | Informational (cookie is set by design) |
 
-Re-run across more endpoints (home, product, cart, checkout) once ZAP is available:
-
-```
-zap-baseline.py -t http://boutique-staging.192.168.1.8.nip.io \
-  -r docs/evidence/phase10/zap-baseline-$(date +%F).html \
-  -J docs/evidence/phase10/zap-baseline-$(date +%F).json
-```
+`10038` (CSP not set) and `10020` (anti-clickjacking) are **fixed** and no longer appear.
 
 Every finding is triaged in `security/exceptions.yaml` with an owner and expiry.
 

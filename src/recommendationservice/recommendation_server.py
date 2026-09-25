@@ -145,7 +145,13 @@ if __name__ == "__main__":
 
     # start server
     logger.info("listening on port: " + port)
-    server.add_insecure_port('[::]:'+port)
+    # Prefer dual-stack, but fall back to IPv4-only (some pod networks disable IPv6 and
+    # add_insecure_port('[::]:...') returns 0 without raising).
+    bound = server.add_insecure_port('[::]:'+port)
+    if not bound:
+        bound = server.add_insecure_port('0.0.0.0:'+port)
+    if not bound:
+        raise Exception('failed to bind port '+port)
     server.start()
 
     # keep alive

@@ -194,7 +194,13 @@ def start(dummy_mode):
 
   port = os.environ.get('PORT', "8080")
   logger.info("listening on port: "+port)
-  server.add_insecure_port('[::]:'+port)
+  # Prefer dual-stack, but fall back to IPv4-only: some pod networks (k3s) have IPv6
+  # disabled and add_insecure_port('[::]:...') then returns 0 without raising.
+  bound = server.add_insecure_port('[::]:'+port)
+  if not bound:
+    bound = server.add_insecure_port('0.0.0.0:'+port)
+  if not bound:
+    raise Exception('failed to bind port '+port)
   server.start()
   try:
     while True:

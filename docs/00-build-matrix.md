@@ -10,15 +10,15 @@ Build contexts are taken from `skaffold.yaml` (the authoritative map).
 |---|---|---|---|---|---|---|---|
 | adservice | Java, `sourceCompatibility=21`, JDK 25 | `src/adservice` | `src/adservice/Dockerfile` | `eclipse-temurin:25.0.4_7-jre-alpine` | 9555 | gRPC | `boutique/adservice` |
 | cartservice | C# / .NET `net10.0` | **`src/cartservice/src`** | `src/cartservice/src/Dockerfile` | `mcr.microsoft.com/dotnet/runtime-deps:10.0.0-noble-chiseled` | 7070 | gRPC | `boutique/cartservice` |
-| checkoutservice | Go 1.25.0 (toolchain 1.27.0) | `src/checkoutservice` | `src/checkoutservice/Dockerfile` | `gcr.io/distroless/static` (unpinned) | 5050 | gRPC | `boutique/checkoutservice` |
+| checkoutservice | Go 1.25.0 (toolchain 1.27.0) | `src/checkoutservice` | `src/checkoutservice/Dockerfile` | `gcr.io/distroless/static` (digest-pinned) | 5050 | gRPC | `boutique/checkoutservice` |
 | currencyservice | Node 20.20.2 | `src/currencyservice` | `src/currencyservice/Dockerfile` | `alpine:3.24.1` + node | 7000 | gRPC | `boutique/currencyservice` |
 | emailservice | Python 3.14.7 | `src/emailservice` | `src/emailservice/Dockerfile` | `python:3.14.7-alpine` | 8080 *(svc 5000)* | gRPC | `boutique/emailservice` |
-| frontend | Go 1.25.0 (toolchain 1.27.0) | `src/frontend` | `src/frontend/Dockerfile` | `gcr.io/distroless/static` (unpinned) | 8080 | HTTP | `boutique/frontend` |
+| frontend | Go 1.25.0 (toolchain 1.27.0) | `src/frontend` | `src/frontend/Dockerfile` | `gcr.io/distroless/static` (digest-pinned) | 8080 | HTTP | `boutique/frontend` |
 | loadgenerator | Python 3.14.7 + Locust | `src/loadgenerator` | `src/loadgenerator/Dockerfile` | `python:3.14.7-alpine` | — | none | `boutique/loadgenerator` |
 | paymentservice | Node 20.20.2 | `src/paymentservice` | `src/paymentservice/Dockerfile` | `alpine:3.24.1` + node | 50051 | gRPC | `boutique/paymentservice` |
-| productcatalogservice | Go 1.25.8 (toolchain 1.27.0) | `src/productcatalogservice` | `src/productcatalogservice/Dockerfile` | `gcr.io/distroless/static` (unpinned) | 3550 | gRPC | `boutique/productcatalogservice` |
+| productcatalogservice | Go 1.25.8 (toolchain 1.27.0) | `src/productcatalogservice` | `src/productcatalogservice/Dockerfile` | `gcr.io/distroless/static` (digest-pinned) | 3550 | gRPC | `boutique/productcatalogservice` |
 | recommendationservice | Python 3.14.7 | `src/recommendationservice` | `src/recommendationservice/Dockerfile` | `python:3.14.7-alpine` | 8080 | gRPC | `boutique/recommendationservice` |
-| shippingservice | Go 1.25.0 (toolchain 1.27.0) | `src/shippingservice` | `src/shippingservice/Dockerfile` | `gcr.io/distroless/static` (unpinned) | 50051 | gRPC | `boutique/shippingservice` |
+| shippingservice | Go 1.25.0 (toolchain 1.27.0) | `src/shippingservice` | `src/shippingservice/Dockerfile` | `gcr.io/distroless/static` (digest-pinned) | 50051 | gRPC | `boutique/shippingservice` |
 | shoppingassistantservice | Python 3.14.7-slim | `src/shoppingassistantservice` | `src/shoppingassistantservice/Dockerfile` | `python:3.14.7-slim` | 8080 | HTTP | **not built for deploy — scan only** |
 | redis-cart | Redis | external image | — | `redis:alpine` (unpinned) | 6379 | TCP | mirror → `boutique/redis-cart` |
 
@@ -45,6 +45,6 @@ Build contexts are taken from `skaffold.yaml` (the authoritative map).
 2. **adservice is the memory peak:** Gradle + JDK 25, `downloadRepos` then `installDist`. Allocate ≥2 GiB and persist `~/.gradle`. No test task exists.
 3. **Go toolchain directives:** every Go module asks for `toolchain go1.27.0`; the Docker builder is `golang:1.27.0-alpine`. CI agents must have Go 1.27 or a module-proxy/toolchain source (Nexus `proxy.golang.org` mirror if available).
 4. **Distroless finals have no shell:** frontend, checkout, productcatalog, shipping — no `kubectl exec` debugging; use ephemeral debug containers.
-5. **Unpinned images to fix in our overlays (not in the upstream Dockerfiles):** four `gcr.io/distroless/static` finals and `redis:alpine` are mutable; our GitOps overlays pin by digest.
+5. **Mutable images:** the four `gcr.io/distroless/static` finals are now digest-pinned in this project's Dockerfiles (B-08); `redis:alpine` is pinned by digest in the GitOps overlays.
 6. **Node 20 is EOL** (Apr 2026) while the repo is dated Sep 2026; both Node Dockerfiles pin `node:20.20.2-alpine`. Report as an SCA/lifecycle finding; do not silently change the build.
 7. **Only non-root upstream image is cartservice** (`USER 1000`); the four distroless Go images use the *root* distroless tag. Container `securityContext` in the manifests still forces `runAsUser: 1000`, so runtime is non-root — but the image default is root.

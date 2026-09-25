@@ -11,7 +11,7 @@ A new `AppProject boutique` restricts sources to this repo and destinations to `
 gitops/
 ├── components/boutique-hardening/   shared patches (seccomp, SA token, nodeSelector, probe tolerance, ClusterIP)
 ├── environments/
-│   ├── dev/       namespace + ingress + mailpit + digest pins + replicas
+│   ├── dev/       namespace + ingress + digest pins + replicas
 │   ├── staging/   same shape, boutique-staging host
 │   └── prod/      same + PDBs, manual sync
 ├── security/      ESO SecretStore/ExternalSecrets + Vault k8s-auth SA (boutique-security)

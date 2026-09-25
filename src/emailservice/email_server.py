@@ -16,6 +16,7 @@
 
 from concurrent import futures
 import argparse
+import hashlib
 import os
 import smtplib
 import ssl
@@ -44,6 +45,12 @@ from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExport
 
 from logger import getJSONLogger
 logger = getJSONLogger('emailservice-server')
+
+def _redact(address):
+  # Never log customer PII: keep a short, non-reversible fingerprint for correlation.
+  if not address:
+    return '(none)'
+  return hashlib.sha256(address.encode('utf-8')).hexdigest()[:12]
 
 # Loads confirmation email template from file
 env = Environment(
@@ -110,7 +117,7 @@ class EmailService(BaseEmailService):
 
 class DummyEmailService(BaseEmailService):
   def SendOrderConfirmation(self, request, context):
-    logger.info('A request to send order confirmation email to {} has been received.'.format(request.email))
+    logger.info('A request to send order confirmation email to {} has been received.'.format(_redact(request.email)))
     return demo_pb2.Empty()
 
 class SMTPEmailService(BaseEmailService):
@@ -159,12 +166,12 @@ class SMTPEmailService(BaseEmailService):
           smtp.login(user, password)
         smtp.sendmail(sender, [email], msg.as_string())
     except Exception as err:
-      logger.error('failed to send order confirmation email to {}: {}'.format(email, err))
+      logger.error('failed to send order confirmation email to {}: {}'.format(_redact(email), err))
       context.set_details("An error occurred when sending the email.")
       context.set_code(grpc.StatusCode.INTERNAL)
       return demo_pb2.Empty()
 
-    logger.info('order confirmation email sent to {} via SMTP {}:{}'.format(email, host, port))
+    logger.info('order confirmation email sent to {} via SMTP {}:{}'.format(_redact(email), host, port))
     return demo_pb2.Empty()
 
 class HealthCheck():

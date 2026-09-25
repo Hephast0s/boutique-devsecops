@@ -181,6 +181,15 @@ spec:
                   capabilities:
                     drop:
                       - ALL
+            =(ephemeralContainers):
+              - (name): "*"
+                securityContext:
+                  privileged: false
+                  allowPrivilegeEscalation: false
+                  readOnlyRootFilesystem: true
+                  capabilities:
+                    drop:
+                      - ALL
 ---
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
@@ -213,6 +222,11 @@ spec:
                 resources:
                   requests: {cpu: "?*", memory: "?*"}
                   limits: {cpu: "?*", memory: "?*"}
+            =(ephemeralContainers):
+              - (name): "*"
+                resources:
+                  requests: {cpu: "?*", memory: "?*"}
+                  limits: {cpu: "?*", memory: "?*"}
 ---
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
@@ -224,6 +238,8 @@ spec:
   background: true
   rules:
     - name: require-liveness-and-readiness
+      # NOTE: initContainers and ephemeralContainers do not support liveness/readiness
+      # probes (Kubernetes forbids them), so only spec.containers is checked here.
       match:
         any:
           - resources:

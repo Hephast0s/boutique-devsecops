@@ -8,9 +8,10 @@ Date: 2026-09-16 · Branch: `phase-9-network` · New objects: 14 NetworkPolicies
 - Authored a `boutique-network` component: default-deny, always-allow DNS, and explicit per-service
   allows derived from the call graph (replacing the upstream wide-open egress).
 - Applied to dev/staging/prod; verified the application still works and that disallowed flows are blocked.
-- **Runtime security (Falco), Trivy Operator and kube-bench are NOT installed** — they require an
-  install-permission decision (CR-003) and resource review against the 4 GiB cap. Documented honestly in
-  `docs/09-runtime-security.md`.
+- **Runtime security at the time of this phase:** Falco, Trivy Operator and kube-bench were not yet
+  installed (they needed an install-permission decision, CR-003, and a capacity review). **Superseded** —
+  see `docs/09-runtime-security.md` and `docs/CHANGE_REQUESTS.md` (Trivy Operator installed; kube-bench
+  run 2026-09-17; Falco removed after a crash-loop).
 
 ## 2. Evidence
 
@@ -31,9 +32,9 @@ Full transcript: docs/evidence/phase9/netpol-tests.txt
 |---|---|
 | Default-deny holds and the app still works end to end (checkout completes) | ✅ |
 | Explicit egress + DNS allow; DNS footgun avoided | ✅ |
-| ≥3 custom Falco rules fire with evidence | ❌ **blocked** (Falco not installed — CR-003) |
-| Trivy Operator reports visible | ❌ **blocked** (CR-003) |
-| kube-bench report | ❌ **blocked** (CR-003) |
+| ≥3 custom Falco rules fire with evidence | ⚠️ Falco attempted then removed (crash-loop) — CR-003 |
+| Trivy Operator reports visible | ✅ installed later (`trivy-system`) — CR-003 resolved |
+| kube-bench report | ✅ run later 2026-09-17 (9 PASS / 7 FAIL / 37 WARN) — CR-003 resolved |
 | Test artifacts cleaned up | ✅ (tests used `exec` into an existing pod; no test objects created) |
 
 ## 4. Also fixed this phase
@@ -55,7 +56,6 @@ Phase 10 — smoke tests + DAST (ZAP) + load. Runtime-security installs remain b
   init did not complete; capacity). A narrow Kyverno exclusion for `managed-by=trivy-operator` and a
   scanner egress netpol were added at the time; **both were removed in a later review fix (they were
   unnecessary — scan jobs run in `trivy-system` — and the label exclusion was a spoofable bypass).**
-  scanner egress NetworkPolicy were added.
 - **Falco installed, detected 12 real events** (`Contact K8S API Server From Container`), then entered
   `CrashLoopBackOff` on 2/3 nodes due to a driver bug (`could not parse param … openat` + a container-plugin
   panic); legacy `ebpf` is unsupported by the chart. **Falco uninstalled**, cluster verified stable.

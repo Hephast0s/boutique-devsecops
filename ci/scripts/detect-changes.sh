@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Detect which services changed between a base ref and HEAD, using ci/services.yaml as the single
 # source of truth. Prints one service name per line. Shared-path changes select ALL services.
-# Usage: detect-changes.sh [base-ref]   (default: origin/devsecops)
+# Usage: detect-changes.sh [base-ref]   (default: origin/main)
 set -euo pipefail
-base="${1:-origin/devsecops}"
+base="${1:-origin/main}"
 
 python3 - "$base" <<'PY'
 import re, sys, subprocess

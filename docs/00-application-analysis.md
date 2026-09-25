@@ -22,7 +22,7 @@ Test reality is from Phase 0 recon; the Jenkins matrix lives in `ci/services.yam
 ## 1. frontend — `src/frontend`
 
 - **Purpose:** the only internet-facing service; renders the shop UI and is the HTTP entry point.
-- **Runtime:** Go `go 1.25.0` / `toolchain go1.27.0`; final `gcr.io/distroless/static` (unpinned).
+- **Runtime:** Go `go 1.25.0` / `toolchain go1.27.0`; final `gcr.io/distroless/static` (digest-pinned).
 - **Entrypoint:** `/src/server` (`src/frontend/Dockerfile:44`), `main.go`.
 - **Port/protocol:** 8080 HTTP.
 - **Serves:** no RPCs — HTTP routes `GET/HEAD /`, `/product/{id}`, `/cart`, `POST /cart`, `/cart/empty`,
@@ -48,7 +48,7 @@ Test reality is from Phase 0 recon; the Jenkins matrix lives in `ci/services.yam
 ## 2. productcatalogservice — `src/productcatalogservice`
 
 - **Purpose:** serves the product catalog (read-only, in-binary JSON).
-- **Runtime:** Go `go 1.25.8` / toolchain 1.27.0; final distroless static (unpinned).
+- **Runtime:** Go `go 1.25.8` / toolchain 1.27.0; final distroless static (digest-pinned).
 - **Entrypoint:** `/src/server` (`Dockerfile:44`); impl `product_catalog.go`, `server.go`.
 - **Port/protocol:** 3550 gRPC.
 - **Serves:** `ListProducts` (`product_catalog.go:41`), `GetProduct` (`:47`), `SearchProducts` (`:60`).
@@ -63,7 +63,7 @@ Test reality is from Phase 0 recon; the Jenkins matrix lives in `ci/services.yam
 ## 3. shippingservice — `src/shippingservice`
 
 - **Purpose:** shipping quotes and order shipment.
-- **Runtime:** Go 1.25.0 / toolchain 1.27.0; distroless static (unpinned).
+- **Runtime:** Go 1.25.0 / toolchain 1.27.0; distroless static (digest-pinned).
 - **Entrypoint:** `/src/shippingservice` (`Dockerfile:44`).
 - **Port/protocol:** 50051 gRPC.
 - **Serves:** `GetQuote` (`main.go:119`), `ShipOrder` (`:142`).
@@ -74,7 +74,7 @@ Test reality is from Phase 0 recon; the Jenkins matrix lives in `ci/services.yam
 ## 4. checkoutservice — `src/checkoutservice`
 
 - **Purpose:** the transaction orchestrator (highest-value target).
-- **Runtime:** Go 1.25.0 / toolchain 1.27.0; distroless static (unpinned).
+- **Runtime:** Go 1.25.0 / toolchain 1.27.0; distroless static (digest-pinned).
 - **Entrypoint:** `/src/checkoutservice` (`Dockerfile:44`), `main.go`.
 - **Port/protocol:** 5050 gRPC.
 - **Serves:** `PlaceOrder` (`main.go:230`). **Consumes:** shipping, cart, catalog, currency, payment, email

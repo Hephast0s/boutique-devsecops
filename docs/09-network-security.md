@@ -21,13 +21,13 @@ environment. It replaces the upstream per-service policies (which had wide-open 
 | `paymentservice` | ingress only from checkout |
 | `emailservice` | ingress from checkout; egress to SMTP:587 **restricted to Google's published IP ranges** (Gmail) |
 | `adservice` | ingress only from frontend |
-| `mailpit` | ingress from emailservice:1025 and the ingress controller:8025 |
+
 
 ## Enforcement proven (real) — `docs/evidence/phase9/netpol-tests.txt`
 
 ```
 (1) full checkout succeeds with default-deny active:  cart=302, checkout=200
-(2) ALLOWED  emailservice -> mailpit:1025                 connected
+(2) ALLOWED  emailservice -> smtp.gmail.com:587          connected   (historical: Mailpit later removed)
 (3) BLOCKED  emailservice -> redis-cart:6379              ConnectionRefusedError
 (4) BLOCKED  emailservice -> productcatalogservice:3550   ConnectionRefusedError
 (5) BLOCKED  emailservice -> 1.1.1.1:443                  ConnectionRefusedError
